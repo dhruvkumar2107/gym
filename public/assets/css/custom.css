@@ -728,3 +728,74 @@ footer { background: #050505; }
   .hero-buttons { flex-direction: column; align-items: center; }
   .hero-btn { width: 100%; max-width: 280px; justify-content: center; }
 }
+
+/* ============================================
+   RESPONSIVE FIXES - AUDIT PASS
+   ============================================ */
+
+/* Global img safety */
+img { max-width: 100%; height: auto; }
+
+/* Services section col-sm fix */
+@media (max-width: 767px) {
+  .services-area .col-sm-8 { flex: 0 0 100%; max-width: 100%; }
+}
+
+/* Section padding responsive override */
+.section-padding { padding: 80px 0 !important; }
+@media (max-width: 991px) { .section-padding { padding: 60px 0 !important; } }
+@media (max-width: 767px) { .section-padding { padding: 40px 0 !important; } }
+@media (max-width: 480px) { .section-padding { padding: 30px 0 !important; } }
+
+/* Gallery section padding */
+@media (max-width: 767px) { .pt-80 { padding-top: 40px !important; } .pb-80 { padding-bottom: 40px !important; } }
+
+/* Schedule table - card view on mobile */
+@media (max-width: 767px) {
+  .schedule-table-wrap { overflow-x: visible !important; }
+  .schedule-table { min-width: auto !important; width: 100% !important; }
+  .schedule-table thead { display: none !important; }
+  .schedule-table tbody tr { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .schedule-table tbody td { flex: 1 1 100%; padding: 6px 10px !important; border: none !important; text-align: left !important; }
+  .schedule-table .time-label { font-size: 14px !important; color: var(--brand-red) !important; font-weight: 600; flex: 0 0 100% !important; }
+  .schedule-item { background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 6px; border-left: 3px solid var(--brand-red); margin-bottom: 4px; }
+}
+
+/* Contact map responsive */
+@media (max-width: 991px) { #map-wrapper { height: 300px !important; } }
+@media (max-width: 575px) {
+  #map-wrapper { height: 220px !important; display: block !important; }
+  .d-none.d-sm-block { display: block !important; }
+}
+
+/* Transformations before/after stacking */
+@media (max-width: 480px) {
+  .before-after { flex-direction: column !important; gap: 12px !important; }
+  .before-after .ba-img { width: 100% !important; }
+}
+
+/* About page image overflow */
+.about-area .right-img img, .about-area2 .right-img img { max-width: 100%; height: auto; }
+
+/* About timeline tablet layout */
+@media (min-width: 768px) and (max-width: 991px) {
+  .about-area2 .col-lg-4 { flex: 0 0 50%; max-width: 50%; }
+}
+
+/* Facilities grid tablet */
+@media (min-width: 576px) and (max-width: 991px) {
+  .facility-card-wrapper { flex: 0 0 50%; max-width: 50%; }
+}
+
+/* Transformations grid tablet */
+@media (min-width: 768px) and (max-width: 991px) {
+  .transformation-card-wrapper { flex: 0 0 50%; max-width: 50%; }
+}
+
+/* Blog details sidebar dark theme */
+.blog-sidebar .widget-title, .sidebar-widget h3 { color: #fff !important; }
+.blog-sidebar .single-cat a { color: var(--brand-gray); }
+.blog-sidebar .single-cat a:hover { color: var(--brand-red); }
+
+/* Class meta wrapping */
+.class-meta { flex-wrap: wrap; gap: 10px !important; }
