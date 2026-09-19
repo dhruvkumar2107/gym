@@ -480,3 +480,61 @@ footer { background: #050505; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+
+/* ============================================
+   TEMPLATE CSS OVERRIDES (style.css fixes)
+   ============================================ */
+#preloader-active { display: none !important; }
+.slider-area { margin-top: 0 !important; background-attachment: scroll !important; }
+@media (min-width: 992px) { .slider-area { background-attachment: fixed; } }
+.slider-height { height: auto !important; min-height: calc(100vh - var(--header-height)) !important; padding: 60px 0 !important; }
+@media (max-width: 991px) { .slider-height { min-height: auto !important; padding: 80px 0 !important; } }
+@media (max-width: 575px) { .slider-height { min-height: auto !important; padding: 50px 0 !important; } }
+.slider-area .hero__caption h1 { font-size: clamp(2rem, 5.5vw, 5rem) !important; line-height: 1.1 !important; margin-bottom: 20px !important; max-width: 650px; }
+@media (min-width: 1200px) { .slider-area .hero__caption h1 { font-size: clamp(3rem, 4.5vw, 5.5rem) !important; } }
+@media (max-width: 767px) { .slider-area .hero__caption h1 { font-size: clamp(2rem, 10vw, 3.5rem) !important; line-height: 1.15 !important; } }
+@media (max-width: 480px) { .slider-area .hero__caption h1 { font-size: clamp(1.8rem, 12vw, 3rem) !important; } }
+.slider-area .hero__caption span { font-size: clamp(11px, 1.2vw, 15px) !important; -webkit-text-fill-color: var(--brand-red) !important; -webkit-text-stroke: 0 !important; letter-spacing: 4px !important; font-weight: 500 !important; }
+.slider-area .hero__caption { overflow: visible !important; max-width: var(--hero-max-width); padding-top: 0 !important; }
+@media (max-width: 991px) { .slider-area .hero__caption { padding-top: 0 !important; text-align: center; max-width: 100%; } }
+.slider-area .hero__caption p { color: var(--brand-gray) !important; font-size: clamp(14px, 1.2vw, 18px) !important; max-width: 520px; }
+@media (max-width: 991px) { .slider-area .hero__caption p { padding-right: 0 !important; margin: 0 auto 30px; text-align: center; } }
+@media (max-width: 991px) { .slider-area .hero__caption .hero-btn { margin: 5px !important; } }
+.header-area { z-index: var(--z-header) !important; }
+.main-header { z-index: var(--z-header) !important; }
+.header-area .container-fluid { padding-left: 20px; padding-right: 20px; }
+.mobile_menu { position: relative; z-index: calc(var(--z-header) + 1) !important; }
+.header-area .col-12 { display: none !important; }
+@media (max-width: 991px) { .header-area .col-12 { display: block !important; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); width: auto !important; max-width: none !important; flex: 0 0 auto !important; } }
+.team-member { border-radius: 12px !important; overflow: hidden; }
+.properties { border-radius: 12px !important; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+.properties__card { padding: 30px 25px !important; }
+.btn { font-family: 'Oswald', sans-serif !important; text-transform: uppercase !important; letter-spacing: 1px !important; font-weight: 600 !important; transition: all 0.3s !important; }
+.border-btn { border: 2px solid var(--brand-red) !important; color: var(--brand-red) !important; background: transparent !important; padding: 12px 30px !important; border-radius: 4px !important; font-size: 13px !important; }
+.border-btn:hover { background: var(--brand-red) !important; color: #fff !important; }
+.section-tittle h2 { font-size: clamp(1.8rem, 3vw, 2.5rem) !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 2px !important; color: #fff !important; }
+.section-tittle p { color: var(--brand-gray) !important; font-family: 'Roboto Condensed', sans-serif !important; margin-top: 10px; }
+.box .overlay { background: rgba(180, 0, 0, 0.75) !important; }
+.footer-area { background: #050505 !important; }
+.footer-top { padding-top: 40px; }
+.services-area .single-services { display: flex; gap: 15px; align-items: flex-start; }
+.video-area { min-height: 250px; display: flex; align-items: center; }
+.about-area2 .support-wrapper { display: flex; align-items: center; flex-wrap: wrap; gap: 40px; }
+.about-area2 .right-content2 { flex: 0 0 50%; }
+.about-area2 .left-content2 { flex: 1; }
+@media (max-width: 991px) { .about-area2 .support-wrapper { flex-direction: column; } .about-area2 .right-content2 { flex: 0 0 100%; } }
+.contact-form .single-form input, .contact-form .single-form textarea, .contact-form .single-form select { background: #111 !important; border: 1px solid rgba(255,255,255,0.1) !important; color: #fff !important; border-radius: 6px !important; padding: 14px 18px !important; }
+.contact-form .single-form input:focus, .contact-form .single-form textarea:focus { border-color: var(--brand-red) !important; outline: none; }
+.contact-form .single-form input::placeholder, .contact-form .single-form textarea::placeholder { color: #666 !important; }
+.contact-form .single-form select option { background: #111; color: #fff; }
+.card { background: #111 !important; border: 1px solid rgba(255,255,255,0.05) !important; }
+.card-header { background: #111 !important; border-bottom: 1px solid rgba(255,255,255,0.05) !important; }
+.card-header button { color: #fff !important; }
+.card-body { color: var(--brand-gray) !important; }
+.nice-select { background: #111 !important; border: 1px solid rgba(255,255,255,0.1) !important; color: #fff !important; height: 50px !important; line-height: 50px !important; }
+.nice-select .list { background: #1a1a1a !important; border: 1px solid rgba(255,255,255,0.1) !important; }
+.nice-select .option { color: #fff !important; }
+.nice-select .option:hover, .nice-select .option.selected { background: var(--brand-red) !important; color: #fff !important; }
+.main-menu, .header-sticky { z-index: var(--z-header) !important; }
+.section-padding40 { padding: 50px 0 !important; }
+.section-padding30 { padding: 30px 0 !important; }

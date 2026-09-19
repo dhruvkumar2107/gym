@@ -626,19 +626,23 @@ function showLightbox(images, startIndex) {
 
 
 function loadClassSchedule() {
-  var container = document.getElementById('schedule-container');
-  if (!container) return;
+  var scheduleBody = document.getElementById('schedule-body');
+  if (!scheduleBody) return;
   apiGet('/classes/schedule').then(function(schedules) {
     if (!schedules || !schedules.length) return;
     var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-    var html = '<div class="schedule-table-wrap"><table class="table schedule-table"><thead><tr><th>Time</th>';
-    days.forEach(function(d) { html += '<th>' + d.substring(0, 3) + '</th>'; });
-    html += '</tr></thead><tbody>';
     var timeSlots = [
-      {label:'Morning',filter:function(s){return parseInt(s.time) < 12;}},
-      {label:'Evening',filter:function(s){return parseInt(s.time) >= 12;}}
+      {label:'Early Morning',filter:function(s){var t=parseInt(s.time); return t>=5 && t<9;}},
+      {label:'Morning',filter:function(s){var t=parseInt(s.time); return t>=9 && t<12;}},
+      {label:'Afternoon',filter:function(s){var t=parseInt(s.time); return t>=12 && t<17;}},
+      {label:'Evening',filter:function(s){var t=parseInt(s.time); return t>=17;}}
     ];
+    var html = '';
     timeSlots.forEach(function(slot) {
+      var hasClasses = days.some(function(d) {
+        return schedules.some(function(s) { return s.day === d && slot.filter(s); });
+      });
+      if (!hasClasses) return;
       html += '<tr><td class="time-label">' + slot.label + '</td>';
       days.forEach(function(d) {
         var dayClasses = schedules.filter(function(s) { return s.day === d && slot.filter(s); });
@@ -648,14 +652,15 @@ function loadClassSchedule() {
       });
       html += '</tr>';
     });
-    html += '</tbody></table></div>';
-    container.innerHTML = html;
+    scheduleBody.innerHTML = html;
   });
 }
 
 function loadClassesList() {
   var container = document.getElementById('classes-list');
   if (!container) return;
+  var loading = document.getElementById('classes-loading');
+  if (loading) loading.style.display = 'none';
   apiGet('/classes').then(function(classes) {
     if (!classes || !classes.length) return;
     var diffColors = {beginner:'#27ae60',intermediate:'#f39c12',advanced:'#e74c3c','all-levels':'#3498db'};
@@ -850,13 +855,16 @@ function loadBlogDetail() {
 }
 
 function initBlogPage() {
-  var container = document.getElementById('blog-page-container');
+  var container = document.getElementById('blog-container');
   if (!container) return;
+  var loading = document.getElementById('blog-loading');
+  if (loading) loading.style.display = 'none';
   var posts = _localData.blogPosts;
   var categories = ['All'];
   posts.forEach(function(p) { if (categories.indexOf(p.category) < 0) categories.push(p.category); });
-  var searchInput = document.getElementById('blogSearch');
-  var catContainer = document.getElementById('blogCategories');
+  var searchInput = document.getElementById('blog-search-input');
+  var catContainer = document.getElementById('blog-categories');
+  var recentContainer = document.getElementById('recent-posts-container');
 
   function renderPosts(filter, search) {
     var filtered = posts;
@@ -867,40 +875,51 @@ function initBlogPage() {
     }
     if (!filtered.length) { container.innerHTML = '<div class="col-12 text-center"><p style="color:#666;padding:40px;">No articles found.</p></div>'; return; }
     container.innerHTML = filtered.map(function(p) {
-      var date = new Date();
       var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      return '<div class="col-xl-4 col-lg-6 col-md-6"><div class="blog-card mb-30">' +
+      var d = new Date();
+      return '<div class="col-lg-6 col-md-6"><div class="blog-card mb-30">' +
         '<div class="blog-card-img"><img src="' + (p.featured_image || 'assets/img/gallery/gallery1.png') + '" alt="' + p.title + '" loading="lazy"></div>' +
         '<div class="blog-card-body"><span class="blog-cat">' + p.category + '</span>' +
         '<h3><a href="blog_details.html?slug=' + p.slug + '">' + p.title + '</a></h3>' +
         '<p class="blog-excerpt">' + p.excerpt + '</p>' +
-        '<div class="blog-meta-info"><span><i class="fas fa-calendar"></i> ' + months[date.getMonth()] + ' ' + date.getDate() + '</span>' +
+        '<div class="blog-meta-info"><span><i class="fas fa-calendar"></i> ' + months[d.getMonth()] + ' ' + d.getDate() + '</span>' +
         '<span><i class="fas fa-clock"></i> ' + p.read_time + ' min</span></div>' +
         '<a href="blog_details.html?slug=' + p.slug + '" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>' +
         '</div></div></div>';
     }).join('');
   }
 
-  if (catContainer) {
-    catContainer.innerHTML = categories.map(function(c) {
-      return '<button class="blog-category-btn' + (c === 'All' ? ' active' : '') + '" data-category="' + c + '">' + c + '</button>';
+  function renderRecent() {
+    if (!recentContainer) return;
+    recentContainer.innerHTML = posts.slice(0, 4).map(function(p) {
+      return '<div class="media mb-30"><div class="media-left"><img src="' + (p.featured_image || 'assets/img/gallery/gallery1.png') + '" alt="' + p.title + '" style="width:70px;height:70px;object-fit:cover;border-radius:8px;"></div><div class="media-body"><a href="blog_details.html?slug=' + p.slug + '"><h4 style="color:#fff;font-size:14px;margin:0;">' + p.title + '</h4></a><p style="color:#888;font-size:12px;margin:0;">' + p.category + '</p></div></div>';
     }).join('');
-    catContainer.querySelectorAll('.blog-category-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        catContainer.querySelectorAll('.blog-category-btn').forEach(function(b) { b.classList.remove('active'); });
-        this.classList.add('active');
-        renderPosts(this.dataset.category, searchInput ? searchInput.value : '');
+  }
+
+  if (catContainer) {
+    var catHtml = '<li class="cat-item cat-item-1 active"><a href="javascript:void(0)" data-cat="All">All</a></li>';
+    categories.slice(1).forEach(function(c) {
+      catHtml += '<li class="cat-item"><a href="javascript:void(0)" data-cat="' + c + '">' + c + '</a></li>';
+    });
+    catContainer.innerHTML = catHtml;
+    catContainer.querySelectorAll('a').forEach(function(a) {
+      a.addEventListener('click', function(e) {
+        e.preventDefault();
+        catContainer.querySelectorAll('li').forEach(function(li) { li.classList.remove('active'); });
+        this.parentElement.classList.add('active');
+        renderPosts(this.dataset.cat, searchInput ? searchInput.value : '');
       });
     });
   }
 
   if (searchInput) {
     searchInput.addEventListener('input', function() {
-      var activeCat = document.querySelector('.blog-category-btn.active');
-      renderPosts(activeCat ? activeCat.dataset.category : 'All', this.value);
+      var activeCat = catContainer ? catContainer.querySelector('.active a') : null;
+      renderPosts(activeCat ? activeCat.dataset.cat : 'All', this.value);
     });
   }
 
+  renderRecent();
   renderPosts('All', '');
 }
 
