@@ -1,20 +1,4 @@
 {
-  "outputDirectory": "public",
-  "builds": [
-    {
-      "src": "api/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": [
-          "sql-wasm.wasm",
-          "database/**",
-          "routes/**",
-          "middleware/**",
-          "services/**"
-        ]
-      }
-    }
-  ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" }
   ]
