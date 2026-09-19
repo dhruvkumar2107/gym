@@ -1,0 +1,327 @@
+<!doctype html>
+<html class="no-js" lang="zxx">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Fitness Calculators | Zacson Fitness</title>
+    <meta name="description" content="Free BMI and calorie calculators at Zacson Fitness. Estimate your ideal weight and daily calorie needs.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="assets/css/slicknav.css">
+    <link rel="stylesheet" href="assets/css/flaticon.css">
+    <link rel="stylesheet" href="assets/css/gijgo.css">
+    <link rel="stylesheet" href="assets/css/animate.min.css">
+    <link rel="stylesheet" href="assets/css/animated-headline.css">
+    <link rel="stylesheet" href="assets/css/magnific-popup.css">
+    <link rel="stylesheet" href="assets/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="assets/css/themify-icons.css">
+    <link rel="stylesheet" href="assets/css/slick.css">
+    <link rel="stylesheet" href="assets/css/nice-select.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .calc-form label{color:#c7a44e;display:block;margin-bottom:5px}
+        .calc-form input,.calc-form select{width:100%;padding:10px;margin-bottom:15px;border:1px solid #ddd;border-radius:5px;background:#fff}
+        .calc-result{background:#1a1a2e;color:#fff;padding:20px;border-radius:10px;margin-top:20px}
+        .calc-result h3{color:#c7a44e}
+    </style>
+</head>
+<body class="black-bg">
+    <div id="preloader-active">
+        <div class="preloader d-flex align-items-center justify-content-center">
+            <div class="preloader-inner position-relative">
+                <div class="preloader-circle"></div>
+                <div class="preloader-img pere-text">
+                    <img src="assets/img/logo/loder.png" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+    <header>
+        <div class="header-area header-transparent">
+            <div class="main-header header-sticky">
+                <div class="container-fluid">
+                    <div class="menu-wrapper d-flex align-items-center justify-content-between">
+                        <div class="logo">
+                            <a href="index.html"><img src="assets/img/logo/logo.png" alt=""></a>
+                        </div>
+                        <div class="main-menu f-right d-none d-lg-block">
+                            <nav>
+                                <ul id="navigation">
+                                    <li><a href="index.html">Home</a></li>
+                                    <li><a href="about.html">About</a></li>
+                                    <li><a href="courses.html">Programs</a></li>
+                                    <li><a href="pricing.html">Pricing</a></li>
+                                    <li><a href="trainers.html">Trainers</a></li>
+                                    <li><a href="classes.html">Classes</a></li>
+                                    <li><a href="facilities.html">Facilities</a></li>
+                                    <li><a href="gallery.html">Gallery</a></li>
+                                    <li><a href="transformations.html">Transformations</a></li>
+                                    <li><a href="calculators.html">Calculators</a></li>
+                                    <li><a href="blog.html">Blog</a></li>
+                                    <li><a href="contact.html">Contact</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                        <div class="header-btns d-none d-lg-block f-right">
+                            <a href="javascript:void(0)" class="btn" onclick="openWhatsApp('Hi! I would like to book a free trial at Zacson Fitness.')">Free Trial</a>
+                        </div>
+                        <div class="col-12">
+                            <div class="mobile_menu d-block d-lg-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="slider-area2">
+            <div class="slider-height2 d-flex align-items-center">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-12">
+                            <div class="hero-cap hero-cap2 pt-70">
+                                <h2>Fitness Calculators</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <section class="team-area pt-80 pb-80">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-6 col-md-12 mb-40">
+                        <h3 style="color:#c7a44e;margin-bottom:20px;">BMI Calculator</h3>
+                        <form class="calc-form" id="bmi-form">
+                            <label for="bmi-height">Height (cm)</label>
+                            <input type="number" id="bmi-height" name="height" placeholder="e.g. 175" required>
+                            <label for="bmi-weight">Weight (kg)</label>
+                            <input type="number" id="bmi-weight" name="weight" placeholder="e.g. 70" required>
+                            <button type="submit" class="btn" style="background:#c7a44e;color:#fff;border:none;padding:12px 30px;border-radius:5px;cursor:pointer;">Calculate BMI</button>
+                        </form>
+                        <div id="bmi-result" class="calc-result" style="display:none;"></div>
+                    </div>
+                    <div class="col-lg-6 col-md-12 mb-40">
+                        <h3 style="color:#c7a44e;margin-bottom:20px;">Calorie Calculator</h3>
+                        <form class="calc-form" id="calorie-form">
+                            <label for="cal-age">Age</label>
+                            <input type="number" id="cal-age" name="age" placeholder="e.g. 25" required>
+                            <label>Sex</label>
+                            <div style="margin-bottom:15px;">
+                                <input type="radio" id="cal-male" name="sex" value="male" style="width:auto;margin-right:5px;" required>
+                                <label for="cal-male" style="display:inline;color:#ccc;">Male</label>
+                                <input type="radio" id="cal-female" name="sex" value="female" style="width:auto;margin-left:20px;margin-right:5px;">
+                                <label for="cal-female" style="display:inline;color:#ccc;">Female</label>
+                            </div>
+                            <label for="cal-height">Height (cm)</label>
+                            <input type="number" id="cal-height" name="height" placeholder="e.g. 175" required>
+                            <label for="cal-weight">Weight (kg)</label>
+                            <input type="number" id="cal-weight" name="weight" placeholder="e.g. 70" required>
+                            <label for="cal-activity">Activity Level</label>
+                            <select id="cal-activity" name="activity_level" required>
+                                <option value="sedentary">Sedentary (little or no exercise)</option>
+                                <option value="light">Lightly active (light exercise 1-3 days/week)</option>
+                                <option value="moderate" selected>Moderately active (moderate exercise 3-5 days/week)</option>
+                                <option value="active">Active (hard exercise 6-7 days/week)</option>
+                                <option value="very_active">Very active (very hard exercise and physical job)</option>
+                            </select>
+                            <label for="cal-goal">Goal</label>
+                            <select id="cal-goal" name="goal" required>
+                                <option value="maintain">Maintain weight</option>
+                                <option value="lose">Lose weight</option>
+                                <option value="gain">Gain weight</option>
+                            </select>
+                            <button type="submit" class="btn" style="background:#c7a44e;color:#fff;border:none;padding:12px 30px;border-radius:5px;cursor:pointer;">Calculate Calories</button>
+                        </form>
+                        <div id="cal-result" class="calc-result" style="display:none;"></div>
+                    </div>
+                </div>
+                <div style="text-align:center;margin-top:20px;">
+                    <p style="color:#999;font-style:italic;">Results are estimates only. Not medical advice.</p>
+                </div>
+            </div>
+        </section>
+        <section class="services-area">
+            <div class="container">
+                <div class="row justify-content-between">
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-8">
+                        <div class="single-services mb-40">
+                            <div class="features-icon">
+                                <img src="assets/img/icon/icon1.svg" alt="">
+                            </div>
+                            <div class="features-caption">
+                                <h3>Location</h3>
+                                <p>Andheri West, Mumbai</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-8">
+                        <div class="single-services mb-40">
+                            <div class="features-icon">
+                                <img src="assets/img/icon/icon2.svg" alt="">
+                            </div>
+                            <div class="features-caption">
+                                <h3>Phone</h3>
+                                <p>+91 98765 43210</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-8">
+                        <div class="single-services mb-40">
+                            <div class="features-icon">
+                                <img src="assets/img/icon/icon3.svg" alt="">
+                            </div>
+                            <div class="features-caption">
+                                <h3>Email</h3>
+                                <p>hello@zacsonfitness.com</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <div class="footer-area black-bg">
+            <div class="container">
+                <div class="footer-top footer-padding">
+                    <div class="row">
+                        <div class="col-xl-12">
+                            <div class="single-footer-caption mb-50 text-center">
+                                <div class="footer-logo wow fadeInUp" data-wow-duration="1s" data-wow-delay=".2s">
+                                    <a href="index.html"><img src="assets/img/logo/logo2_footer.png" alt=""></a>
+                                </div>
+                                <div class="header-area main-header2 wow fadeInUp" data-wow-duration="2s" data-wow-delay=".4s">
+                                    <div class="main-header main-header2">
+                                        <div class="menu-wrapper menu-wrapper2">
+                                            <div class="main-menu main-menu2 text-center">
+                                                <nav>
+                                                    <ul>
+                                                        <li><a href="index.html">Home</a></li>
+                                                        <li><a href="about.html">About</a></li>
+                                                        <li><a href="courses.html">Programs</a></li>
+                                                        <li><a href="pricing.html">Pricing</a></li>
+                                                        <li><a href="trainers.html">Trainers</a></li>
+                                                        <li><a href="classes.html">Classes</a></li>
+                                                        <li><a href="facilities.html">Facilities</a></li>
+                                                        <li><a href="gallery.html">Gallery</a></li>
+                                                        <li><a href="transformations.html">Transformations</a></li>
+                                                        <li><a href="calculators.html">Calculators</a></li>
+                                                        <li><a href="blog.html">Blog</a></li>
+                                                        <li><a href="contact.html">Contact</a></li>
+                                                    </ul>
+                                                </nav>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="footer-social mt-30 wow fadeInUp" data-wow-duration="3s" data-wow-delay=".8s">
+                                    <a href="#"><i class="fab fa-twitter"></i></a>
+                                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                                    <a href="#"><i class="fab fa-instagram"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <div class="row d-flex align-items-center">
+                        <div class="col-lg-12">
+                            <div class="footer-copy-right text-center">
+                                <p>&copy; 2026 Zacson Fitness. All rights reserved.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <div id="back-top">
+        <a title="Go to Top" href="#"><i class="fas fa-level-up-alt"></i></a>
+    </div>
+    <script src="./assets/js/vendor/modernizr-3.5.0.min.js"></script>
+    <script src="./assets/js/vendor/jquery-1.12.4.min.js"></script>
+    <script src="./assets/js/popper.min.js"></script>
+    <script src="./assets/js/bootstrap.min.js"></script>
+    <script src="./assets/js/jquery.slicknav.min.js"></script>
+    <script src="./assets/js/owl.carousel.min.js"></script>
+    <script src="./assets/js/slick.min.js"></script>
+    <script src="./assets/js/wow.min.js"></script>
+    <script src="./assets/js/animated.headline.js"></script>
+    <script src="./assets/js/jquery.magnific-popup.js"></script>
+    <script src="./assets/js/gijgo.min.js"></script>
+    <script src="./assets/js/jquery.nice-select.min.js"></script>
+    <script src="./assets/js/jquery.sticky.js"></script>
+    <script src="./assets/js/jquery.counterup.min.js"></script>
+    <script src="./assets/js/waypoints.min.js"></script>
+    <script src="./assets/js/jquery.countdown.min.js"></script>
+    <script src="./assets/js/hover-direction-snake.min.js"></script>
+    <script src="./assets/js/contact.js"></script>
+    <script src="./assets/js/jquery.form.js"></script>
+    <script src="./assets/js/jquery.validate.min.js"></script>
+    <script src="./assets/js/mail-script.js"></script>
+    <script src="./assets/js/jquery.ajaxchimp.min.js"></script>
+    <script src="./assets/js/plugins.js"></script>
+    <script src="./assets/js/main.js"></script>
+    <script src="./assets/js/site.js"></script>
+    <script>
+    document.getElementById('bmi-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var height = document.getElementById('bmi-height').value;
+        var weight = document.getElementById('bmi-weight').value;
+        var resultDiv = document.getElementById('bmi-result');
+        resultDiv.style.display = 'none';
+        try {
+            var res = await fetch('/api/calculators/bmi', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ height: Number(height), weight: Number(weight) })
+            });
+            var data = await res.json();
+            var category = '';
+            if (data.bmi < 18.5) category = 'Underweight';
+            else if (data.bmi < 25) category = 'Normal weight';
+            else if (data.bmi < 30) category = 'Overweight';
+            else category = 'Obese';
+            resultDiv.innerHTML = '<h3>Your BMI Results</h3><p><strong>BMI:</strong> ' + data.bmi.toFixed(1) + '</p><p><strong>Category:</strong> ' + category + '</p>';
+            resultDiv.style.display = 'block';
+        } catch (err) {
+            resultDiv.innerHTML = '<p>Unable to calculate BMI. Please try again later.</p>';
+            resultDiv.style.display = 'block';
+        }
+    });
+
+    document.getElementById('calorie-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        var age = document.getElementById('cal-age').value;
+        var sex = document.querySelector('input[name="sex"]:checked').value;
+        var height = document.getElementById('cal-height').value;
+        var weight = document.getElementById('cal-weight').value;
+        var activity = document.getElementById('cal-activity').value;
+        var goal = document.getElementById('cal-goal').value;
+        var resultDiv = document.getElementById('cal-result');
+        resultDiv.style.display = 'none';
+        try {
+            var res = await fetch('/api/calculators/calories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ age: Number(age), sex: sex, height: Number(height), weight: Number(weight), activity_level: activity, goal: goal })
+            });
+            var data = await res.json();
+            var goalCalories = data.maintenance_calories;
+            var goalLabel = 'Maintenance';
+            if (goal === 'lose') { goalCalories = Math.round(data.maintenance_calories - 500); goalLabel = 'Weight Loss (~0.5 kg/week)'; }
+            if (goal === 'gain') { goalCalories = Math.round(data.maintenance_calories + 500); goalLabel = 'Weight Gain (~0.5 kg/week)'; }
+            resultDiv.innerHTML = '<h3>Your Calorie Results</h3><p><strong>BMR (Basal Metabolic Rate):</strong> ' + data.bmr + ' kcal/day</p><p><strong>Maintenance Calories:</strong> ' + data.maintenance_calories + ' kcal/day</p><p><strong>' + goalLabel + ':</strong> ' + goalCalories + ' kcal/day</p>';
+            resultDiv.style.display = 'block';
+        } catch (err) {
+            resultDiv.innerHTML = '<p>Unable to calculate calories. Please try again later.</p>';
+            resultDiv.style.display = 'block';
+        }
+    });
+    </script>
+</body>
+</html>
