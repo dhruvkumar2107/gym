@@ -799,3 +799,76 @@ img { max-width: 100%; height: auto; }
 
 /* Class meta wrapping */
 .class-meta { flex-wrap: wrap; gap: 10px !important; }
+
+/* ============================================
+   ACCESSIBILITY FIXES
+   ============================================ */
+
+/* Skip navigation link */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--brand-red);
+  color: #fff;
+  padding: 12px 24px;
+  z-index: 99999;
+  font-size: 14px;
+  text-decoration: none;
+  border-radius: 0 0 6px 6px;
+  transition: top 0.3s;
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* Visible focus styles */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible {
+  outline: 3px solid var(--brand-red);
+  outline-offset: 2px;
+}
+a:focus:not(:focus-visible) {
+  outline: none;
+}
+button:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Fix failing contrast - footer text */
+.footer-bottom p { color: #999 !important; }
+
+/* Fix blog sidebar contrast */
+.blog-sidebar .widget-title,
+.sidebar-widget h3,
+.blog-sidebar h3,
+.blog-sidebar h4 {
+  color: #fff !important;
+}
+.blog-details-widget .single-cat a,
+.recent-post-content .meta-info,
+.newsletter-form input {
+  color: var(--brand-gray) !important;
+}
+
+/* Focus trap for modals */
+.trainer-modal-overlay[aria-hidden="true"],
+.checkout-overlay[aria-hidden="true"],
+.lightbox-overlay[aria-hidden="true"] {
+  pointer-events: none;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -225,14 +225,26 @@ function initNavbar() {
     drawer.innerHTML = '<button class="mobile-nav-close" aria-label="Close menu">&times;</button><ul>' + linksHtml + '</ul><div class="mobile-nav-cta"><a href="javascript:void(0)" onclick="openWhatsApp(\'Hi! I would like to book a free trial.\')">Free Trial</a></div>';
     document.body.appendChild(drawer);
   }
-  function closeMenu() { overlay.classList.remove('active'); drawer.classList.remove('active'); document.body.style.overflow = ''; }
-  function openMenu() { overlay.classList.add('active'); drawer.classList.add('active'); document.body.style.overflow = 'hidden'; }
+  function closeMenu() { overlay.classList.remove('active'); drawer.classList.remove('active'); document.body.style.overflow = ''; drawer.setAttribute('aria-hidden', 'true'); }
+  function openMenu() { overlay.classList.add('active'); drawer.classList.add('active'); document.body.style.overflow = 'hidden'; drawer.removeAttribute('aria-hidden'); closeBtn && closeBtn.focus(); }
+  function trapFocus(e) {
+    if (!drawer.classList.contains('active')) return;
+    var focusable = drawer.querySelectorAll('a, button, [tabindex]');
+    if (!focusable.length) return;
+    var first = focusable[0], last = focusable[focusable.length - 1];
+    if (e.key === 'Tab') {
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  }
+  drawer.setAttribute('aria-hidden', 'true');
+  drawer.setAttribute('aria-label', 'Mobile navigation');
   if (hamburger) hamburger.addEventListener('click', function() { drawer.classList.contains('active') ? closeMenu() : openMenu(); });
   overlay.addEventListener('click', closeMenu);
   var closeBtn = drawer.querySelector('.mobile-nav-close');
   if (closeBtn) closeBtn.addEventListener('click', closeMenu);
   drawer.querySelectorAll('a').forEach(function(a) { a.addEventListener('click', closeMenu); });
-  document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && drawer.classList.contains('active')) closeMenu(); });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && drawer.classList.contains('active')) closeMenu(); trapFocus(e); });
   var currentPage = window.location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('.main-menu nav ul li').forEach(function(li) {
     var a = li.querySelector('a');
@@ -301,6 +313,9 @@ function openCheckoutModal(plan) {
     modal = document.createElement('div');
     modal.id = 'checkoutModal';
     modal.style.cssText = 'display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;align-items:center;justify-content:center;';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Checkout');
     var html = '<div class="checkout-overlay" onclick="closeCheckoutModal()"></div>';
     html += '<div class="checkout-dialog"><div class="checkout-header"><h3>Join Zacson Fitness</h3><button class="checkout-close" onclick="closeCheckoutModal()">&times;</button></div>';
     html += '<div class="checkout-body">';
@@ -483,6 +498,9 @@ function showTrainerProfile(slug) {
     modal = document.createElement('div');
     modal.id = 'trainerModal';
     modal.className = 'trainer-modal-overlay';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Trainer profile');
     modal.onclick = function(e) { if (e.target === modal) modal.style.display = 'none'; };
     document.body.appendChild(modal);
   }
@@ -602,6 +620,9 @@ function initLightbox() {
 function showLightbox(images, startIndex) {
   var overlay = document.createElement('div');
   overlay.className = 'lightbox-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-label', 'Image gallery lightbox');
   overlay.innerHTML = '<button class="lightbox-close" aria-label="Close">&times;</button>' +
     '<button class="lightbox-nav lightbox-prev" aria-label="Previous">&#10094;</button>' +
     '<button class="lightbox-nav lightbox-next" aria-label="Next">&#10095;</button>' +
@@ -613,15 +634,22 @@ function showLightbox(images, startIndex) {
     current = (i + images.length) % images.length;
     imgEl.src = images[current].src;
   }
-  overlay.querySelector('.lightbox-close').onclick = function() { overlay.remove(); };
+  overlay.querySelector('.lightbox-close').onclick = function() { overlay.remove(); document.onkeydown = null; };
   overlay.querySelector('.lightbox-prev').onclick = function() { goTo(current - 1); };
   overlay.querySelector('.lightbox-next').onclick = function() { goTo(current + 1); };
-  overlay.onclick = function(ev) { if (ev.target === overlay) overlay.remove(); };
+  overlay.onclick = function(ev) { if (ev.target === overlay) { overlay.remove(); document.onkeydown = null; } };
   document.onkeydown = function(e) {
     if (e.key === 'Escape') { overlay.remove(); document.onkeydown = null; }
     if (e.key === 'ArrowLeft') goTo(current - 1);
     if (e.key === 'ArrowRight') goTo(current + 1);
+    if (e.key === 'Tab') {
+      var btns = overlay.querySelectorAll('button');
+      var first = btns[0], last = btns[btns.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
   };
+  overlay.querySelector('.lightbox-close').focus();
 }
 
 
