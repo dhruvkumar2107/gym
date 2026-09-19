@@ -1,0 +1,27 @@
+{
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": [
+          "sql-wasm.wasm",
+          "database/**",
+          "routes/**",
+          "middleware/**",
+          "services/**"
+        ]
+      }
+    }
+  ],
+  "routes": [
+    { "src": "/assets/(.*)", "dest": "/assets/$1" },
+    { "src": "/admin/(.*)", "dest": "/admin/$1" },
+    { "src": "/uploads/(.*)", "dest": "/uploads/$1" },
+    { "src": "/robots.txt", "dest": "/robots.txt" },
+    { "src": "/sitemap.xml", "dest": "/sitemap.xml" },
+    { "src": "/(.*\\.html)", "dest": "/$1" },
+    { "src": "/api/(.*)", "dest": "/server.js" },
+    { "src": "/(.*)", "dest": "/server.js" }
+  ]
+}
