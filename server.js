@@ -35,10 +35,14 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const fs = require('fs');
 
-async function start() {
+let initialized = false;
+
+async function init() {
+  if (initialized) return;
   await initDatabase();
   createTables();
   seedData();
+  initialized = true;
 
   app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
   app.use(compression());
@@ -79,9 +83,6 @@ async function start() {
 
   app.get('/api/health', (req, res) => res.json({ status: 'ok', brand: 'Zacson Fitness' }));
 
-  // Razorpay webhook needs raw body - must be before json middleware, but we handle it via the payment route
-
-  // Clean SEO URLs: /blog/:slug, /trainers/:slug
   app.get('/blog/:slug', (req, res) => {
     const filePath = path.join(__dirname, 'blog_details.html');
     if (fs.existsSync(filePath)) return res.sendFile(filePath);
@@ -101,13 +102,9 @@ async function start() {
       return res.status(404).json({ error: 'Not found' });
     }
     const htmlPath = path.join(__dirname, req.path.endsWith('.html') ? req.path : req.path + '.html');
-    if (fs.existsSync(htmlPath)) {
-      return res.sendFile(htmlPath);
-    }
+    if (fs.existsSync(htmlPath)) return res.sendFile(htmlPath);
     const cleanPath = path.join(__dirname, path.basename(req.path) + '.html');
-    if (fs.existsSync(cleanPath)) {
-      return res.sendFile(cleanPath);
-    }
+    if (fs.existsSync(cleanPath)) return res.sendFile(cleanPath);
     res.status(404).sendFile(path.join(__dirname, '404.html'));
   });
 
@@ -115,10 +112,18 @@ async function start() {
     console.error(err.stack);
     res.status(500).json({ error: 'Internal server error' });
   });
-
-  app.listen(PORT, () => {
-    console.log(`Zacson Fitness server running at http://localhost:${PORT}`);
-  });
 }
 
-start().catch(console.error);
+app.use(async (req, res, next) => {
+  try { await init(); next(); } catch (e) { next(e); }
+});
+
+if (process.env.VERCEL) {
+  module.exports = app;
+} else {
+  init().then(() => {
+    app.listen(PORT, () => {
+      console.log(`Zacson Fitness server running at http://localhost:${PORT}`);
+    });
+  }).catch(console.error);
+}
