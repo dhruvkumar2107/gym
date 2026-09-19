@@ -1,0 +1,353 @@
+<!doctype html>
+<html class="no-js" lang="zxx">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Our Expert Trainers | Zacson Fitness</title>
+    <meta name="description" content="Meet the expert trainers at Zacson Fitness. Certified professionals specializing in strength training, yoga, HIIT, boxing, and more.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
+
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="assets/css/slicknav.css">
+    <link rel="stylesheet" href="assets/css/animate.min.css">
+    <link rel="stylesheet" href="assets/css/magnific-popup.css">
+    <link rel="stylesheet" href="assets/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="assets/css/themify-icons.css">
+    <link rel="stylesheet" href="assets/css/slick.css">
+    <link rel="stylesheet" href="assets/css/nice-select.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .trainer-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .trainer-modal-overlay.active {
+            display: flex;
+        }
+        .trainer-modal {
+            background: #1a1a2e;
+            border-radius: 12px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            color: #fff;
+        }
+        .trainer-modal-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: 28px;
+            color: #fff;
+            cursor: pointer;
+            z-index: 10;
+            background: none;
+            border: none;
+            line-height: 1;
+        }
+        .trainer-modal-close:hover {
+            color: #c7a44e;
+        }
+        .trainer-modal-content {
+            display: flex;
+            flex-direction: column;
+        }
+        .trainer-modal-img {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            border-radius: 12px 12px 0 0;
+        }
+        .trainer-modal-info {
+            padding: 24px;
+        }
+        .trainer-modal-info h3 {
+            color: #c7a44e;
+            margin-bottom: 4px;
+        }
+        .trainer-designation {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        .trainer-bio {
+            color: #ccc;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        .trainer-specs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .spec-tag {
+            background: rgba(199, 164, 78, 0.15);
+            color: #c7a44e;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            border: 1px solid rgba(199, 164, 78, 0.3);
+        }
+        .trainer-certs {
+            margin-bottom: 16px;
+        }
+        .trainer-certs h5 {
+            font-size: 14px;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .cert-tag {
+            display: inline-block;
+            background: rgba(39, 174, 96, 0.15);
+            color: #27ae60;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin: 2px 4px 2px 0;
+            border: 1px solid rgba(39, 174, 96, 0.3);
+        }
+        .trainer-stats {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        .trainer-stats .stat {
+            text-align: center;
+        }
+        .trainer-stats .stat-value {
+            display: block;
+            font-size: 22px;
+            font-weight: 700;
+            color: #c7a44e;
+        }
+        .trainer-stats .stat-label {
+            font-size: 12px;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+        .btn-book-trainer {
+            display: inline-block;
+            background: #c7a44e;
+            color: #fff;
+            padding: 10px 28px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-book-trainer:hover {
+            background: #b3933e;
+            color: #fff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body class="black-bg">
+    <div id="preloader-active">
+        <div class="preloader d-flex align-items-center justify-content-center">
+            <div class="preloader-inner position-relative">
+                <div class="preloader-circle"></div>
+                <div class="preloader-img pere-text">
+                    <img src="assets/img/logo/loder.png" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+    <header>
+        <div class="header-area header-transparent">
+            <div class="main-header header-sticky">
+                <div class="container-fluid">
+                    <div class="menu-wrapper d-flex align-items-center justify-content-between">
+                        <div class="logo">
+                            <a href="index.html"><img src="assets/img/logo/logo.png" alt=""></a>
+                        </div>
+                        <div class="main-menu f-right d-none d-lg-block">
+                            <nav>
+                                <ul id="navigation">
+                                    <li><a href="index.html">Home</a></li><li><a href="about.html">About</a></li><li><a href="courses.html">Programs</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="trainers.html" class="active">Trainers</a></li><li><a href="classes.html">Classes</a></li><li><a href="facilities.html">Facilities</a></li><li><a href="gallery.html">Gallery</a></li><li><a href="transformations.html">Transformations</a></li><li><a href="calculators.html">Calculators</a></li><li><a href="blog.html">Blog</a></li><li><a href="contact.html">Contact</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                        <div class="header-btns d-none d-lg-block f-right">
+                            <a href="javascript:void(0)" class="btn" onclick="openWhatsApp('Hi! I would like to book a free trial at Zacson Fitness.')">Free Trial</a>
+                        </div>
+                        <div class="col-12">
+                            <div class="mobile_menu d-block d-lg-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="slider-area2">
+            <div class="slider-height2 d-flex align-items-center">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-12">
+                            <div class="hero-cap hero-cap2 pt-70">
+                                <h2>Our Expert Trainers</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <section class="team-area pt-80">
+            <div class="container">
+                <div id="trainers-container" class="row"></div>
+                <div id="trainers-loading" class="text-center py-5">
+                    <div class="spinner-border" style="color:#c7a44e" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2" style="color:#aaa;">Loading trainers...</p>
+                </div>
+            </div>
+        </section>
+        <section class="services-area">
+            <div class="container">
+                <div class="row justify-content-between">
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-8">
+                        <div class="single-services mb-40">
+                            <div class="features-icon">
+                                <img src="assets/img/icon/icon1.svg" alt="">
+                            </div>
+                            <div class="features-caption">
+                                <h3>Location</h3>
+                                <p>Andheri West, Mumbai</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-8">
+                        <div class="single-services mb-40">
+                            <div class="features-icon">
+                                <img src="assets/img/icon/icon2.svg" alt="">
+                            </div>
+                            <div class="features-caption">
+                                <h3>Phone</h3>
+                                <p>+91 98765 43210</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-8">
+                        <div class="single-services mb-40">
+                            <div class="features-icon">
+                                <img src="assets/img/icon/icon3.svg" alt="">
+                            </div>
+                            <div class="features-caption">
+                                <h3>Email</h3>
+                                <p>hello@zacsonfitness.com</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <div class="trainer-modal-overlay" id="trainer-modal">
+        <div class="trainer-modal">
+            <button class="trainer-modal-close" id="trainer-modal-close">&times;</button>
+            <div class="trainer-modal-content" id="trainer-modal-content"></div>
+        </div>
+    </div>
+    <footer>
+        <div class="footer-area black-bg">
+            <div class="container">
+                <div class="footer-top footer-padding">
+                    <div class="row">
+                        <div class="col-xl-12">
+                            <div class="single-footer-caption mb-50 text-center">
+                                <div class="footer-logo wow fadeInUp" data-wow-duration="1s" data-wow-delay=".2s">
+                                    <a href="index.html"><img src="assets/img/logo/logo2_footer.png" alt=""></a>
+                                </div>
+                                <div class="header-area main-header2 wow fadeInUp" data-wow-duration="2s" data-wow-delay=".4s">
+                                    <div class="main-header main-header2">
+                                        <div class="menu-wrapper menu-wrapper2">
+                                            <div class="main-menu main-menu2 text-center">
+                                                <nav>
+                                                    <ul>
+                                                        <li><a href="index.html">Home</a></li><li><a href="about.html">About</a></li><li><a href="courses.html">Programs</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="trainers.html">Trainers</a></li><li><a href="classes.html">Classes</a></li><li><a href="facilities.html">Facilities</a></li><li><a href="gallery.html">Gallery</a></li><li><a href="transformations.html">Transformations</a></li><li><a href="calculators.html">Calculators</a></li><li><a href="blog.html">Blog</a></li><li><a href="contact.html">Contact</a></li>
+                                                    </ul>
+                                                </nav>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="footer-social mt-30 wow fadeInUp" data-wow-duration="3s" data-wow-delay=".8s">
+                                    <a href="#"><i class="fab fa-twitter"></i></a>
+                                    <a href="https://bit.ly/sai4ull"><i class="fab fa-facebook-f"></i></a>
+                                    <a href="#"><i class="fab fa-pinterest-p"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <div class="row d-flex align-items-center">
+                        <div class="col-lg-12">
+                            <div class="footer-copy-right text-center">
+                                <p>&copy; 2026 Zacson Fitness. All rights reserved.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <div id="back-top">
+        <a title="Go to Top" href="#"><i class="fas fa-level-up-alt"></i></a>
+    </div>
+
+    <script src="./assets/js/vendor/modernizr-3.5.0.min.js"></script>
+    <script src="./assets/js/vendor/jquery-1.12.4.min.js"></script>
+    <script src="./assets/js/popper.min.js"></script>
+    <script src="./assets/js/bootstrap.min.js"></script>
+    <script src="./assets/js/jquery.slicknav.min.js"></script>
+    <script src="./assets/js/owl.carousel.min.js"></script>
+    <script src="./assets/js/slick.min.js"></script>
+    <script src="./assets/js/wow.min.js"></script>
+    <script src="./assets/js/animated.headline.js"></script>
+    <script src="./assets/js/jquery.magnific-popup.js"></script>
+    <script src="./assets/js/jquery.nice-select.min.js"></script>
+    <script src="./assets/js/jquery.sticky.js"></script>
+    <script src="./assets/js/jquery.counterup.min.js"></script>
+    <script src="./assets/js/waypoints.min.js"></script>
+    <script src="./assets/js/jquery.countdown.min.js"></script>
+    <script src="./assets/js/hover-direction-snake.min.js"></script>
+    <script src="./assets/js/contact.js"></script>
+    <script src="./assets/js/jquery.form.js"></script>
+    <script src="./assets/js/jquery.validate.min.js"></script>
+    <script src="./assets/js/mail-script.js"></script>
+    <script src="./assets/js/jquery.ajaxchimp.min.js"></script>
+    <script src="./assets/js/plugins.js"></script>
+    <script src="./assets/js/main.js"></script>
+    <script src="./assets/js/site.js"></script>
+    <script>
+        document.getElementById('trainer-modal-close').addEventListener('click', function() {
+            document.getElementById('trainer-modal').classList.remove('active');
+        });
+        document.getElementById('trainer-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

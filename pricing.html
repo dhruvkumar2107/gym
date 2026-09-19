@@ -1,0 +1,623 @@
+﻿<!doctype html>
+<html class="no-js" lang="zxx">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Zacson Fitness | Membership Plans - Premium Gym in Andheri West, Mumbai</title>
+    <meta name="description" content="Transparent pricing for Zacson Fitness, a premium gym in Andheri West, Mumbai. No hidden fees, no joining fee. Choose from flexible membership plans.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="Zacson Fitness - Membership Plans">
+    <meta property="og:description" content="Transparent pricing. No hidden fees. No joining fee. Join the best gym in Andheri West, Mumbai.">
+    <meta property="og:type" content="website">
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="assets/css/slicknav.css">
+    <link rel="stylesheet" href="assets/css/flaticon.css">
+    <link rel="stylesheet" href="assets/css/gijgo.css">
+    <link rel="stylesheet" href="assets/css/animate.min.css">
+    <link rel="stylesheet" href="assets/css/animated-headline.css">
+    <link rel="stylesheet" href="assets/css/magnific-popup.css">
+    <link rel="stylesheet" href="assets/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="assets/css/themify-icons.css">
+    <link rel="stylesheet" href="assets/css/slick.css">
+    <link rel="stylesheet" href="assets/css/nice-select.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": "Zacson Fitness Membership",
+      "description": "Premium gym membership at Zacson Fitness, Andheri West, Mumbai. Includes full gym access, personal training, and group classes.",
+      "brand": { "@type": "Brand", "name": "Zacson Fitness" },
+      "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": "INR",
+        "lowPrice": "999",
+        "highPrice": "4999",
+        "offerCount": "4",
+        "availability": "https://schema.org/InStock"
+      }
+    }
+    </script>
+    <style>
+        .checkout-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;justify-content:center;align-items:center}
+        .checkout-overlay.active{display:flex}
+        .checkout-dialog{background:#1a1a2e;border:1px solid rgba(199,164,78,0.3);border-radius:16px;width:95%;max-width:600px;max-height:90vh;overflow-y:auto;color:#fff}
+        .checkout-header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.1)}
+        .checkout-header h3{margin:0;color:#c7a44e;font-size:22px}
+        .checkout-header .close-checkout{background:none;border:none;color:#fff;font-size:28px;cursor:pointer;padding:0;line-height:1}
+        .checkout-body{padding:24px}
+        .checkout-steps{display:flex;justify-content:center;gap:12px;margin-bottom:30px}
+        .step{display:flex;align-items:center;gap:8px;color:#666;font-size:14px}
+        .step.active{color:#c7a44e}
+        .step .step-number{width:30px;height:30px;border-radius:50%;background:#333;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px}
+        .step.active .step-number{background:#c7a44e}
+        .checkout-step-content{display:none}
+        .checkout-step-content.active{display:block}
+        .plan-selected{background:rgba(199,164,78,0.1);border:1px solid rgba(199,164,78,0.3);border-radius:12px;padding:20px;margin-bottom:20px}
+        .plan-selected h4{color:#c7a44e;margin-bottom:8px}
+        .checkout-coupon{display:flex;gap:10px;margin:20px 0}
+        .checkout-coupon input{flex:1;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px}
+        .btn-coupon{padding:10px 20px;border-radius:8px;border:none;background:#c7a44e;color:#000;font-weight:bold;cursor:pointer;white-space:nowrap}
+        .btn-coupon:hover{background:#b8943d}
+        .coupon-message{font-size:13px;margin-top:8px}
+        .coupon-error{color:#e74c3c}
+        .coupon-success{color:#2ecc71}
+        .checkout-pricing{background:rgba(255,255,255,0.05);border-radius:12px;padding:20px;margin:20px 0}
+        .pricing-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:15px}
+        .pricing-row.total{border-top:1px solid rgba(255,255,255,0.15);margin-top:10px;padding-top:14px;font-weight:bold;font-size:18px;color:#c7a44e}
+        .final-summary{background:rgba(255,255,255,0.05);border-radius:12px;padding:20px;margin:20px 0}
+        .summary-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.08)}
+        .summary-row:last-child{border-bottom:none}
+        .checkout-next-btn,.checkout-pay-btn{width:100%;padding:14px;border-radius:10px;border:none;font-size:16px;font-weight:bold;cursor:pointer;margin-top:16px;transition:all 0.3s ease}
+        .checkout-next-btn{background:#c7a44e;color:#000}
+        .checkout-next-btn:hover{background:#b8943d}
+        .checkout-back-btn{width:100%;padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.2);background:transparent;color:#fff;font-size:16px;font-weight:bold;cursor:pointer;margin-top:10px;transition:all 0.3s ease}
+        .checkout-back-btn:hover{background:rgba(255,255,255,0.05)}
+        .checkout-pay-btn{background:#27ae60;color:#fff}
+        .checkout-pay-btn:hover{background:#219a52}
+        .success-icon{text-align:center;font-size:60px;color:#2ecc71;margin:20px 0}
+        .success-icon i{width:80px;height:80px;border-radius:50%;background:rgba(46,204,113,0.15);display:inline-flex;align-items:center;justify-content:center}
+        .comparison-table-wrap{overflow-x:auto;margin:30px 0}
+        .comparison-table{width:100%;border-collapse:collapse;color:#fff}
+        .comparison-table th,.comparison-table td{padding:14px 18px;text-align:center;border:1px solid rgba(255,255,255,0.1)}
+        .comparison-table thead th{background:rgba(199,164,78,0.15);color:#c7a44e;font-size:16px;font-weight:700}
+        .comparison-table tbody tr:nth-child(odd){background:rgba(255,255,255,0.03)}
+        .comparison-table tbody td:first-child{text-align:left;font-weight:600}
+        .comparison-table .check{color:#c7a44e;font-size:18px}
+        .comparison-table .cross{color:#666;font-size:18px}
+        .faq-item{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;margin-bottom:14px;overflow:hidden}
+        .faq-question{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;cursor:pointer;color:#fff;font-weight:600;font-size:16px;transition:background 0.2s}
+        .faq-question:hover{background:rgba(199,164,78,0.08)}
+        .faq-question i{transition:transform 0.3s;color:#c7a44e}
+        .faq-item.open .faq-question i{transform:rotate(180deg)}
+        .faq-answer{max-height:0;overflow:hidden;transition:max-height 0.3s ease,padding 0.3s ease}
+        .faq-item.open .faq-answer{max-height:300px}
+        .faq-answer-inner{padding:0 22px 18px;color:#bbb;line-height:1.7;font-size:15px}
+        .coupon-section{background:rgba(199,164,78,0.08);border:1px solid rgba(199,164,78,0.2);border-radius:12px;padding:24px;margin-bottom:40px;text-align:center}
+        .coupon-section h4{color:#c7a44e;margin-bottom:6px}
+        .coupon-section p{color:#aaa;margin-bottom:16px;font-size:14px}
+        .coupon-section .coupon-row{display:flex;gap:10px;max-width:400px;margin:0 auto}
+        .coupon-section .coupon-row input{flex:1;padding:12px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:15px;text-transform:uppercase;letter-spacing:1px}
+        .coupon-section .coupon-row input::placeholder{text-transform:none;letter-spacing:0}
+        .coupon-section .coupon-msg{margin-top:12px;font-size:14px;min-height:20px}
+        @media(max-width:768px){.checkout-dialog{width:100%;max-height:100vh;border-radius:0}.coupon-section .coupon-row{flex-direction:column}}
+    </style>
+</head>
+<body class="black-bg">
+    <div id="preloader-active">
+        <div class="preloader d-flex align-items-center justify-content-center">
+            <div class="preloader-inner position-relative">
+                <div class="preloader-circle"></div>
+                <div class="preloader-img pere-text">
+                    <img src="assets/img/logo/loder.png" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+    <header>
+        <div class="header-area header-transparent">
+            <div class="main-header header-sticky">
+                <div class="container-fluid">
+                    <div class="menu-wrapper d-flex align-items-center justify-content-between">
+                        <div class="logo">
+                            <a href="index.html"><img src="assets/img/logo/logo.png" alt="Zacson Fitness"></a>
+                        </div>
+                        <div class="main-menu f-right d-none d-lg-block">
+                            <nav>
+                                <ul id="navigation">
+                                    <li><a href="index.html">Home</a></li><li><a href="about.html">About</a></li><li><a href="classes.html">Programs</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="gallery.html">Gallery</a></li><li><a href="contact.html">Contact</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                        <div class="header-btns d-none d-lg-block f-right">
+                            <a href="javascript:void(0)" class="btn" onclick="openWhatsApp('Hi! I would like to book a free trial at Zacson Fitness.')">Free Trial</a>
+                        </div>
+                        <div class="col-12">
+                            <div class="mobile_menu d-block d-lg-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="slider-area2">
+            <div class="slider-height2 d-flex align-items-center">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-12">
+                            <div class="hero-cap hero-cap2 pt-70">
+                                <h2>Membership Plans</h2>
+                            </div>
+                            <p style="color:#bbb;margin-top:10px;font-size:17px;">Transparent pricing. No hidden fees. No joining fee.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <section style="padding:30px 0 0 0;">
+            <div class="container">
+                <div class="coupon-section">
+                    <h4>Have a Coupon Code?</h4>
+                    <p>Enter your code below to get a discount on your membership.</p>
+                    <div class="coupon-row">
+                        <input type="text" id="couponInput" placeholder="Enter coupon code" maxlength="20">
+                        <button class="btn-coupon" id="applyCouponBtn">Apply</button>
+                    </div>
+                    <div class="coupon-msg" id="couponMessage"></div>
+                </div>
+            </div>
+        </section>
+        <section class="pricing-area section-padding30 fix">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="section-tittle text-center mb-55">
+                            <h2>Choose Your Plan</h2>
+                        </div>
+                    </div>
+                </div>
+                <div id="plans-container" class="row"></div>
+            </div>
+        </section>
+        <section class="section-padding30" style="background:rgba(255,255,255,0.02);">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="section-tittle text-center mb-55">
+                            <h2>Compare Plans</h2>
+                            <p style="color:#aaa;margin-top:8px;">See which plan is the right fit for your fitness goals.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="comparison-table-wrap">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>1 Month</th>
+                                <th>3 Months</th>
+                                <th>6 Months</th>
+                                <th>12 Months</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Full Gym Access</td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                            </tr>
+                            <tr>
+                                <td>Cardio &amp; Weights Zone</td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                            </tr>
+                            <tr>
+                                <td>Free Wi-Fi</td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                            </tr>
+                            <tr>
+                                <td>Locker &amp; Shower</td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                            </tr>
+                            <tr>
+                                <td>Personal Training Sessions</td>
+                                <td><span class="cross"><i class="fas fa-times"></i></span></td>
+                                <td><span class="cross"><i class="fas fa-times"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                            </tr>
+                            <tr>
+                                <td>Group Classes (Zumba, HIIT, Yoga)</td>
+                                <td><span class="cross"><i class="fas fa-times"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                            </tr>
+                            <tr>
+                                <td>Diet &amp; Nutrition Guidance</td>
+                                <td><span class="cross"><i class="fas fa-times"></i></span></td>
+                                <td><span class="cross"><i class="fas fa-times"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                            </tr>
+                            <tr>
+                                <td>Body Composition Analysis</td>
+                                <td><span class="cross"><i class="fas fa-times"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                            </tr>
+                            <tr>
+                                <td>Priority Booking for Classes</td>
+                                <td><span class="cross"><i class="fas fa-times"></i></span></td>
+                                <td><span class="cross"><i class="fas fa-times"></i></span></td>
+                                <td><span class="cross"><i class="fas fa-times"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                            </tr>
+                            <tr>
+                                <td>Guest Passes</td>
+                                <td><span class="cross"><i class="fas fa-times"></i></span></td>
+                                <td><span class="cross"><i class="fas fa-times"></i></span></td>
+                                <td><span class="cross"><i class="fas fa-times"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                            </tr>
+                            <tr>
+                                <td>Freeze Facility</td>
+                                <td><span class="cross"><i class="fas fa-times"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                                <td><span class="check"><i class="fas fa-check"></i></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <section class="section-padding30">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="section-tittle text-center mb-55">
+                            <h2>Membership FAQ</h2>
+                            <p style="color:#aaa;margin-top:8px;">Got questions? We have answers.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="col-xl-8">
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <span>How do I sign up for a membership?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <div class="faq-answer-inner">
+                                    Choose your preferred plan above, click "Join Now", complete the online checkout via Razorpay, and your membership is activated instantly. You can also visit our gym at Andheri West, Mumbai to sign up in person.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <span>Is there a joining fee or hidden charges?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <div class="faq-answer-inner">
+                                    Absolutely not. We charge zero joining fee and there are no hidden charges. The price you see on the plan is the price you pay. No surprise deductions ever.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <span>What payment methods are accepted?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <div class="faq-answer-inner">
+                                    We accept UPI, credit/debit cards, net banking, and popular wallets through our secure Razorpay payment gateway. All transactions are 100% safe and encrypted.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <span>Can I pay in installments?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <div class="faq-answer-inner">
+                                    Monthly plans are billed each month. For quarterly, half-yearly, and annual plans, the full amount is collected at the time of purchase. We do offer flexible EMI options on select plans through Razorpay.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <span>Can I freeze my membership?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <div class="faq-answer-inner">
+                                    Yes, memberships of 3 months or longer are eligible for a freeze. You can freeze for up to 14 days per quarter for medical reasons or travel. Contact our front desk or reach out via WhatsApp to request a freeze.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <span>What is the cancellation and refund policy?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <div class="faq-answer-inner">
+                                    You may cancel within 3 days of purchase for a full refund if no sessions have been used. After that, memberships are non-refundable but you can transfer or gift your remaining duration to another person with prior approval.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <span>Do plans auto-renew?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <div class="faq-answer-inner">
+                                    No, your membership does not auto-renew. You will receive a reminder before your plan expires, and you can choose to renew with the same plan or upgrade to a different one.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <span>Can I upgrade my plan later?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <div class="faq-answer-inner">
+                                    Yes! You can upgrade to a higher-tier plan at any time. The remaining value of your current plan will be adjusted toward the new plan. Simply contact us or visit the front desk to process the upgrade.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="services-area">
+            <div class="container">
+                <div class="row justify-content-between">
+                    <div class="col-xl-4 col-lg-4 col-md-6 col-sm-8">
+                        <div class="single-services mb-40">
+                            <div class="features-icon">
+                                <img src="assets/img/icon/icon1.svg" alt="">
+                            </div>
+                            <div class="features-caption">
+                                <h3>Location</h3>
+                                <p>Andheri West, Mumbai, Maharashtra</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-8">
+                        <div class="single-services mb-40">
+                            <div class="features-icon">
+                                <img src="assets/img/icon/icon2.svg" alt="">
+                            </div>
+                            <div class="features-caption">
+                                <h3>Phone</h3>
+                                <p>+91 98765 43210</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-8">
+                        <div class="single-services mb-40">
+                            <div class="features-icon">
+                                <img src="assets/img/icon/icon3.svg" alt="">
+                            </div>
+                            <div class="features-caption">
+                                <h3>Email</h3>
+                                <p>hello@zacsonfitness.com</p>
+                                <p>info@zacsonfitness.com</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>    <footer>
+        <div class="footer-area black-bg">
+            <div class="container">
+                <div class="footer-top footer-padding">
+                    <div class="row">
+                        <div class="col-xl-12">
+                            <div class="single-footer-caption mb-50 text-center">
+                                <div class="footer-logo wow fadeInUp" data-wow-duration="1s" data-wow-delay=".2s">
+                                    <a href="index.html"><img src="assets/img/logo/logo2_footer.png" alt="Zacson Fitness"></a>
+                                </div>
+                                <div class="header-area main-header2 wow fadeInUp" data-wow-duration="2s" data-wow-delay=".4s">
+                                    <div class="main-header main-header2">
+                                        <div class="menu-wrapper menu-wrapper2">
+                                            <div class="main-menu main-menu2 text-center">
+                                                <nav>
+                                                    <ul>
+                                                        <li><a href="index.html">Home</a></li><li><a href="about.html">About</a></li><li><a href="classes.html">Programs</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="gallery.html">Gallery</a></li><li><a href="contact.html">Contact</a></li>
+                                                    </ul>
+                                                </nav>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="footer-social mt-30 wow fadeInUp" data-wow-duration="3s" data-wow-delay=".8s">
+                                    <a href="#"><i class="fab fa-twitter"></i></a>
+                                    <a href="https://bit.ly/sai4ull"><i class="fab fa-facebook-f"></i></a>
+                                    <a href="#"><i class="fab fa-pinterest-p"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <div class="row d-flex align-items-center">
+                        <div class="col-lg-12">
+                            <div class="footer-copy-right text-center">
+                                <p>&copy; 2026 Zacson Fitness. All rights reserved.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <div id="back-top">
+        <a title="Go to Top" href="#"><i class="fas fa-level-up-alt"></i></a>
+    </div>
+    <div class="checkout-overlay" id="checkoutOverlay">
+        <div class="checkout-dialog">
+            <div class="checkout-header">
+                <h3>Complete Your Purchase</h3>
+                <button class="close-checkout" id="closeCheckout">&times;</button>
+            </div>
+            <div class="checkout-body">
+                <div class="checkout-steps">
+                    <div class="step active" data-step="1"><span class="step-number">1</span> Plan</div>
+                    <div class="step" data-step="2"><span class="step-number">2</span> Details</div>
+                    <div class="step" data-step="3"><span class="step-number">3</span> Payment</div>
+                </div>
+                <div class="checkout-step-content active" id="checkoutStep1">
+                    <div class="plan-selected" id="checkoutPlanSelected">
+                        <h4 id="checkoutPlanName">-</h4>
+                        <p id="checkoutPlanDuration" style="color:#aaa;margin:0;font-size:14px;"></p>
+                    </div>
+                    <div class="checkout-pricing">
+                        <div class="pricing-row"><span>Plan Price</span><span id="checkoutPlanPrice">-</span></div>
+                        <div class="pricing-row" id="checkoutDiscountRow" style="display:none;color:#2ecc71;"><span>Discount</span><span id="checkoutDiscountAmount">-&#8377;0</span></div>
+                        <div class="pricing-row total"><span>Total</span><span id="checkoutTotalPrice">-</span></div>
+                    </div>
+                    <div class="checkout-coupon">
+                        <input type="text" id="checkoutCouponInput" placeholder="Coupon code (optional)" maxlength="20">
+                        <button class="btn-coupon" id="checkoutApplyCoupon">Apply</button>
+                    </div>
+                    <div class="coupon-message" id="checkoutCouponMsg"></div>
+                    <button class="checkout-next-btn" id="checkoutNext1">Continue to Details</button>
+                </div>
+                <div class="checkout-step-content" id="checkoutStep2">
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block;color:#aaa;font-size:13px;margin-bottom:6px;">Full Name *</label>
+                        <input type="text" id="checkoutName" style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;" placeholder="Enter your full name">
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block;color:#aaa;font-size:13px;margin-bottom:6px;">Email Address *</label>
+                        <input type="email" id="checkoutEmail" style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;" placeholder="Enter your email">
+                    </div>
+                    <div style="margin-bottom:16px;">
+                        <label style="display:block;color:#aaa;font-size:13px;margin-bottom:6px;">Phone Number *</label>
+                        <input type="tel" id="checkoutPhone" style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;" placeholder="Enter your phone number">
+                    </div>
+                    <div class="final-summary">
+                        <div class="summary-row"><span>Plan</span><span id="summaryPlanName">-</span></div>
+                        <div class="summary-row"><span>Duration</span><span id="summaryDuration">-</span></div>
+                        <div class="summary-row"><span>Total</span><span id="summaryTotal" style="color:#c7a44e;font-weight:bold;">-</span></div>
+                    </div>
+                    <button class="checkout-next-btn" id="checkoutNext2">Proceed to Payment</button>
+                    <button class="checkout-back-btn" id="checkoutBack2">Back</button>
+                </div>
+                <div class="checkout-step-content" id="checkoutStep3">
+                    <div class="final-summary">
+                        <div class="summary-row"><span>Name</span><span id="paySummaryName">-</span></div>
+                        <div class="summary-row"><span>Email</span><span id="paySummaryEmail">-</span></div>
+                        <div class="summary-row"><span>Phone</span><span id="paySummaryPhone">-</span></div>
+                        <div class="summary-row"><span>Plan</span><span id="paySummaryPlan">-</span></div>
+                        <div class="summary-row"><span>Total</span><span id="paySummaryTotal" style="color:#c7a44e;font-weight:bold;">-</span></div>
+                    </div>
+                    <button class="checkout-pay-btn" id="checkoutPayBtn">Pay Now</button>
+                    <button class="checkout-back-btn" id="checkoutBack3">Back</button>
+                </div>
+                <div class="checkout-step-content" id="checkoutStepSuccess">
+                    <div class="success-icon"><i class="fas fa-check"></i></div>
+                    <h3 style="text-align:center;color:#2ecc71;">Payment Successful!</h3>
+                    <p style="text-align:center;color:#aaa;margin:12px 0 24px;">Your membership has been activated. A confirmation has been sent to your email.</p>
+                    <button class="checkout-next-btn" id="checkoutDoneBtn" style="background:#c7a44e;">Done</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./assets/js/vendor/modernizr-3.5.0.min.js"></script>
+    <script src="./assets/js/vendor/jquery-1.12.4.min.js"></script>
+    <script src="./assets/js/popper.min.js"></script>
+    <script src="./assets/js/bootstrap.min.js"></script>
+    <script src="./assets/js/jquery.slicknav.min.js"></script>
+    <script src="./assets/js/owl.carousel.min.js"></script>
+    <script src="./assets/js/slick.min.js"></script>
+    <script src="./assets/js/wow.min.js"></script>
+    <script src="./assets/js/animated.headline.js"></script>
+    <script src="./assets/js/jquery.magnific-popup.js"></script>
+    <script src="./assets/js/gijgo.min.js"></script>
+    <script src="./assets/js/jquery.nice-select.min.js"></script>
+    <script src="./assets/js/jquery.sticky.js"></script>
+    <script src="./assets/js/jquery.counterup.min.js"></script>
+    <script src="./assets/js/waypoints.min.js"></script>
+    <script src="./assets/js/jquery.countdown.min.js"></script>
+    <script src="./assets/js/hover-direction-snake.min.js"></script>
+    <script src="./assets/js/contact.js"></script>
+    <script src="./assets/js/jquery.form.js"></script>
+    <script src="./assets/js/jquery.validate.min.js"></script>
+    <script src="./assets/js/mail-script.js"></script>
+    <script src="./assets/js/jquery.ajaxchimp.min.js"></script>
+    <script src="./assets/js/plugins.js"></script>
+    <script src="./assets/js/main.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="./assets/js/site.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function(){
+        var couponInput = document.getElementById('couponInput');
+        var applyCouponBtn = document.getElementById('applyCouponBtn');
+        var couponMessage = document.getElementById('couponMessage');
+
+        function applyCouponMain() {
+            var code = couponInput.value.trim().toUpperCase();
+            if (!code) {
+                couponMessage.textContent = 'Please enter a coupon code.';
+                couponMessage.className = 'coupon-msg coupon-error';
+                return;
+            }
+            couponMessage.textContent = 'Applying coupon...';
+            couponMessage.className = 'coupon-msg';
+            fetch('/api/coupons/validate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: code })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.valid) {
+                    couponMessage.textContent = 'Coupon applied! ' + (data.discountPercent ? data.discountPercent + '% off' : 'Discount applied');
+                    couponMessage.className = 'coupon-msg coupon-success';
+                } else {
+                    couponMessage.textContent = data.message || 'Invalid coupon code.';
+                    couponMessage.className = 'coupon-msg coupon-error';
+                }
+            })
+            .catch(function() {
+                couponMessage.textContent = 'Could not validate coupon. Please try again.';
+                couponMessage.className = 'coupon-msg coupon-error';
+            });
+        }
+        applyCouponBtn.addEventListener('click', applyCouponMain);
+
+        var faqItems = document.querySelectorAll('.faq-item');
+        faqItems.forEach(function(item) {
+            item.querySelector('.faq-question').addEventListener('click', function() {
+                item.classList.toggle('open');
+            });
+        });
+    });
+    </script>
+</body>
+</html>
