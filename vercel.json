@@ -9,7 +9,11 @@
           "database/**",
           "routes/**",
           "middleware/**",
-          "services/**"
+          "services/**",
+          "*.html",
+          "admin/**",
+          "robots.txt",
+          "sitemap.xml"
         ]
       }
     }
