@@ -1,0 +1,17 @@
+{
+  "name": "Zacson Fitness",
+  "short_name": "Zacson Fitness",
+  "description": "Forge Your Strength. Shape Your Life. Premium gym in Andheri West, Mumbai.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#e91e63",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/img/favicon.ico",
+      "sizes": "64x64 32x32 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}
