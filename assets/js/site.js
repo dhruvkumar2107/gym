@@ -247,20 +247,45 @@ function initNavbar() {
   if (!drawer) {
     drawer = document.createElement('div'); drawer.id = 'mobileNavDrawer'; drawer.className = 'mobile-nav-drawer';
     var navItems = [
-      {href:'index.html',text:'Home'},{href:'about.html',text:'About'},{href:'courses.html',text:'Programs'},
-      {href:'pricing.html',text:'Pricing'},{href:'trainers.html',text:'Trainers'},{href:'classes.html',text:'Classes'},
-      {href:'facilities.html',text:'Facilities'},{href:'gallery.html',text:'Gallery'},{href:'transformations.html',text:'Transformations'},
-      {href:'calculators.html',text:'Calculators'},{href:'blog.html',text:'Blog'},{href:'contact.html',text:'Contact'}
+      {href:'index.html',text:'Home',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'},
+      {href:'about.html',text:'About',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'},
+      {href:'courses.html',text:'Programs',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/><path d="M6 15a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/><path d="M18 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/><path d="M6 15V8a4 4 0 0 1 4-4h4"/></svg>'},
+      {href:'pricing.html',text:'Pricing',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>'},
+      {href:'trainers.html',text:'Trainers',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'},
+      {href:'classes.html',text:'Classes',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'},
+      {href:'facilities.html',text:'Facilities',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>'},
+      {href:'gallery.html',text:'Gallery',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'},
+      {href:'transformations.html',text:'Transformations',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>'},
+      {href:'calculators.html',text:'Calculators',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="14" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="16" y2="18"/></svg>'},
+      {href:'blog.html',text:'Blog',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'},
+      {href:'contact.html',text:'Contact',icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>'}
     ];
     var currentPage = window.location.pathname.split('/').pop() || 'index.html';
     var linksHtml = navItems.map(function(n) {
-      return '<li><a href="' + n.href + '"' + (currentPage === n.href ? ' class="active"' : '') + '>' + n.text + '</a></li>';
+      var isActive = currentPage === n.href;
+      return '<li' + (isActive ? ' class="active"' : '') + '><a href="' + n.href + '"><span class="nav-icon">' + n.icon + '</span>' + n.text + '<span class="nav-arrow">&#8250;</span></a></li>';
     }).join('');
-    drawer.innerHTML = '<button class="mobile-nav-close" aria-label="Close menu">&times;</button><ul>' + linksHtml + '</ul><div class="mobile-nav-cta"><a href="contact.html">Free Trial</a></div>';
+    drawer.innerHTML = '<div class="mobile-nav-drawer-header"><img src="assets/img/logo/logo.png" alt="Zacson Fitness" class="mobile-nav-drawer-logo"><button class="mobile-nav-close" aria-label="Close navigation">&times;</button></div><div class="mobile-nav-drawer-nav"><ul>' + linksHtml + '</ul></div><div class="mobile-nav-drawer-cta"><a href="contact.html">Book Free Trial</a></div>';
     document.body.appendChild(drawer);
   }
-  function closeMenu() { overlay.classList.remove('active'); drawer.classList.remove('active'); if (hamburger) { hamburger.classList.remove('active'); hamburger.setAttribute('aria-expanded', 'false'); } document.body.style.overflow = ''; drawer.setAttribute('aria-hidden', 'true'); }
-  function openMenu() { overlay.classList.add('active'); drawer.classList.add('active'); if (hamburger) { hamburger.classList.add('active'); hamburger.setAttribute('aria-expanded', 'true'); } document.body.style.overflow = 'hidden'; drawer.removeAttribute('aria-hidden'); closeBtn && closeBtn.focus(); }
+  function closeMenu() {
+    overlay.classList.remove('active');
+    drawer.classList.remove('active');
+    if (hamburger) { hamburger.classList.remove('active'); hamburger.setAttribute('aria-expanded', 'false'); hamburger.setAttribute('aria-label', 'Open navigation'); }
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+    drawer.setAttribute('aria-hidden', 'true');
+  }
+  function openMenu() {
+    overlay.classList.add('active');
+    drawer.classList.add('active');
+    if (hamburger) { hamburger.classList.add('active'); hamburger.setAttribute('aria-expanded', 'true'); hamburger.setAttribute('aria-label', 'Close navigation'); }
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    drawer.removeAttribute('aria-hidden');
+    var closeBtn = drawer.querySelector('.mobile-nav-close');
+    if (closeBtn) closeBtn.focus();
+  }
   function trapFocus(e) {
     if (!drawer.classList.contains('active')) return;
     var focusable = drawer.querySelectorAll('a, button, [tabindex]');
@@ -277,7 +302,7 @@ function initNavbar() {
   overlay.addEventListener('click', closeMenu);
   var closeBtn = drawer.querySelector('.mobile-nav-close');
   if (closeBtn) closeBtn.addEventListener('click', closeMenu);
-  drawer.querySelectorAll('a').forEach(function(a) { a.addEventListener('click', closeMenu); });
+  drawer.querySelectorAll('.mobile-nav-drawer-nav a').forEach(function(a) { a.addEventListener('click', closeMenu); });
   document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && drawer.classList.contains('active')) closeMenu(); trapFocus(e); });
   var currentPage = window.location.pathname.split('/').pop() || 'index.html';
   document.querySelectorAll('.main-menu nav ul li').forEach(function(li) {
