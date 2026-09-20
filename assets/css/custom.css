@@ -1,5 +1,5 @@
 /* ============================================
-   ZACSON FITNESS — CUSTOM CSS v3
+   ZACSON FITNESS â€” CUSTOM CSS v3
    Mobile-first rebuild. No opacity traps.
    Clean z-index. No black blank sections.
    Navbar uses html body prefix (0,4,0) specificity.
@@ -53,285 +53,212 @@ button { font-family: inherit; cursor: pointer; }
 .preloader { display: none !important; }
 .preloader-circle, .preloader-circle2, .preloader-img, .pere-text { display: none !important; }
 
+
 /* ============================================
-   NAVBAR — Maximum specificity override
-   html body prefix = (0,4,0) specificity
-   Beats template's .mobile_menu = (0,1,0)
+   NAVBAR — Premium responsive header
    ============================================ */
 
-/* Kill template's broken sticky-bar */
+/* --- Kill template debris --- */
 html body .sticky-bar,
 html body .header-sticky.sticky-bar,
 html body .header-sticky.sticky-bar.sticky {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
+  display: none !important; visibility: hidden !important; pointer-events: none !important;
 }
-
-/* Kill template's duplicate second header */
 html body header .header-area.main-header2,
 html body header .main-header.main-header2,
 html body header .menu-wrapper.menu-wrapper2,
 html body header .main-menu.main-menu2 {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
+  display: none !important; visibility: hidden !important; pointer-events: none !important;
 }
-
-/* Kill slicknav */
 html body .slicknav_menu,
 html body .slicknav_nav,
 html body .slicknav_btn,
 html body .slicknav_open,
 html body .slicknav_bar {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
+  display: none !important; visibility: hidden !important; pointer-events: none !important;
 }
-
-/* Footer's main-header2 is a nav menu, NOT a header — reset all header styles */
+/* Footer nav reuses header classes — reset */
 footer .header-area.main-header2,
 footer .main-header.main-header2,
 footer .menu-wrapper.menu-wrapper2,
 footer .main-menu.main-menu2 {
-  position: static !important;
-  width: auto !important;
-  height: auto !important;
-  min-height: auto !important;
-  z-index: auto !important;
-  background: transparent !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: none !important;
-  display: block !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
+  position: static !important; width: auto !important; height: auto !important;
+  min-height: auto !important; z-index: auto !important;
+  background: transparent !important; backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important; border: none !important;
+  display: block !important; visibility: visible !important; pointer-events: auto !important;
 }
 
-/* Header area */
+/* --- HEADER BAR --- */
 html body header > .header-area {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 80px !important;
+  position: fixed !important; top: 0 !important; left: 0 !important;
+  width: 100% !important; height: 80px !important;
   z-index: 1000 !important;
-  background: rgba(0,0,0,0.92) !important;
-  backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  background: rgba(0,0,0,0.95) !important;
+  backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.08) !important;
   transition: background 0.3s !important;
 }
 html body header > .header-area.scrolled {
-  background: rgba(0,0,0,0.98) !important;
+  background: rgba(0,0,0,1) !important;
 }
 html body header > .header-area > .main-header {
   height: 80px !important;
 }
+html body header > .header-area > .main-header > .container-fluid {
+  max-width: 1400px !important; margin: 0 auto !important;
+  padding: 0 32px !important; height: 100% !important;
+}
 html body header > .header-area > .main-header > .container-fluid > .menu-wrapper {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  height: 80px !important;
+  display: flex !important; align-items: center !important;
+  justify-content: space-between !important; height: 80px !important;
   position: relative !important;
 }
-html body header > .header-area > .main-header > .container-fluid {
-  padding-left: 20px !important;
-  padding-right: 20px !important;
-}
 
-/* Logo */
-html body header .logo {
-  flex-shrink: 0 !important;
-}
-html body header .logo img {
-  height: 45px !important;
-  width: auto !important;
-}
+/* --- LOGO --- */
+html body header .logo { flex-shrink: 0 !important; }
+html body header .logo a { display: flex !important; align-items: center !important; }
+html body header .logo img { height: 45px !important; width: auto !important; }
 
-/* Desktop nav */
+/* --- DESKTOP NAV --- */
 html body header .main-menu {
-  flex: 1 !important;
+  flex: 1 !important; display: flex !important; justify-content: center !important;
+  margin-right: 0 !important; /* override style.css margin-right:30px */
 }
 html body header .main-menu nav,
 html body header .main-menu nav ul {
-  display: flex !important;
-  list-style: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  gap: 2px !important;
+  display: flex !important; align-items: center !important;
+  list-style: none !important; margin: 0 !important; padding: 0 !important; gap: 2px !important;
 }
+html body header .main-menu nav ul li { position: relative !important; }
 html body header .main-menu nav ul li a {
-  color: #fff !important;
-  font-size: 13px !important;
-  font-weight: 400 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 1px !important;
-  padding: 8px 10px !important;
-  transition: color 0.3s !important;
-  white-space: nowrap !important;
+  color: rgba(255,255,255,0.8) !important;
+  font-size: 13px !important; font-weight: 500 !important;
+  text-transform: uppercase !important; letter-spacing: 0.5px !important;
+  padding: 8px 10px !important; white-space: nowrap !important;
+  transition: color 0.3s !important; display: block !important;
+  border-bottom: 2px solid transparent !important;
 }
 html body header .main-menu nav ul li a:hover,
 html body header .main-menu nav ul li.active a {
   color: #FF0000 !important;
 }
+html body header .main-menu nav ul li.active a {
+  border-bottom-color: #FF0000 !important;
+}
 
-/* Hamburger button — forced small and clickable */
+/* --- CTA BUTTON (desktop only) --- */
+html body header .header-cta {
+  display: inline-flex !important; align-items: center !important;
+  background: #FF0000 !important; color: #fff !important;
+  padding: 10px 24px !important; border-radius: 4px !important;
+  font-size: 13px !important; font-weight: 600 !important;
+  text-transform: uppercase !important; letter-spacing: 1px !important;
+  white-space: nowrap !important; text-decoration: none !important;
+  transition: background 0.3s, transform 0.2s !important;
+  flex-shrink: 0 !important; margin-left: 12px !important;
+  min-height: 44px !important;
+}
+html body header .header-cta:hover {
+  background: #e60000 !important; transform: translateY(-1px) !important;
+}
+
+/* --- HAMBURGER BUTTON --- */
 html body header .mobile_menu {
-  position: relative !important;
-  width: 28px !important;
-  min-width: 28px !important;
-  max-width: 28px !important;
-  height: 20px !important;
-  z-index: 99999 !important;
-  display: none !important;
-  cursor: pointer !important;
-  background: none !important;
-  border: none !important;
-  padding: 0 !important;
-  right: auto !important;
-  -webkit-tap-highlight-color: transparent !important;
+  display: none !important; /* shown on mobile via media query */
+  position: relative !important; /* override style.css position:absolute */
+  width: 28px !important; min-width: 28px !important; max-width: 28px !important;
+  height: 20px !important; z-index: 1001 !important;
+  cursor: pointer !important; background: none !important; border: none !important;
+  padding: 0 !important; right: auto !important; left: auto !important;
+  top: auto !important;
+  -webkit-tap-highlight-color: transparent !important; touch-action: manipulation !important;
 }
 html body header .mobile_menu span {
-  display: block !important;
-  width: 100% !important;
-  height: 2px !important;
-  background: #fff !important;
-  position: absolute !important;
-  left: 0 !important;
-  transition: all 0.3s ease !important;
-  border-radius: 2px !important;
+  display: block !important; width: 100% !important; height: 2px !important;
+  background: #fff !important; position: absolute !important; left: 0 !important;
+  transition: all 0.3s ease !important; border-radius: 2px !important;
 }
-html body header .mobile_menu span:nth-child(1) {
-  top: 0 !important;
-}
-html body header .mobile_menu span:nth-child(2) {
-  top: 9px !important;
-}
-html body header .mobile_menu span:nth-child(3) {
-  top: 18px !important;
-}
-html body header .mobile_menu.active span:nth-child(1) {
-  transform: rotate(45deg) translate(5px, 5px) !important;
-}
-html body header .mobile_menu.active span:nth-child(2) {
-  opacity: 0 !important;
-}
-html body header .mobile_menu.active span:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -6px) !important;
-}
+html body header .mobile_menu span:nth-child(1) { top: 0 !important; }
+html body header .mobile_menu span:nth-child(2) { top: 9px !important; }
+html body header .mobile_menu span:nth-child(3) { top: 18px !important; }
+html body header .mobile_menu.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px) !important; }
+html body header .mobile_menu.active span:nth-child(2) { opacity: 0 !important; }
+html body header .mobile_menu.active span:nth-child(3) { transform: rotate(-45deg) translate(7px, -6px) !important; }
 
-/* Mobile nav overlay */
+/* --- MOBILE NAV OVERLAY --- */
 html body .mobile-nav-overlay {
-  display: none !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  background: rgba(0,0,0,0.85) !important;
-  z-index: 2000 !important;
+  display: none !important; position: fixed !important;
+  top: 0 !important; left: 0 !important;
+  width: 100% !important; height: 100% !important;
+  background: rgba(0,0,0,0.8) !important; z-index: 2000 !important;
 }
-html body .mobile-nav-overlay.active {
-  display: block !important;
-}
+html body .mobile-nav-overlay.active { display: block !important; }
 
-/* Mobile nav drawer */
+/* --- MOBILE NAV DRAWER --- */
 html body .mobile-nav-drawer {
-  position: fixed !important;
-  top: 0 !important;
-  right: -100% !important;
-  width: 280px !important;
-  height: 100% !important;
-  background: #111 !important;
-  z-index: 2000 !important;
-  transition: right 0.35s ease !important;
-  padding: 80px 24px 30px !important;
-  overflow-y: auto !important;
+  position: fixed !important; top: 0 !important; right: -100% !important;
+  width: 300px !important; height: 100% !important;
+  background: #0a0a0a !important; z-index: 2001 !important;
+  transition: right 0.3s ease !important;
+  padding: 80px 24px 30px !important; overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
 }
-html body .mobile-nav-drawer.active {
-  right: 0 !important;
-}
+html body .mobile-nav-drawer.active { right: 0 !important; }
 html body .mobile-nav-drawer ul {
-  list-style: none !important;
-  padding: 0 !important;
-  margin: 0 !important;
+  list-style: none !important; padding: 0 !important; margin: 0 !important;
 }
 html body .mobile-nav-drawer ul li {
   border-bottom: 1px solid rgba(255,255,255,0.08) !important;
-  opacity: 1 !important;
-  transform: none !important;
 }
 html body .mobile-nav-drawer ul li a {
-  display: block !important;
-  padding: 14px 0 !important;
-  color: #fff !important;
-  font-size: 16px !important;
-  text-transform: uppercase !important;
-  letter-spacing: 1.5px !important;
-  transition: color 0.3s !important;
+  display: block !important; padding: 14px 0 !important; color: #fff !important;
+  font-size: 16px !important; font-weight: 500 !important;
+  text-transform: uppercase !important; letter-spacing: 1px !important;
+  transition: color 0.3s !important; border-bottom: none !important;
 }
-html body .mobile-nav-drawer ul li a:hover {
-  color: #FF0000 !important;
-}
+html body .mobile-nav-drawer ul li a:hover,
+html body .mobile-nav-drawer ul li.active a { color: #FF0000 !important; }
 
-/* Mobile nav close button */
+/* --- MOBILE NAV CLOSE --- */
 html body .mobile-nav-close {
-  position: absolute !important;
-  top: 20px !important;
-  right: 20px !important;
-  background: none !important;
-  border: none !important;
-  color: #fff !important;
-  font-size: 28px !important;
-  width: 44px !important;
-  height: 44px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  position: absolute !important; top: 20px !important; right: 20px !important;
+  background: none !important; border: none !important; color: #fff !important;
+  font-size: 28px !important; width: 44px !important; height: 44px !important;
+  display: flex !important; align-items: center !important; justify-content: center !important;
   z-index: 10 !important;
 }
 
-/* Mobile nav CTA */
+/* --- MOBILE NAV CTA --- */
 html body .mobile-nav-cta {
-  margin-top: 30px !important;
-  padding-top: 20px !important;
+  margin-top: 30px !important; padding-top: 20px !important;
   border-top: 1px solid rgba(255,255,255,0.1) !important;
 }
 html body .mobile-nav-cta a {
-  display: block !important;
-  text-align: center !important;
-  background: #FF0000 !important;
-  color: #fff !important;
-  padding: 14px !important;
-  border-radius: 4px !important;
-  text-transform: uppercase !important;
-  letter-spacing: 1px !important;
-  font-weight: 600 !important;
-  text-decoration: none !important;
+  display: block !important; text-align: center !important;
+  background: #FF0000 !important; color: #fff !important;
+  padding: 14px !important; border-radius: 4px !important;
+  text-transform: uppercase !important; letter-spacing: 1px !important;
+  font-weight: 600 !important; font-size: 14px !important;
+  text-decoration: none !important; transition: background 0.3s !important;
+}
+html body .mobile-nav-cta a:hover { background: #e60000 !important; }
+
+/* --- TABLET: hide nav, show hamburger --- */
+@media (max-width: 1199px) {
+  html body header .main-menu { display: none !important; }
+  html body header .header-cta { display: none !important; }
+  html body header .mobile_menu { display: block !important; }
 }
 
-/* Mobile: hide desktop nav, show hamburger */
-@media (max-width: 991px) {
-  html body header .main-menu {
-    display: none !important;
-  }
-  html body header .mobile_menu {
-    display: block !important;
-  }
-       html body header .menu-wrapper {
-       justify-content: space-between !important;
-       }
-       html body header .menu-wrapper .logo {
-    flex: 1 !important;
-  }
-  html body header .main-header2,
-  html body header .header-area.main-header2,
-  html body header .menu-wrapper2,
-  html body header .main-menu2 {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
+/* --- MOBILE: compact height --- */
+@media (max-width: 767px) {
+  html body header > .header-area { height: 64px !important; }
+  html body header > .header-area > .main-header { height: 64px !important; }
+  html body header > .header-area > .main-header > .container-fluid > .menu-wrapper { height: 64px !important; }
+  html body header > .header-area > .main-header > .container-fluid { padding: 0 16px !important; }
+  html body header .logo img { height: 36px !important; }
+  html body header .mobile_menu { width: 28px !important; height: 20px !important; }
 }
 
 /* ============================================
@@ -823,7 +750,7 @@ footer { background: #050505; }
 .contact-form .single-form input, .contact-form .single-form textarea, .contact-form .single-form select { background: #111 !important; border: 1px solid rgba(255,255,255,0.1) !important; color: #fff !important; border-radius: 6px !important; padding: 14px 18px !important; }
 
 /* ============================================
-   SCROLL REVEAL — FAIL-SAFE
+   SCROLL REVEAL â€” FAIL-SAFE
    Content is VISIBLE by default.
    JS adds .reveal-init to body when ready.
    Only THEN do elements start hidden.

@@ -256,11 +256,11 @@ function initNavbar() {
     var linksHtml = navItems.map(function(n) {
       return '<li><a href="' + n.href + '"' + (currentPage === n.href ? ' class="active"' : '') + '>' + n.text + '</a></li>';
     }).join('');
-    drawer.innerHTML = '<button class="mobile-nav-close" aria-label="Close menu">&times;</button><ul>' + linksHtml + '</ul><div class="mobile-nav-cta"><a href="javascript:void(0)" onclick="openWhatsApp(\'Hi! I would like to book a free trial.\')">Free Trial</a></div>';
+    drawer.innerHTML = '<button class="mobile-nav-close" aria-label="Close menu">&times;</button><ul>' + linksHtml + '</ul><div class="mobile-nav-cta"><a href="contact.html">Free Trial</a></div>';
     document.body.appendChild(drawer);
   }
-  function closeMenu() { overlay.classList.remove('active'); drawer.classList.remove('active'); if (hamburger) hamburger.classList.remove('active'); document.body.style.overflow = ''; drawer.setAttribute('aria-hidden', 'true'); }
-  function openMenu() { overlay.classList.add('active'); drawer.classList.add('active'); if (hamburger) hamburger.classList.add('active'); document.body.style.overflow = 'hidden'; drawer.removeAttribute('aria-hidden'); closeBtn && closeBtn.focus(); }
+  function closeMenu() { overlay.classList.remove('active'); drawer.classList.remove('active'); if (hamburger) { hamburger.classList.remove('active'); hamburger.setAttribute('aria-expanded', 'false'); } document.body.style.overflow = ''; drawer.setAttribute('aria-hidden', 'true'); }
+  function openMenu() { overlay.classList.add('active'); drawer.classList.add('active'); if (hamburger) { hamburger.classList.add('active'); hamburger.setAttribute('aria-expanded', 'true'); } document.body.style.overflow = 'hidden'; drawer.removeAttribute('aria-hidden'); closeBtn && closeBtn.focus(); }
   function trapFocus(e) {
     if (!drawer.classList.contains('active')) return;
     var focusable = drawer.querySelectorAll('a, button, [tabindex]');
