@@ -716,7 +716,82 @@ function loadClassSchedule() {
       html += '</tr>';
     });
     scheduleBody.innerHTML = html;
+    initScheduleDayTabs();
   });
+}
+
+function initScheduleDayTabs() {
+  var tabs = document.getElementById('scheduleDayTabs');
+  var table = document.getElementById('schedule-table');
+  if (!tabs || !table) return;
+  var dayButtons = tabs.querySelectorAll('.schedule-day-tab');
+  var allRows = table.querySelectorAll('tbody tr');
+  var dayColumns = { Monday:1, Tuesday:2, Wednesday:3, Thursday:4, Friday:5, Saturday:6, Sunday:7 };
+
+  function filterByDay(day) {
+    if (day === 'all') {
+      allRows.forEach(function(row) {
+        row.classList.remove('schedule-row-active');
+        row.style.display = '';
+      });
+      table.querySelector('thead').style.display = '';
+      allRows.forEach(function(row) { row.style.display = ''; });
+      return;
+    }
+    var colIdx = dayColumns[day];
+    if (!colIdx) return;
+    allRows.forEach(function(row) {
+      row.style.display = '';
+      row.classList.remove('schedule-row-active');
+    });
+    table.querySelector('thead').style.display = 'none';
+    allRows.forEach(function(row) {
+      var cells = row.querySelectorAll('td');
+      var hasContent = false;
+      cells.forEach(function(cell, i) {
+        if (i === 0) {
+          cell.classList.add('time-cell');
+          cell.style.display = '';
+        } else if (i === colIdx) {
+          cell.style.display = cell.textContent.trim() ? '' : 'none';
+          if (cell.textContent.trim()) hasContent = true;
+        } else {
+          cell.style.display = 'none';
+        }
+      });
+      if (hasContent) {
+        row.style.display = 'flex';
+        row.classList.add('schedule-row-active');
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+
+  dayButtons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      dayButtons.forEach(function(b) { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      filterByDay(btn.dataset.day);
+    });
+  });
+
+  var mq = window.matchMedia('(max-width: 767px)');
+  function handleMQ(e) {
+    if (e.matches) {
+      filterByDay('all');
+      var monBtn = tabs.querySelector('[data-day="Monday"]');
+      if (monBtn) monBtn.click();
+    } else {
+      filterByDay('all');
+    }
+  }
+  mq.addListener(handleMQ);
+  if (mq.matches) {
+    var monBtn = tabs.querySelector('[data-day="Monday"]');
+    if (monBtn) monBtn.click();
+  }
 }
 
 function loadClassesList() {
