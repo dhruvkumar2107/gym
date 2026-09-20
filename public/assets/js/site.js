@@ -1064,12 +1064,16 @@ function initBlogPage() {
 }
 
 /* ============================================
-   SCROLL REVEAL ANIMATIONS
+   SCROLL REVEAL ANIMATIONS (FAIL-SAFE)
+   Content visible by default (CSS default).
+   JS adds reveal-init to body, THEN hides elements.
+   If JS fails, everything stays visible.
    ============================================ */
 (function() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var reveals = document.querySelectorAll('.reveal');
   if (!reveals.length) return;
+  document.body.classList.add('reveal-init');
   var observer = new IntersectionObserver(function(entries) {
     entries.forEach(function(entry) {
       if (entry.isIntersecting) {
@@ -1077,8 +1081,17 @@ function initBlogPage() {
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+  }, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
   reveals.forEach(function(el) { observer.observe(el); });
+  setTimeout(function() {
+    reveals.forEach(function(el) {
+      var rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight) {
+        el.classList.add('revealed');
+        observer.unobserve(el);
+      }
+    });
+  }, 100);
 })();
 
 /* ============================================
