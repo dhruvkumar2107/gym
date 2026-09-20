@@ -89,8 +89,27 @@ html body .slicknav_bar {
   pointer-events: none !important;
 }
 
+/* Footer's main-header2 is a nav menu, NOT a header — reset all header styles */
+footer .header-area.main-header2,
+footer .main-header.main-header2,
+footer .menu-wrapper.menu-wrapper2,
+footer .main-menu.main-menu2 {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: auto !important;
+  z-index: auto !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  display: block !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
 /* Header area */
-html body .header-area {
+html body header > .header-area {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
@@ -98,51 +117,50 @@ html body .header-area {
   height: 80px !important;
   z-index: 1000 !important;
   background: rgba(0,0,0,0.92) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
+  backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important;
   border-bottom: 1px solid rgba(255,255,255,0.05) !important;
   transition: background 0.3s !important;
 }
-html body .header-area.scrolled {
+html body header > .header-area.scrolled {
   background: rgba(0,0,0,0.98) !important;
 }
-html body .main-header {
+html body header > .header-area > .main-header {
   height: 80px !important;
 }
-html body .menu-wrapper {
+html body header > .header-area > .main-header > .container-fluid > .menu-wrapper {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
   height: 80px !important;
   position: relative !important;
 }
-html body .header-area .container-fluid {
+html body header > .header-area > .main-header > .container-fluid {
   padding-left: 20px !important;
   padding-right: 20px !important;
 }
 
 /* Logo */
-html body .logo {
+html body header .logo {
   flex-shrink: 0 !important;
 }
-html body .logo img {
+html body header .logo img {
   height: 45px !important;
   width: auto !important;
 }
 
 /* Desktop nav */
-html body .main-menu {
+html body header .main-menu {
   flex: 1 !important;
 }
-html body .main-menu nav,
-html body .main-menu nav ul {
+html body header .main-menu nav,
+html body header .main-menu nav ul {
   display: flex !important;
   list-style: none !important;
   margin: 0 !important;
   padding: 0 !important;
   gap: 2px !important;
 }
-html body .main-menu nav ul li a {
+html body header .main-menu nav ul li a {
   color: #fff !important;
   font-size: 13px !important;
   font-weight: 400 !important;
@@ -152,13 +170,13 @@ html body .main-menu nav ul li a {
   transition: color 0.3s !important;
   white-space: nowrap !important;
 }
-html body .main-menu nav ul li a:hover,
-html body .main-menu nav ul li.active a {
+html body header .main-menu nav ul li a:hover,
+html body header .main-menu nav ul li.active a {
   color: #FF0000 !important;
 }
 
 /* Hamburger button — forced small and clickable */
-html body .mobile_menu {
+html body header .mobile_menu {
   position: relative !important;
   width: 28px !important;
   min-width: 28px !important;
@@ -173,7 +191,7 @@ html body .mobile_menu {
   right: auto !important;
   -webkit-tap-highlight-color: transparent !important;
 }
-html body .mobile_menu span {
+html body header .mobile_menu span {
   display: block !important;
   width: 100% !important;
   height: 2px !important;
@@ -183,22 +201,22 @@ html body .mobile_menu span {
   transition: all 0.3s ease !important;
   border-radius: 2px !important;
 }
-html body .mobile_menu span:nth-child(1) {
+html body header .mobile_menu span:nth-child(1) {
   top: 0 !important;
 }
-html body .mobile_menu span:nth-child(2) {
+html body header .mobile_menu span:nth-child(2) {
   top: 9px !important;
 }
-html body .mobile_menu span:nth-child(3) {
+html body header .mobile_menu span:nth-child(3) {
   top: 18px !important;
 }
-html body .mobile_menu.active span:nth-child(1) {
+html body header .mobile_menu.active span:nth-child(1) {
   transform: rotate(45deg) translate(5px, 5px) !important;
 }
-html body .mobile_menu.active span:nth-child(2) {
+html body header .mobile_menu.active span:nth-child(2) {
   opacity: 0 !important;
 }
-html body .mobile_menu.active span:nth-child(3) {
+html body header .mobile_menu.active span:nth-child(3) {
   transform: rotate(-45deg) translate(7px, -6px) !important;
 }
 
@@ -294,16 +312,16 @@ html body .mobile-nav-cta a {
 
 /* Mobile: hide desktop nav, show hamburger */
 @media (max-width: 991px) {
-  html body .main-menu {
+  html body header .main-menu {
     display: none !important;
   }
-  html body .mobile_menu {
+  html body header .mobile_menu {
     display: block !important;
   }
-  html body .menu-wrapper {
-    justify-content: space-between !important;
-  }
-  html body .menu-wrapper .logo {
+       html body header .menu-wrapper {
+       justify-content: space-between !important;
+       }
+       html body header .menu-wrapper .logo {
     flex: 1 !important;
   }
   html body header .main-header2,
