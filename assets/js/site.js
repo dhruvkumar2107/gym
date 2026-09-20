@@ -403,6 +403,10 @@ function applyCoupon() {
     msgEl.innerHTML = '<span class="coupon-error">Invalid coupon code</span>';
     checkoutState.coupon = null;
     checkoutState.discount = 0;
+  } else if (couponData.min_plan && checkoutState.plan.duration < couponData.min_plan) {
+    msgEl.innerHTML = '<span class="coupon-error">This coupon requires a ' + couponData.min_plan + '-month plan or longer</span>';
+    checkoutState.coupon = null;
+    checkoutState.discount = 0;
   } else {
     var base = checkoutState.plan.price * checkoutState.plan.duration;
     if (couponData.discount_percent) checkoutState.discount = Math.round(base * couponData.discount_percent / 100);
@@ -439,6 +443,9 @@ function initiateRazorpayPayment() {
     var form = document.getElementById('checkoutForm');
     var userData = {};
     if (form) new FormData(form).forEach(function(v, k) { userData[k] = v; });
+    var payBtn = document.querySelector('.checkout-pay-btn');
+    if (payBtn && payBtn.disabled) return;
+    if (payBtn) { payBtn.disabled = true; payBtn.textContent = 'Processing...'; }
     var options = {
       key: 'rzp_test_placeholder',
       amount: total * 100,
@@ -454,9 +461,9 @@ function initiateRazorpayPayment() {
       },
       prefill: {name: userData.name, email: userData.email, contact: userData.phone},
       theme: {color: '#FF0000'},
-      modal: {ondismiss: function() { showToast('Payment cancelled.', 'error'); }}
+      modal: {ondismiss: function() { if (payBtn) { payBtn.disabled = false; payBtn.textContent = 'Pay Now'; } showToast('Payment cancelled.', 'error'); }}
     };
-    new Razorpay(options).open();
+    try { new Razorpay(options).open(); } catch(err) { if (payBtn) { payBtn.disabled = false; payBtn.textContent = 'Pay Now'; } showToast('Payment error. Please try again.', 'error'); }
   } else {
     document.querySelectorAll('.checkout-step-content').forEach(function(el) { el.style.display = 'none'; });
     document.getElementById('checkoutSuccess').style.display = 'block';
@@ -639,7 +646,7 @@ function showLightbox(images, startIndex) {
   overlay.querySelector('.lightbox-next').onclick = function() { goTo(current + 1); };
   overlay.onclick = function(ev) { if (ev.target === overlay) { overlay.remove(); document.onkeydown = null; } };
   document.onkeydown = function(e) {
-    if (e.key === 'Escape') { overlay.remove(); document.onkeydown = null; }
+    if (e.key === 'Escape') { overlay.remove(); document.onkeydown = null; return; }
     if (e.key === 'ArrowLeft') goTo(current - 1);
     if (e.key === 'ArrowRight') goTo(current + 1);
     if (e.key === 'Tab') {
@@ -653,6 +660,15 @@ function showLightbox(images, startIndex) {
 }
 
 
+function parseTimeTo24(timeStr) {
+  var match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (!match) return parseInt(timeStr) || 0;
+  var h = parseInt(match[1]);
+  var ampm = match[3].toUpperCase();
+  if (ampm === 'PM' && h !== 12) h += 12;
+  if (ampm === 'AM' && h === 12) h = 0;
+  return h;
+}
 function loadClassSchedule() {
   var scheduleBody = document.getElementById('schedule-body');
   if (!scheduleBody) return;
@@ -660,10 +676,10 @@ function loadClassSchedule() {
     if (!schedules || !schedules.length) return;
     var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
     var timeSlots = [
-      {label:'Early Morning',filter:function(s){var t=parseInt(s.time); return t>=5 && t<9;}},
-      {label:'Morning',filter:function(s){var t=parseInt(s.time); return t>=9 && t<12;}},
-      {label:'Afternoon',filter:function(s){var t=parseInt(s.time); return t>=12 && t<17;}},
-      {label:'Evening',filter:function(s){var t=parseInt(s.time); return t>=17;}}
+      {label:'Early Morning',filter:function(s){var t=parseTimeTo24(s.time); return t>=5 && t<9;}},
+      {label:'Morning',filter:function(s){var t=parseTimeTo24(s.time); return t>=9 && t<12;}},
+      {label:'Afternoon',filter:function(s){var t=parseTimeTo24(s.time); return t>=12 && t<17;}},
+      {label:'Evening',filter:function(s){var t=parseTimeTo24(s.time); return t>=17;}}
     ];
     var html = '';
     timeSlots.forEach(function(slot) {
@@ -728,14 +744,20 @@ function handleContactForm() {
   if (!form) return;
   form.addEventListener('submit', function(e) {
     e.preventDefault();
+    var name = form.querySelector('[name="name"]').value.trim();
+    var email = form.querySelector('[name="email"]').value.trim();
+    var message = form.querySelector('[name="message"]').value.trim();
+    if (!name) { showToast('Please enter your name.', 'error'); return; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Please enter a valid email address.', 'error'); return; }
+    if (!message) { showToast('Please enter your message.', 'error'); return; }
     var btn = form.querySelector('button[type="submit"]');
     if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
     var data = {
-      name: form.querySelector('[name="name"]').value,
-      email: form.querySelector('[name="email"]').value,
-      phone: form.querySelector('[name="phone"]') ? form.querySelector('[name="phone"]').value : '',
-      subject: form.querySelector('[name="subject"]') ? form.querySelector('[name="subject"]').value : '',
-      message: form.querySelector('[name="message"]').value
+      name: name,
+      email: email,
+      phone: form.querySelector('[name="phone"]') ? form.querySelector('[name="phone"]').value.trim() : '',
+      subject: form.querySelector('[name="subject"]') ? form.querySelector('[name="subject"]').value.trim() : '',
+      message: message
     };
     apiPost('/contact/submit', data).then(function(result) {
       if (result.error) { showToast(result.error, 'error'); }
@@ -774,20 +796,17 @@ function handleFreeTrialForm() {
 }
 
 function initBMICalculator() {
-  var form = document.getElementById('bmiForm');
+  var form = document.getElementById('bmi-form');
   if (!form) return;
   form.addEventListener('submit', function(e) {
     e.preventDefault();
     var height = parseFloat(form.querySelector('[name="height"]').value);
     var weight = parseFloat(form.querySelector('[name="weight"]').value);
-    var resultEl = document.getElementById('bmiResult');
-    var errorEl = document.getElementById('bmiError');
+    var resultEl = document.getElementById('bmi-result');
     if (!height || !weight || height <= 0 || weight <= 0) {
-      if (errorEl) { errorEl.textContent = 'Please enter valid height and weight values.'; errorEl.style.display = 'block'; }
-      if (resultEl) resultEl.style.display = 'none';
+      if (resultEl) { resultEl.style.display = 'block'; resultEl.innerHTML = '<p style="color:#e74c3c;">Please enter valid height and weight values.</p>'; }
       return;
     }
-    if (errorEl) errorEl.style.display = 'none';
     var heightM = height / 100;
     var bmi = weight / (heightM * heightM);
     var category = '';
@@ -803,24 +822,23 @@ function initBMICalculator() {
 }
 
 function initCalorieCalculator() {
-  var form = document.getElementById('calorieForm');
+  var form = document.getElementById('calorie-form');
   if (!form) return;
+  var activityMap = {sedentary:1.2, light:1.375, moderate:1.55, active:1.725, very_active:1.9};
   form.addEventListener('submit', function(e) {
     e.preventDefault();
     var age = parseInt(form.querySelector('[name="age"]').value);
     var sex = form.querySelector('[name="sex"]').value;
     var height = parseFloat(form.querySelector('[name="height"]').value);
     var weight = parseFloat(form.querySelector('[name="weight"]').value);
-    var activity = parseFloat(form.querySelector('[name="activity"]').value) || 1.2;
+    var activityVal = form.querySelector('[name="activity_level"]').value;
+    var activity = activityMap[activityVal] || 1.2;
     var goal = form.querySelector('[name="goal"]').value;
-    var resultEl = document.getElementById('calorieResult');
-    var errorEl = document.getElementById('calorieError');
+    var resultEl = document.getElementById('cal-result');
     if (!age || !sex || !height || !weight || age <= 0 || height <= 0 || weight <= 0) {
-      if (errorEl) { errorEl.textContent = 'Please fill all fields with valid values.'; errorEl.style.display = 'block'; }
-      if (resultEl) resultEl.style.display = 'none';
+      if (resultEl) { resultEl.style.display = 'block'; resultEl.innerHTML = '<p style="color:#e74c3c;">Please fill all fields with valid values.</p>'; }
       return;
     }
-    if (errorEl) errorEl.style.display = 'none';
     var bmr;
     if (sex === 'male') bmr = 10 * weight + 6.25 * height - 5 * age + 5;
     else bmr = 10 * weight + 6.25 * height - 5 * age - 161;
