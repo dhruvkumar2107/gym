@@ -49,6 +49,8 @@ button { font-family: inherit; cursor: pointer; }
 
 /* --- PRELOADER --- */
 #preloader-active { display: none !important; }
+.preloader { display: none !important; }
+.preloader-circle, .preloader-circle2, .preloader-img, .pere-text { display: none !important; }
 
 /* ============================================
    NAVBAR — Complete override of template styles
@@ -65,10 +67,14 @@ button { font-family: inherit; cursor: pointer; }
   z-index: calc(var(--z-header) + 1) !important;
 }
 
-/* Also kill template's sticky-bar */
+/* Also kill template's sticky-bar and duplicate second header */
 .sticky-bar,
 .header-sticky.sticky-bar,
 .header-sticky.sticky-bar.sticky { display: none !important; }
+.header-area.main-header2,
+.main-header.main-header2,
+.menu-wrapper.menu-wrapper2,
+.main-menu.main-menu2 { display: none !important; }
 
 .header-area {
   position: fixed; top: 0; left: 0; width: 100%; height: var(--header-height);
@@ -162,6 +168,11 @@ button { font-family: inherit; cursor: pointer; }
   .mobile_menu { display: block !important; }
   .menu-wrapper { justify-content: space-between; }
   .menu-wrapper .logo { flex: 1; }
+  /* Kill the template's second sticky header — it has no hamburger, covers the real one */
+  .main-header2,
+  .header-area.main-header2,
+  .menu-wrapper2,
+  .main-menu2 { display: none !important; }
 }
 
 /* ============================================
