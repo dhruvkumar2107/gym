@@ -67,14 +67,14 @@ button { font-family: inherit; cursor: pointer; }
   z-index: calc(var(--z-header) + 1) !important;
 }
 
-/* Also kill template's sticky-bar and duplicate second header */
+/* Also kill template's sticky-bar and duplicate second header (only in header, not footer) */
 .sticky-bar,
 .header-sticky.sticky-bar,
 .header-sticky.sticky-bar.sticky { display: none !important; }
-.header-area.main-header2,
-.main-header.main-header2,
-.menu-wrapper.menu-wrapper2,
-.main-menu.main-menu2 { display: none !important; }
+header .header-area.main-header2,
+header .main-header.main-header2,
+header .menu-wrapper.menu-wrapper2,
+header .main-menu.main-menu2 { display: none !important; }
 
 .header-area {
   position: fixed; top: 0; left: 0; width: 100%; height: var(--header-height);
@@ -168,11 +168,11 @@ button { font-family: inherit; cursor: pointer; }
   .mobile_menu { display: block !important; }
   .menu-wrapper { justify-content: space-between; }
   .menu-wrapper .logo { flex: 1; }
-  /* Kill the template's second sticky header — it has no hamburger, covers the real one */
-  .main-header2,
-  .header-area.main-header2,
-  .menu-wrapper2,
-  .main-menu2 { display: none !important; }
+  /* Kill the template's second sticky header in header only */
+  header .main-header2,
+  header .header-area.main-header2,
+  header .menu-wrapper2,
+  header .main-menu2 { display: none !important; }
 }
 
 /* ============================================
@@ -848,25 +848,7 @@ body.reveal-init .reveal.revealed {
   #back-top a { width: 40px; height: 40px; font-size: 14px; }
 }
 
-/* --- MOBILE STICKY CTA BAR --- */
-.mobile-sticky-cta { display: none; }
-@media (max-width: 767px) {
-  .mobile-sticky-cta {
-    display: flex; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 9997;
-    background: rgba(10,10,10,0.97); backdrop-filter: blur(15px);
-    border-top: 1px solid rgba(255,0,0,0.2);
-    padding: 10px 16px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
-    gap: 10px;
-  }
-  .mobile-sticky-cta a {
-    flex: 1; text-align: center; padding: 12px 8px; border-radius: 6px;
-    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
-    min-height: 44px; display: flex; align-items: center; justify-content: center;
-  }
-  .mobile-sticky-cta .cta-whatsapp { background: #25d366; color: #fff; }
-  .mobile-sticky-cta .cta-trial { background: var(--brand-red); color: #fff; }
-  body { padding-bottom: 70px; }
-}
+/* --- MOBILE STICKY CTA BAR --- REMOVED --- */
 
 /* --- MOBILE CONTACT FORM --- */
 @media (max-width: 767px) {
