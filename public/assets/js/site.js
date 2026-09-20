@@ -286,13 +286,7 @@ function initNavbar() {
   });
 }
 
-function initWhatsAppBtn() {
-  if (document.getElementById('whatsapp-fab')) return;
-  var fab = document.createElement('div');
-  fab.id = 'whatsapp-fab';
-  fab.innerHTML = '<a href="https://wa.me/919876543210?text=' + encodeURIComponent('Hi! I would like to know more about Zacson Fitness.') + '" target="_blank" aria-label="Chat on WhatsApp" style="position:fixed;bottom:30px;left:30px;z-index:9998;background:#25d366;color:#fff;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 4px 20px rgba(0,0,0,0.3);text-decoration:none;transition:transform 0.3s;"><i class="fab fa-whatsapp"></i></a>';
-  document.body.appendChild(fab);
-}
+function initWhatsAppBtn() { /* REMOVED */ }
 
 function initBackToTop() {
   var btn = document.getElementById('back-top');
