@@ -238,6 +238,9 @@ function initNavbar() {
     window.addEventListener('scroll', function() { header.classList.toggle('scrolled', window.scrollY > 50); });
   }
   var hamburger = document.querySelector('.mobile_menu');
+  if (hamburger && !hamburger.querySelector('span')) {
+    hamburger.innerHTML = '<span></span><span></span><span></span>';
+  }
   var overlay = document.getElementById('mobileNavOverlay');
   var drawer = document.getElementById('mobileNavDrawer');
   if (!overlay) { overlay = document.createElement('div'); overlay.id = 'mobileNavOverlay'; overlay.className = 'mobile-nav-overlay'; document.body.appendChild(overlay); }
@@ -256,8 +259,8 @@ function initNavbar() {
     drawer.innerHTML = '<button class="mobile-nav-close" aria-label="Close menu">&times;</button><ul>' + linksHtml + '</ul><div class="mobile-nav-cta"><a href="javascript:void(0)" onclick="openWhatsApp(\'Hi! I would like to book a free trial.\')">Free Trial</a></div>';
     document.body.appendChild(drawer);
   }
-  function closeMenu() { overlay.classList.remove('active'); drawer.classList.remove('active'); document.body.style.overflow = ''; drawer.setAttribute('aria-hidden', 'true'); }
-  function openMenu() { overlay.classList.add('active'); drawer.classList.add('active'); document.body.style.overflow = 'hidden'; drawer.removeAttribute('aria-hidden'); closeBtn && closeBtn.focus(); }
+  function closeMenu() { overlay.classList.remove('active'); drawer.classList.remove('active'); if (hamburger) hamburger.classList.remove('active'); document.body.style.overflow = ''; drawer.setAttribute('aria-hidden', 'true'); }
+  function openMenu() { overlay.classList.add('active'); drawer.classList.add('active'); if (hamburger) hamburger.classList.add('active'); document.body.style.overflow = 'hidden'; drawer.removeAttribute('aria-hidden'); closeBtn && closeBtn.focus(); }
   function trapFocus(e) {
     if (!drawer.classList.contains('active')) return;
     var focusable = drawer.querySelectorAll('a, button, [tabindex]');
