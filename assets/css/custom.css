@@ -1,7 +1,8 @@
 /* ============================================
-   ZACSON FITNESS — CUSTOM CSS v2
+   ZACSON FITNESS — CUSTOM CSS v3
    Mobile-first rebuild. No opacity traps.
    Clean z-index. No black blank sections.
+   Navbar uses html body prefix (0,4,0) specificity.
    ============================================ */
 
 /* --- VARIABLES --- */
@@ -53,126 +54,266 @@ button { font-family: inherit; cursor: pointer; }
 .preloader-circle, .preloader-circle2, .preloader-img, .pere-text { display: none !important; }
 
 /* ============================================
-   NAVBAR — Complete override of template styles
+   NAVBAR — Maximum specificity override
+   html body prefix = (0,4,0) specificity
+   Beats template's .mobile_menu = (0,1,0)
    ============================================ */
 
-/* Kill template's broken mobile_menu rules */
-.mobile_menu,
-.header-area .mobile_menu,
-.main-header .mobile_menu,
-.menu-wrapper .mobile_menu {
+/* Kill template's broken sticky-bar */
+html body .sticky-bar,
+html body .header-sticky.sticky-bar,
+html body .header-sticky.sticky-bar.sticky {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Kill template's duplicate second header */
+html body header .header-area.main-header2,
+html body header .main-header.main-header2,
+html body header .menu-wrapper.menu-wrapper2,
+html body header .main-menu.main-menu2 {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Kill slicknav */
+html body .slicknav_menu,
+html body .slicknav_nav,
+html body .slicknav_btn,
+html body .slicknav_open,
+html body .slicknav_bar {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Header area */
+html body .header-area {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 80px !important;
+  z-index: 1000 !important;
+  background: rgba(0,0,0,0.92) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  transition: background 0.3s !important;
+}
+html body .header-area.scrolled {
+  background: rgba(0,0,0,0.98) !important;
+}
+html body .main-header {
+  height: 80px !important;
+}
+html body .menu-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  height: 80px !important;
   position: relative !important;
-  right: auto !important;
-  width: 28px !important;
-  z-index: calc(var(--z-header) + 1) !important;
 }
-
-/* Also kill template's sticky-bar and duplicate second header (only in header, not footer) */
-.sticky-bar,
-.header-sticky.sticky-bar,
-.header-sticky.sticky-bar.sticky { display: none !important; }
-header .header-area.main-header2,
-header .main-header.main-header2,
-header .menu-wrapper.menu-wrapper2,
-header .main-menu.main-menu2 { display: none !important; }
-
-.header-area {
-  position: fixed; top: 0; left: 0; width: 100%; height: var(--header-height);
-  z-index: var(--z-header);
-  background: rgba(0,0,0,0.92);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  transition: background 0.3s;
+html body .header-area .container-fluid {
+  padding-left: 20px !important;
+  padding-right: 20px !important;
 }
-.header-area.scrolled { background: rgba(0,0,0,0.98); }
-.main-header { height: var(--header-height); }
-.menu-wrapper {
-  display: flex; align-items: center; justify-content: space-between;
-  height: var(--header-height); position: relative;
-}
-.header-area .container-fluid { padding-left: 20px; padding-right: 20px; }
 
 /* Logo */
-.logo { flex-shrink: 0; }
-.logo img { height: 45px; width: auto; }
+html body .logo {
+  flex-shrink: 0 !important;
+}
+html body .logo img {
+  height: 45px !important;
+  width: auto !important;
+}
 
 /* Desktop nav */
-.main-menu { flex: 1; }
-.main-menu nav, .main-menu nav ul { display: flex; list-style: none; margin: 0; padding: 0; gap: 2px; }
-.main-menu nav ul li a {
-  color: #fff; font-size: 13px; font-weight: 400;
-  text-transform: uppercase; letter-spacing: 1px;
-  padding: 8px 10px; transition: color 0.3s; white-space: nowrap;
+html body .main-menu {
+  flex: 1 !important;
 }
-.main-menu nav ul li a:hover, .main-menu nav ul li.active a { color: var(--brand-red); }
+html body .main-menu nav,
+html body .main-menu nav ul {
+  display: flex !important;
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 2px !important;
+}
+html body .main-menu nav ul li a {
+  color: #fff !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  padding: 8px 10px !important;
+  transition: color 0.3s !important;
+  white-space: nowrap !important;
+}
+html body .main-menu nav ul li a:hover,
+html body .main-menu nav ul li.active a {
+  color: #FF0000 !important;
+}
 
-/* Hamburger button */
-.mobile_menu {
-  display: none; cursor: pointer;
-  background: none; border: none; padding: 0;
-  width: 28px; height: 20px; position: relative;
-  z-index: calc(var(--z-header) + 1);
-  -webkit-tap-highlight-color: transparent;
+/* Hamburger button — forced small and clickable */
+html body .mobile_menu {
+  position: relative !important;
+  width: 28px !important;
+  min-width: 28px !important;
+  max-width: 28px !important;
+  height: 20px !important;
+  z-index: 99999 !important;
+  display: none !important;
+  cursor: pointer !important;
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  right: auto !important;
+  -webkit-tap-highlight-color: transparent !important;
 }
-.mobile_menu span {
-  display: block; width: 100%; height: 2px; background: #fff;
-  position: absolute; left: 0; transition: all 0.3s ease;
-  border-radius: 2px;
+html body .mobile_menu span {
+  display: block !important;
+  width: 100% !important;
+  height: 2px !important;
+  background: #fff !important;
+  position: absolute !important;
+  left: 0 !important;
+  transition: all 0.3s ease !important;
+  border-radius: 2px !important;
 }
-.mobile_menu span:nth-child(1) { top: 0; }
-.mobile_menu span:nth-child(2) { top: 9px; }
-.mobile_menu span:nth-child(3) { top: 18px; }
-.mobile_menu.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
-.mobile_menu.active span:nth-child(2) { opacity: 0; }
-.mobile_menu.active span:nth-child(3) { transform: rotate(-45deg) translate(7px, -6px); }
+html body .mobile_menu span:nth-child(1) {
+  top: 0 !important;
+}
+html body .mobile_menu span:nth-child(2) {
+  top: 9px !important;
+}
+html body .mobile_menu span:nth-child(3) {
+  top: 18px !important;
+}
+html body .mobile_menu.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px) !important;
+}
+html body .mobile_menu.active span:nth-child(2) {
+  opacity: 0 !important;
+}
+html body .mobile_menu.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px) !important;
+}
 
 /* Mobile nav overlay */
-.mobile-nav-overlay {
-  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.85); z-index: var(--z-mobile-menu);
+html body .mobile-nav-overlay {
+  display: none !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: rgba(0,0,0,0.85) !important;
+  z-index: 2000 !important;
 }
-.mobile-nav-overlay.active { display: block; }
-
-/* --- MOBILE NAV DRAWER --- */
-.mobile-nav-drawer {
-  position: fixed; top: 0; right: -100%; width: 280px; height: 100%;
-  background: #111; z-index: var(--z-mobile-menu);
-  transition: right 0.35s ease; padding: 80px 24px 30px; overflow-y: auto;
-}
-.mobile-nav-drawer.active { right: 0; }
-.mobile-nav-drawer ul { list-style: none; padding: 0; margin: 0; }
-.mobile-nav-drawer ul li {
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  opacity: 1; transform: none;
-}
-.mobile-nav-drawer ul li a {
-  display: block; padding: 14px 0; color: #fff; font-size: 16px;
-  text-transform: uppercase; letter-spacing: 1.5px; transition: color 0.3s;
-}
-.mobile-nav-drawer ul li a:hover { color: var(--brand-red); }
-.mobile-nav-close {
-  position: absolute; top: 20px; right: 20px; background: none; border: none;
-  color: #fff; font-size: 28px; width: 44px; height: 44px;
-  display: flex; align-items: center; justify-content: center; z-index: 10;
-}
-.mobile-nav-cta { margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
-.mobile-nav-cta a {
-  display: block; text-align: center; background: var(--brand-red); color: #fff;
-  padding: 14px; border-radius: 4px; text-transform: uppercase;
-  letter-spacing: 1px; font-weight: 600; text-decoration: none;
+html body .mobile-nav-overlay.active {
+  display: block !important;
 }
 
-/* --- MOBILE: hide desktop nav, show hamburger --- */
+/* Mobile nav drawer */
+html body .mobile-nav-drawer {
+  position: fixed !important;
+  top: 0 !important;
+  right: -100% !important;
+  width: 280px !important;
+  height: 100% !important;
+  background: #111 !important;
+  z-index: 2000 !important;
+  transition: right 0.35s ease !important;
+  padding: 80px 24px 30px !important;
+  overflow-y: auto !important;
+}
+html body .mobile-nav-drawer.active {
+  right: 0 !important;
+}
+html body .mobile-nav-drawer ul {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+html body .mobile-nav-drawer ul li {
+  border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+html body .mobile-nav-drawer ul li a {
+  display: block !important;
+  padding: 14px 0 !important;
+  color: #fff !important;
+  font-size: 16px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1.5px !important;
+  transition: color 0.3s !important;
+}
+html body .mobile-nav-drawer ul li a:hover {
+  color: #FF0000 !important;
+}
+
+/* Mobile nav close button */
+html body .mobile-nav-close {
+  position: absolute !important;
+  top: 20px !important;
+  right: 20px !important;
+  background: none !important;
+  border: none !important;
+  color: #fff !important;
+  font-size: 28px !important;
+  width: 44px !important;
+  height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 10 !important;
+}
+
+/* Mobile nav CTA */
+html body .mobile-nav-cta {
+  margin-top: 30px !important;
+  padding-top: 20px !important;
+  border-top: 1px solid rgba(255,255,255,0.1) !important;
+}
+html body .mobile-nav-cta a {
+  display: block !important;
+  text-align: center !important;
+  background: #FF0000 !important;
+  color: #fff !important;
+  padding: 14px !important;
+  border-radius: 4px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+}
+
+/* Mobile: hide desktop nav, show hamburger */
 @media (max-width: 991px) {
-  .main-menu { display: none !important; }
-  .mobile_menu { display: block !important; }
-  .menu-wrapper { justify-content: space-between; }
-  .menu-wrapper .logo { flex: 1; }
-  /* Kill the template's second sticky header in header only */
-  header .main-header2,
-  header .header-area.main-header2,
-  header .menu-wrapper2,
-  header .main-menu2 { display: none !important; }
+  html body .main-menu {
+    display: none !important;
+  }
+  html body .mobile_menu {
+    display: block !important;
+  }
+  html body .menu-wrapper {
+    justify-content: space-between !important;
+  }
+  html body .menu-wrapper .logo {
+    flex: 1 !important;
+  }
+  html body header .main-header2,
+  html body header .header-area.main-header2,
+  html body header .menu-wrapper2,
+  html body header .main-menu2 {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
 }
 
 /* ============================================
@@ -840,12 +981,6 @@ body.reveal-init .reveal.revealed {
 @media (max-width: 767px) {
   .trainer-modal { width: 95%; max-height: 85vh; }
   .trainer-modal-img { height: 200px; }
-}
-
-/* --- MOBILE BACK TO TOP --- */
-@media (max-width: 767px) {
-  #back-top { right: 16px; bottom: 80px; }
-  #back-top a { width: 40px; height: 40px; font-size: 14px; }
 }
 
 /* --- MOBILE STICKY CTA BAR --- REMOVED --- */
