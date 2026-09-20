@@ -988,3 +988,35 @@ function initBlogPage() {
   renderPosts('All', '');
 }
 
+/* ============================================
+   SCROLL REVEAL ANIMATIONS
+   ============================================ */
+(function() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var reveals = document.querySelectorAll('.reveal');
+  if (!reveals.length) return;
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+  reveals.forEach(function(el) { observer.observe(el); });
+})();
+
+/* ============================================
+   MOBILE STICKY CTA BAR
+   ============================================ */
+(function() {
+  if (document.getElementById('mobileStickyCta')) return;
+  var bar = document.createElement('div');
+  bar.id = 'mobileStickyCta';
+  bar.className = 'mobile-sticky-cta';
+  bar.setAttribute('role', 'complementary');
+  bar.setAttribute('aria-label', 'Contact actions');
+  bar.innerHTML = '<a href="https://wa.me/919876543210?text=Hi!%20I%20would%20like%20to%20book%20a%20free%20trial." target="_blank" rel="noopener" class="cta-whatsapp"><i class="fa fa-whatsapp"></i> WhatsApp</a><a href="javascript:void(0)" class="cta-trial" onclick="openWhatsApp(\'Hi! I would like to book a free trial.\')"><i class="fa fa-calendar-check-o"></i> Free Trial</a>';
+  document.body.appendChild(bar);
+})();
+
