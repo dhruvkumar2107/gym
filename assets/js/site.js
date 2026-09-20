@@ -542,6 +542,9 @@ function showTrainerProfile(slug) {
     '<a href="javascript:void(0)" onclick="openWhatsApp(\'Hi! I would like to book a consultation with ' + trainer.name + '.\')" class="btn-book-trainer">Book Consultation</a>' +
     '</div></div></div>';
   modal.style.display = 'flex';
+  var escHandler = function(e) { if (e.key === 'Escape') { modal.style.display = 'none'; document.removeEventListener('keydown', escHandler); } };
+  document.addEventListener('keydown', escHandler);
+  modal.querySelector('.trainer-modal-close').focus();
 }
 
 function loadTestimonials() {

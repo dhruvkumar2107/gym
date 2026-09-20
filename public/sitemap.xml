@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://zacsonfitness.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://zacsonfitness.com/about.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://zacsonfitness.com/pricing.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://zacsonfitness.com/courses.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://zacsonfitness.com/trainers.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://zacsonfitness.com/classes.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://zacsonfitness.com/facilities.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://zacsonfitness.com/gallery.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://zacsonfitness.com/personal-training.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://zacsonfitness.com/transformations.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://zacsonfitness.com/calculators.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://zacsonfitness.com/workouts.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://zacsonfitness.com/faq.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://zacsonfitness.com/locations.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://zacsonfitness.com/blog.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://zacsonfitness.com/contact.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://zacson-100.vercel.app/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://zacson-100.vercel.app/about.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://zacson-100.vercel.app/pricing.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://zacson-100.vercel.app/courses.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://zacson-100.vercel.app/trainers.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://zacson-100.vercel.app/classes.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://zacson-100.vercel.app/facilities.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://zacson-100.vercel.app/gallery.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://zacson-100.vercel.app/personal-training.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://zacson-100.vercel.app/transformations.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://zacson-100.vercel.app/calculators.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://zacson-100.vercel.app/workouts.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://zacson-100.vercel.app/faq.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://zacson-100.vercel.app/locations.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://zacson-100.vercel.app/blog.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://zacson-100.vercel.app/blog_details.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://zacson-100.vercel.app/contact.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
 </urlset>

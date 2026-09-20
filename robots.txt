@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /api/
 Disallow: /uploads/
-Sitemap: https://zacsonfitness.com/sitemap.xml
+Sitemap: https://zacson-100.vercel.app/sitemap.xml
