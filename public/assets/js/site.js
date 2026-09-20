@@ -282,9 +282,9 @@ function initNavbar() {
     if (hamburger) { hamburger.classList.add('active'); hamburger.setAttribute('aria-expanded', 'true'); hamburger.setAttribute('aria-label', 'Close navigation'); }
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
-    drawer.removeAttribute('aria-hidden');
+    drawer.setAttribute('aria-hidden', 'false');
     var closeBtn = drawer.querySelector('.mobile-nav-close');
-    if (closeBtn) closeBtn.focus();
+    if (closeBtn) setTimeout(function() { closeBtn.focus(); }, 0);
   }
   function trapFocus(e) {
     if (!drawer.classList.contains('active')) return;
