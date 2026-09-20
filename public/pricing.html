@@ -173,7 +173,7 @@
                     <h4>Have a Coupon Code?</h4>
                     <p>Enter your code below to get a discount on your membership.</p>
                     <div class="coupon-row">
-                        <input type="text" id="couponInput" placeholder="Enter coupon code" maxlength="20" aria-label="Coupon code aria-label="Coupon code"">
+                        <input type="text" id="couponInput" placeholder="Enter coupon code" maxlength="20" aria-label="Coupon code">
                         <button class="btn-coupon" id="applyCouponBtn">Apply</button>
                     </div>
                     <div class="coupon-msg" id="couponMessage"></div>
@@ -488,76 +488,6 @@
     <div id="back-top">
         <a title="Go to Top" href="#"><i class="fas fa-level-up-alt"></i></a>
     </div>
-    <div class="checkout-overlay" id="checkoutOverlay" role="dialog" aria-modal="true">
-        <div class="checkout-dialog">
-            <div class="checkout-header">
-                <h3>Complete Your Purchase</h3>
-                <button class="close-checkout" id="closeCheckout">&times;</button>
-            </div>
-            <div class="checkout-body">
-                <div class="checkout-steps">
-                    <div class="step active" data-step="1"><span class="step-number">1</span> Plan</div>
-                    <div class="step" data-step="2"><span class="step-number">2</span> Details</div>
-                    <div class="step" data-step="3"><span class="step-number">3</span> Payment</div>
-                </div>
-                <div class="checkout-step-content active" id="checkoutStep1">
-                    <div class="plan-selected" id="checkoutPlanSelected">
-                        <h4 id="checkoutPlanName">-</h4>
-                        <p id="checkoutPlanDuration" style="color:#aaa;margin:0;font-size:14px;"></p>
-                    </div>
-                    <div class="checkout-pricing">
-                        <div class="pricing-row"><span>Plan Price</span><span id="checkoutPlanPrice">-</span></div>
-                        <div class="pricing-row" id="checkoutDiscountRow" style="display:none;color:#2ecc71;"><span>Discount</span><span id="checkoutDiscountAmount">-&#8377;0</span></div>
-                        <div class="pricing-row total"><span>Total</span><span id="checkoutTotalPrice">-</span></div>
-                    </div>
-                    <div class="checkout-coupon">
-                        <input type="text" id="checkoutCouponInput" placeholder="Coupon code (optional)" maxlength="20" aria-label="Coupon code">
-                        <button class="btn-coupon" id="checkoutApplyCoupon">Apply</button>
-                    </div>
-                    <div class="coupon-message" id="checkoutCouponMsg"></div>
-                    <button class="checkout-next-btn" id="checkoutNext1">Continue to Details</button>
-                </div>
-                <div class="checkout-step-content" id="checkoutStep2">
-                    <div style="margin-bottom:16px;">
-                        <label style="display:block;color:#aaa;font-size:13px;margin-bottom:6px;">Full Name *</label>
-                        <input type="text" id="checkoutName" style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;" placeholder="Enter your full name" aria-label="Full name">
-                    </div>
-                    <div style="margin-bottom:16px;">
-                        <label style="display:block;color:#aaa;font-size:13px;margin-bottom:6px;">Email Address *</label>
-                        <input type="email" id="checkoutEmail" style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;" placeholder="Enter your email" aria-label="Email address">
-                    </div>
-                    <div style="margin-bottom:16px;">
-                        <label style="display:block;color:#aaa;font-size:13px;margin-bottom:6px;">Phone Number *</label>
-                        <input type="tel" id="checkoutPhone" style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;" placeholder="Enter your phone number" aria-label="Phone number">
-                    </div>
-                    <div class="final-summary">
-                        <div class="summary-row"><span>Plan</span><span id="summaryPlanName">-</span></div>
-                        <div class="summary-row"><span>Duration</span><span id="summaryDuration">-</span></div>
-                        <div class="summary-row"><span>Total</span><span id="summaryTotal" style="color:#c7a44e;font-weight:bold;">-</span></div>
-                    </div>
-                    <button class="checkout-next-btn" id="checkoutNext2">Proceed to Payment</button>
-                    <button class="checkout-back-btn" id="checkoutBack2">Back</button>
-                </div>
-                <div class="checkout-step-content" id="checkoutStep3">
-                    <div class="final-summary">
-                        <div class="summary-row"><span>Name</span><span id="paySummaryName">-</span></div>
-                        <div class="summary-row"><span>Email</span><span id="paySummaryEmail">-</span></div>
-                        <div class="summary-row"><span>Phone</span><span id="paySummaryPhone">-</span></div>
-                        <div class="summary-row"><span>Plan</span><span id="paySummaryPlan">-</span></div>
-                        <div class="summary-row"><span>Total</span><span id="paySummaryTotal" style="color:#c7a44e;font-weight:bold;">-</span></div>
-                    </div>
-                    <button class="checkout-pay-btn" id="checkoutPayBtn">Pay Now</button>
-                    <button class="checkout-back-btn" id="checkoutBack3">Back</button>
-                </div>
-                <div class="checkout-step-content" id="checkoutStepSuccess">
-                    <div class="success-icon"><i class="fas fa-check"></i></div>
-                    <h3 style="text-align:center;color:#2ecc71;">Payment Successful!</h3>
-                    <p style="text-align:center;color:#aaa;margin:12px 0 24px;">Your membership has been activated. A confirmation has been sent to your email.</p>
-                    <button class="checkout-next-btn" id="checkoutDoneBtn" style="background:#c7a44e;">Done</button>
-                </div>
-            </div>
-        </div>
-    </div>
     <script src="./assets/js/vendor/modernizr-3.5.0.min.js"></script>
     <script src="./assets/js/vendor/jquery-1.12.4.min.js"></script>
     <script src="./assets/js/popper.min.js"></script>
@@ -631,5 +561,6 @@
     </script>
 </body>
 </html>
+
 
 

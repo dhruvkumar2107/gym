@@ -126,6 +126,21 @@ _localData.offers = [
 
 _localData.coupons = {'WELCOME10':{discount_percent:10},'FIT2026':{discount_percent:15},'FIRST500':{discount_amount:500},'ANNUAL20':{discount_percent:20,min_plan:4}};
 
+_localData.workouts = [
+  {id:1,name:'Bench Press',category:'Chest',difficulty:'Intermediate',duration:'4 sets x 8-10 reps',description:'Compound chest exercise targeting pectorals, anterior deltoids, and triceps. Use proper arch and foot placement.',muscles:'Pectorals, Triceps, Front Delts',equipment:'Barbell, Bench'},
+  {id:2,name:'Deadlift',category:'Back',difficulty:'Advanced',duration:'4 sets x 5-6 reps',description:'Full-body compound lift targeting posterior chain. Maintain neutral spine throughout the movement.',muscles:'Hamstrings, Glutes, Lower Back, Traps',equipment:'Barbell'},
+  {id:3,name:'Squat',category:'Legs',difficulty:'Intermediate',duration:'4 sets x 8-10 reps',description:'King of all exercises. Targets quads, glutes, and core. Go to parallel depth for maximum benefit.',muscles:'Quadriceps, Glutes, Hamstrings',equipment:'Barbell, Squat Rack'},
+  {id:4,name:'Overhead Press',category:'Shoulders',difficulty:'Intermediate',duration:'3 sets x 8-10 reps',description:'Standing barbell press for shoulder development. Engage core and squeeze glutes for stability.',muscles:'Deltoids, Triceps, Core',equipment:'Barbell'},
+  {id:5,name:'Barbell Row',category:'Back',difficulty:'Intermediate',duration:'4 sets x 8-10 reps',description:'Horizontal pulling movement for back thickness. Keep torso stable and pull to lower chest.',muscles:'Lats, Rhomboids, Biceps',equipment:'Barbell'},
+  {id:6,name:'Pull-Ups',category:'Back',difficulty:'Intermediate',duration:'3 sets x max reps',description:'Bodyweight vertical pulling exercise. Full range of motion from dead hang to chin over bar.',muscles:'Lats, Biceps, Rear Delts',equipment:'Pull-Up Bar'},
+  {id:7,name:'Lateral Raises',category:'Shoulders',difficulty:'Beginner',duration:'3 sets x 12-15 reps',description:'Isolation exercise for medial deltoids. Use light weight with controlled tempo.',muscles:'Lateral Deltoids',equipment:'Dumbbells'},
+  {id:8,name:'Bicep Curls',category:'Arms',difficulty:'Beginner',duration:'3 sets x 10-12 reps',description:'Classic bicep isolation. Alternate between hammer and standard grip for complete development.',muscles:'Biceps, Brachialis',equipment:'Dumbbells'},
+  {id:9,name:'Tricep Dips',category:'Arms',difficulty:'Intermediate',duration:'3 sets x 10-12 reps',description:'Compound arm exercise. Lean forward for chest emphasis, upright for tricep emphasis.',muscles:'Triceps, Chest, Front Delts',equipment:'Dip Station'},
+  {id:10,name:'Plank',category:'Core',difficulty:'Beginner',duration:'3 sets x 45-60 seconds',description:'Isometric core exercise. Maintain straight line from head to heels. Do not let hips sag.',muscles:'Abs, Obliques, Lower Back',equipment:'None'},
+  {id:11,name:'Romanian Deadlift',category:'Legs',difficulty:'Intermediate',description:'Hip-hinge movement targeting hamstrings and glutes. Keep slight knee bend throughout.',duration:'3 sets x 10-12 reps',muscles:'Hamstrings, Glutes, Lower Back',equipment:'Barbell'},
+  {id:12,name:'Burpees',category:'Full Body',difficulty:'Advanced',duration:'3 sets x 15 reps',description:'Full-body metabolic conditioning exercise. Combines squat, plank, push-up, and jump.',muscles:'Full Body',equipment:'None'}
+];
+
 function apiGet(path) {
   return fetch(API + path).then(function(res) {
     if (!res.ok) throw new Error('fail');
@@ -158,6 +173,7 @@ function getLocalData(path) {
   }
   if (path.indexOf('/facilities') >= 0) return _localData.facilities;
   if (path.indexOf('/gallery') >= 0) return _localData.gallery;
+  if (path.indexOf('/workouts') >= 0) return _localData.workouts;
   if (path.indexOf('/faq') >= 0) return _localData.faq;
   if (path.indexOf('/offers') >= 0) return _localData.offers;
   if (path.indexOf('/locations') >= 0) return [{id:1,name:'Zacson Fitness Andheri West',address:'14th Floor, Sagar Tech Plaza, Andheri Kurla Road, Andheri West, Mumbai',phone:'+919876543210',lat:19.1197,lng:72.8464}];
