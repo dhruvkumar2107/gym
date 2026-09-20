@@ -1,6 +1,6 @@
 User-agent: *
 Allow: /
-Disallow: /admin/
 Disallow: /api/
-Disallow: /uploads/
+Disallow: /admin/
+
 Sitemap: https://zacson-100.vercel.app/sitemap.xml

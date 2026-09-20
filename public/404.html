@@ -4,7 +4,12 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>Page Not Found | Zacson Fitness</title>
+    <meta name="description" content="The page you're looking for doesn't exist. Return to Zacson Fitness homepage.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <meta property="og:title" content="Page Not Found | Zacson Fitness">
+    <meta property="og:description" content="The page you're looking for doesn't exist.">
+    <meta property="og:type" content="website">
     <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/animate.min.css">
@@ -12,9 +17,15 @@
     <link rel="stylesheet" href="assets/css/themify-icons.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/custom.css">
+    <style>
+      .error-404-num { font-size: clamp(80px, 20vw, 160px); font-weight: 900; color: var(--brand-red); margin-bottom: 20px; line-height: 1; }
+      .error-404-msg { font-size: clamp(18px, 4vw, 28px); color: #fff; margin-bottom: 15px; }
+      .error-404-desc { font-size: clamp(14px, 2vw, 16px); color: #999; margin-bottom: 30px; max-width: 500px; margin-left: auto; margin-right: auto; }
+      .error-404-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    </style>
 </head>
 <body class="black-bg">
-    <a href="index.html" class="skip-link">Skip to main content</a>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <header>
         <div class="header-area header-transparent">
             <div class="main-header header-sticky">
@@ -33,26 +44,15 @@
         </div>
     </header>
 <main id="main-content">
-    <div class="slider-area2">
-        <div class="slider-height2 d-flex align-items-center">
-            <div class="container">
-                <div class="row">
-                    <div class="col-xl-12">
-                        <div class="hero-cap hero-cap2 pt-70">
-                            <h2>404 - Page Not Found</h2>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <section class="section-padding" style="text-align:center; padding:100px 0;">
+    <section style="text-align:center; padding: 160px 0 100px; min-height: 60vh; display: flex; align-items: center;">
         <div class="container">
-            <h1 style="font-size:120px; color:#c7a44e; margin-bottom:20px;">404</h1>
-            <h3 style="color:#fff; margin-bottom:15px;">Oops! This page does not exist.</h3>
-            <p style="color:#999; margin-bottom:30px;">The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
-            <a href="index.html" class="border-btn" style="margin-right:10px;">Back to Home</a>
-            <a href="contact.html" class="btn">Contact Us</a>
+            <div class="error-404-num">404</div>
+            <h2 class="error-404-msg">Oops! This page does not exist.</h2>
+            <p class="error-404-desc">The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
+            <div class="error-404-actions">
+                <a href="index.html" class="border-btn">Back to Home</a>
+                <a href="contact.html" class="btn">Contact Us</a>
+            </div>
         </div>
     </section>
 </main>
@@ -91,10 +91,10 @@
                                 </div>
                             </div>
                             <div class="footer-social mt-30">
-                                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                                <a href="https://wa.me/919876543210" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                                <a href="https://www.facebook.com/zacsonfitness" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                                <a href="https://www.instagram.com/zacsonfitness" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                                <a href="https://twitter.com/zacsonfitness" target="_blank" rel="noopener" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                                <a href="https://wa.me/919876543210" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                             </div>
                         </div>
                     </div>
@@ -118,4 +118,3 @@
 <script src="./assets/js/site.js"></script>
 </body>
 </html>
-

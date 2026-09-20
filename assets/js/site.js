@@ -152,13 +152,22 @@ function apiGet(path) {
   }).catch(function() { return getLocalData(path); });
 }
 function apiPost(path, data) {
-  return fetch(API + path, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(function(r){return r.json();}).catch(function(){return{error:'Network error'};});
+  return fetch(API + path, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(function(r){
+    if (!r.ok) return r.json().catch(function(){return{error:'Request failed (status ' + r.status + ')'};}).then(function(d){ throw d; });
+    return r.json();
+  }).catch(function(e){ return (e && e.error) ? e : {error:'Network error'}; });
 }
 function getLocalData(path) {
   if (path.indexOf('/membership/plans') >= 0) return _localData.plans;
   if (path.indexOf('/membership/validate-coupon') >= 0) return null;
   if (path.indexOf('/trainers') >= 0) {
-    if (path.match(/\/trainers\/[\w-]+$/)) return _localData.trainers[0];
+    var trainerMatch = path.match(/\/trainers\/([\w-]+)$/);
+    if (trainerMatch) {
+      var slug = trainerMatch[1];
+      var found = null;
+      _localData.trainers.forEach(function(t) { if (t.slug === slug) found = t; });
+      return found || _localData.trainers[0];
+    }
     return _localData.trainers;
   }
   if (path.indexOf('/classes') >= 0) {
@@ -168,7 +177,13 @@ function getLocalData(path) {
   if (path.indexOf('/testimonials') >= 0) return _localData.testimonials;
   if (path.indexOf('/transformations') >= 0) return _localData.transformations;
   if (path.indexOf('/blog') >= 0) {
-    if (path.match(/\/blog\/[\w-]+$/)) return _localData.blogPosts[0];
+    var blogMatch = path.match(/\/blog\/([\w-]+)$/);
+    if (blogMatch) {
+      var bslug = blogMatch[1];
+      var bfound = null;
+      _localData.blogPosts.forEach(function(p) { if (p.slug === bslug) bfound = p; });
+      return bfound || _localData.blogPosts[0];
+    }
     return {posts: _localData.blogPosts};
   }
   if (path.indexOf('/facilities') >= 0) return _localData.facilities;
@@ -295,7 +310,7 @@ function loadMembershipPlans() {
   var container = document.getElementById('plans-container');
   if (!container) return;
   apiGet('/membership/plans').then(function(plans) {
-    if (!plans || !plans.length) return;
+    if (!plans || !plans.length) { container.innerHTML = '<div class="col-12 text-center"><p style="color:#888;padding:40px;">Membership plans coming soon. Please check back later.</p></div>'; return; }
     container.innerHTML = plans.map(function(p) {
       var total = p.price * p.duration_months;
       var featuresHtml = p.features.map(function(f) {
@@ -495,7 +510,7 @@ function loadTrainers() {
   var container = document.getElementById('trainers-container');
   if (!container) return;
   apiGet('/trainers').then(function(trainers) {
-    if (!trainers || !trainers.length) return;
+    if (!trainers || !trainers.length) { container.innerHTML = '<div class="col-12 text-center"><p style="color:#888;padding:40px;">Our trainer profiles are being updated. Check back soon!</p></div>'; return; }
     container.innerHTML = trainers.map(function(t) {
       var specs = Array.isArray(t.specializations) ? t.specializations : [];
       return '<div class="col-lg-4 col-md-6"><div class="team-member text-center mb-30">' +
@@ -504,12 +519,17 @@ function loadTrainers() {
         '<span>' + t.designation + '</span>' +
         '<p>' + t.experience_years + ' years experience</p>' +
         '<div class="team-social">' +
-        '<a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>' +
-        '<a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>' +
-        '<a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>' +
+        (t.social_links && t.social_links.instagram ? '<a href="' + t.social_links.instagram + '" aria-label="Instagram" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>' : '<a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>') +
+        (t.social_links && t.social_links.twitter ? '<a href="' + t.social_links.twitter + '" aria-label="Twitter" target="_blank" rel="noopener"><i class="fab fa-twitter"></i></a>' : '<a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>') +
+        (t.social_links && t.social_links.facebook ? '<a href="' + t.social_links.facebook + '" aria-label="Facebook" target="_blank" rel="noopener"><i class="fab fa-facebook-f"></i></a>' : '<a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>') +
         '</div></div></div></div>';
     }).join('');
   });
+}
+
+function closeTrainerModal() {
+  var modal = document.getElementById('trainerModal');
+  if (modal) { modal.style.display = 'none'; document.body.style.overflow = ''; if (modal._closeHandler) document.removeEventListener('keydown', modal._closeHandler); }
 }
 
 function showTrainerProfile(slug) {
@@ -524,13 +544,13 @@ function showTrainerProfile(slug) {
     modal.setAttribute('role', 'dialog');
     modal.setAttribute('aria-modal', 'true');
     modal.setAttribute('aria-label', 'Trainer profile');
-    modal.onclick = function(e) { if (e.target === modal) modal.style.display = 'none'; };
+    modal.onclick = function(e) { if (e.target === modal) closeTrainerModal(); };
     document.body.appendChild(modal);
   }
   var specs = trainer.specializations.map(function(s) { return '<span class="spec-tag">' + s + '</span>'; }).join('');
   var certs = trainer.certifications.map(function(c) { return '<span class="cert-tag"><i class="fas fa-certificate"></i> ' + c + '</span>'; }).join('');
   modal.innerHTML = '<div class="trainer-modal">' +
-    '<button class="trainer-modal-close" onclick="document.getElementById(\'trainerModal\').style.display=\'none\'">&times;</button>' +
+    '<button class="trainer-modal-close" onclick="closeTrainerModal()">&times;</button>' +
     '<div class="trainer-modal-content">' +
     '<div class="trainer-modal-img"><img src="' + trainer.photo + '" alt="' + trainer.name + '" onerror="this.src=\'assets/img/trainers/trainer1.jpg\'"></div>' +
     '<div class="trainer-modal-info"><h2>' + trainer.name + '</h2>' +
@@ -542,8 +562,10 @@ function showTrainerProfile(slug) {
     '<a href="javascript:void(0)" onclick="openWhatsApp(\'Hi! I would like to book a consultation with ' + trainer.name + '.\')" class="btn-book-trainer">Book Consultation</a>' +
     '</div></div></div>';
   modal.style.display = 'flex';
-  var escHandler = function(e) { if (e.key === 'Escape') { modal.style.display = 'none'; document.removeEventListener('keydown', escHandler); } };
+  document.body.style.overflow = 'hidden';
+  var escHandler = function(e) { if (e.key === 'Escape') { modal.style.display = 'none'; document.body.style.overflow = ''; document.removeEventListener('keydown', escHandler); } };
   document.addEventListener('keydown', escHandler);
+  modal._closeHandler = escHandler;
   modal.querySelector('.trainer-modal-close').focus();
 }
 
@@ -551,7 +573,7 @@ function loadTestimonials() {
   var container = document.getElementById('testimonials-container');
   if (!container) return;
   apiGet('/testimonials').then(function(testimonials) {
-    if (!testimonials || !testimonials.length) return;
+    if (!testimonials || !testimonials.length) { container.innerHTML = '<div class="col-12 text-center"><p style="color:#888;padding:20px;">Member testimonials coming soon.</p></div>'; return; }
     container.innerHTML = testimonials.map(function(t) {
       var stars = '';
       for (var i = 0; i < t.rating; i++) stars += '<i class="fas fa-star"></i>';
@@ -569,7 +591,7 @@ function loadBlogPosts() {
   if (!container) return;
   apiGet('/blog?limit=6').then(function(data) {
     var posts = data && data.posts ? data.posts : (Array.isArray(data) ? data : []);
-    if (!posts.length) return;
+    if (!posts.length) { container.innerHTML = '<div class="col-12 text-center"><p style="color:#888;padding:40px;">Blog articles coming soon.</p></div>'; return; }
     container.innerHTML = posts.slice(0, 6).map(function(p) {
       var date = p.published_at ? new Date(p.published_at) : new Date();
       var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -587,7 +609,7 @@ function loadFacilities() {
   var container = document.getElementById('facilities-container');
   if (!container) return;
   apiGet('/facilities').then(function(facilities) {
-    if (!facilities || !facilities.length) return;
+    if (!facilities || !facilities.length) { container.innerHTML = '<div class="col-12 text-center"><p style="color:#888;padding:40px;">Our facility details are being updated.</p></div>'; return; }
     container.innerHTML = facilities.map(function(f) {
       return '<div class="col-lg-3 col-md-4 col-sm-6"><div class="single-facility mb-30">' +
         '<div class="facility-icon"><i class="fas fa-' + (f.icon || 'star') + '"></i></div>' +
@@ -602,7 +624,7 @@ function loadGallery() {
   var container = document.getElementById('gallery-container');
   if (!container) return;
   apiGet('/gallery').then(function(gallery) {
-    if (!gallery || !gallery.length) return;
+    if (!gallery || !gallery.length) { container.innerHTML = '<div class="col-12 text-center"><p style="color:#888;padding:40px;">Gallery photos coming soon.</p></div>'; return; }
     container.innerHTML = gallery.map(function(g) {
       return '<div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 gallery-item" data-category="' + g.category + '">' +
         '<div class="box snake mb-30">' +
@@ -660,12 +682,19 @@ function showLightbox(images, startIndex) {
     current = (i + images.length) % images.length;
     imgEl.src = images[current].src;
   }
-  overlay.querySelector('.lightbox-close').onclick = function() { overlay.remove(); document.onkeydown = null; };
+  overlay.querySelector('.lightbox-close').onclick = function() { overlay.remove(); document.onkeydown = null; document.body.style.overflow = ''; };
   overlay.querySelector('.lightbox-prev').onclick = function() { goTo(current - 1); };
   overlay.querySelector('.lightbox-next').onclick = function() { goTo(current + 1); };
-  overlay.onclick = function(ev) { if (ev.target === overlay) { overlay.remove(); document.onkeydown = null; } };
+  overlay.onclick = function(ev) { if (ev.target === overlay) { overlay.remove(); document.onkeydown = null; document.body.style.overflow = ''; } };
+  document.body.style.overflow = 'hidden';
+  var touchStartX = 0;
+  overlay.addEventListener('touchstart', function(e) { touchStartX = e.touches[0].clientX; }, {passive: true});
+  overlay.addEventListener('touchend', function(e) {
+    var diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) { diff > 0 ? goTo(current + 1) : goTo(current - 1); }
+  }, {passive: true});
   document.onkeydown = function(e) {
-    if (e.key === 'Escape') { overlay.remove(); document.onkeydown = null; return; }
+    if (e.key === 'Escape') { overlay.remove(); document.onkeydown = null; document.body.style.overflow = ''; return; }
     if (e.key === 'ArrowLeft') goTo(current - 1);
     if (e.key === 'ArrowRight') goTo(current + 1);
     if (e.key === 'Tab') {
@@ -692,7 +721,7 @@ function loadClassSchedule() {
   var scheduleBody = document.getElementById('schedule-body');
   if (!scheduleBody) return;
   apiGet('/classes/schedule').then(function(schedules) {
-    if (!schedules || !schedules.length) return;
+    if (!schedules || !schedules.length) { scheduleBody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#888;padding:30px;">Schedule not available yet. Please check back soon.</td></tr>'; return; }
     var days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
     var timeSlots = [
       {label:'Early Morning',filter:function(s){var t=parseTimeTo24(s.time); return t>=5 && t<9;}},
@@ -787,7 +816,7 @@ function initScheduleDayTabs() {
       filterByDay('all');
     }
   }
-  mq.addListener(handleMQ);
+  if (mq.addEventListener) { mq.addEventListener('change', handleMQ); } else if (mq.addListener) { mq.addListener(handleMQ); }
   if (mq.matches) {
     var monBtn = tabs.querySelector('[data-day="Monday"]');
     if (monBtn) monBtn.click();
@@ -798,9 +827,12 @@ function loadClassesList() {
   var container = document.getElementById('classes-list');
   if (!container) return;
   var loading = document.getElementById('classes-loading');
-  if (loading) loading.style.display = 'none';
   apiGet('/classes').then(function(classes) {
-    if (!classes || !classes.length) return;
+    if (loading) loading.style.display = 'none';
+    if (!classes || !classes.length) {
+      container.innerHTML = '<div class="col-12 text-center"><p style="color:#888;padding:40px;">No classes available at the moment. Please check back later.</p></div>';
+      return;
+    }
     var diffColors = {beginner:'#27ae60',intermediate:'#f39c12',advanced:'#e74c3c','all-levels':'#3498db'};
     container.innerHTML = classes.map(function(c) {
       return '<div class="col-lg-4 col-md-6"><div class="single-class mb-30">' +
@@ -820,7 +852,7 @@ function loadTransformations() {
   if (!container) return;
   apiGet('/transformations').then(function(data) {
     var items = Array.isArray(data) ? data : [];
-    if (!items.length) return;
+    if (!items.length) { container.innerHTML = '<div class="col-12 text-center"><p style="color:#888;padding:40px;">Transformation stories coming soon.</p></div>'; return; }
     container.innerHTML = items.map(function(t) {
       return '<div class="col-lg-4 col-md-6"><div class="transformation-card mb-30">' +
         '<div class="before-after">' +
@@ -866,12 +898,22 @@ function handleFreeTrialForm() {
   if (!form) return;
   form.addEventListener('submit', function(e) {
     e.preventDefault();
+    var nameEl = form.querySelector('[name="name"]');
+    var phoneEl = form.querySelector('[name="phone"]');
+    var emailEl = form.querySelector('[name="email"]');
+    if (!nameEl || !phoneEl || !emailEl) return;
+    var name = nameEl.value.trim();
+    var phone = phoneEl.value.trim();
+    var email = emailEl.value.trim();
+    if (!name) { showToast('Please enter your name.', 'error'); nameEl.focus(); return; }
+    if (!phone) { showToast('Please enter your phone number.', 'error'); phoneEl.focus(); return; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Please enter a valid email address.', 'error'); emailEl.focus(); return; }
     var btn = form.querySelector('button[type="submit"]');
     if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
     var data = {
-      name: form.querySelector('[name="name"]').value,
-      phone: form.querySelector('[name="phone"]').value,
-      email: form.querySelector('[name="email"]').value,
+      name: name,
+      phone: phone,
+      email: email,
       fitness_goal: form.querySelector('[name="fitness_goal"]') ? form.querySelector('[name="fitness_goal"]').value : '',
       preferred_date: form.querySelector('[name="preferred_date"]') ? form.querySelector('[name="preferred_date"]').value : '',
       preferred_time: form.querySelector('[name="preferred_time"]') ? form.querySelector('[name="preferred_time"]').value : '',
@@ -897,8 +939,8 @@ function initBMICalculator() {
     var height = parseFloat(form.querySelector('[name="height"]').value);
     var weight = parseFloat(form.querySelector('[name="weight"]').value);
     var resultEl = document.getElementById('bmi-result');
-    if (!height || !weight || height <= 0 || weight <= 0) {
-      if (resultEl) { resultEl.style.display = 'block'; resultEl.innerHTML = '<p style="color:#e74c3c;">Please enter valid height and weight values.</p>'; }
+    if (!height || !weight || height <= 0 || weight <= 0 || height > 300 || weight > 500) {
+      if (resultEl) { resultEl.style.display = 'block'; resultEl.innerHTML = '<p style="color:#e74c3c;">Please enter valid height (1-300 cm) and weight (1-500 kg) values.</p>'; }
       return;
     }
     var heightM = height / 100;
@@ -910,7 +952,7 @@ function initBMICalculator() {
     else category = 'Obese';
     if (resultEl) {
       resultEl.style.display = 'block';
-      resultEl.innerHTML = '<h4>' + bmi.toFixed(1) + '</h4><p><strong>' + category + '</strong></p><p>Your BMI indicates you are in the ' + category.toLowerCase() + ' range. Consult a healthcare professional for personalized advice.</p>';
+      resultEl.innerHTML = '<h4>' + bmi.toFixed(1) + '</h4><p><strong>' + category + '</strong></p><p>Your BMI indicates you are in the ' + category.toLowerCase() + ' range. This is an estimate only and not medical advice. Consult a healthcare professional for personalized guidance.</p>';
     }
   });
 }
@@ -922,15 +964,17 @@ function initCalorieCalculator() {
   form.addEventListener('submit', function(e) {
     e.preventDefault();
     var age = parseInt(form.querySelector('[name="age"]').value);
-    var sex = form.querySelector('[name="sex"]').value;
+    var sexEl = form.querySelector('[name="sex"]');
+    var sex = sexEl ? sexEl.value : '';
     var height = parseFloat(form.querySelector('[name="height"]').value);
     var weight = parseFloat(form.querySelector('[name="weight"]').value);
     var activityVal = form.querySelector('[name="activity_level"]').value;
     var activity = activityMap[activityVal] || 1.2;
-    var goal = form.querySelector('[name="goal"]').value;
+    var goalEl = form.querySelector('[name="goal"]');
+    var goal = goalEl ? goalEl.value : 'maintain';
     var resultEl = document.getElementById('cal-result');
-    if (!age || !sex || !height || !weight || age <= 0 || height <= 0 || weight <= 0) {
-      if (resultEl) { resultEl.style.display = 'block'; resultEl.innerHTML = '<p style="color:#e74c3c;">Please fill all fields with valid values.</p>'; }
+    if (!age || !sex || !height || !weight || age <= 0 || age > 120 || height <= 0 || weight <= 0) {
+      if (resultEl) { resultEl.style.display = 'block'; resultEl.innerHTML = '<p style="color:#e74c3c;">Please fill all fields with valid values. Age must be 1-120.</p>'; }
       return;
     }
     var bmr;
@@ -952,25 +996,26 @@ function initCalorieCalculator() {
 
 
 document.addEventListener('DOMContentLoaded', function() {
-  initNavbar();
-  initWhatsAppBtn();
-  initBackToTop();
-  setActiveNav();
-  loadMembershipPlans();
-  loadTrainers();
-  loadTestimonials();
-  loadBlogPosts();
-  loadBlogDetail();
-  loadFacilities();
-  loadGallery();
-  loadClassSchedule();
-  loadClassesList();
-  loadTransformations();
-  handleContactForm();
-  handleFreeTrialForm();
-  initBMICalculator();
-  initCalorieCalculator();
-  initBlogPage();
+  function safe(fn) { try { fn(); } catch(e) { console.error('Init error:', fn.name, e); } }
+  safe(initNavbar);
+  safe(initWhatsAppBtn);
+  safe(initBackToTop);
+  safe(setActiveNav);
+  safe(loadMembershipPlans);
+  safe(loadTrainers);
+  safe(loadTestimonials);
+  safe(loadBlogPosts);
+  safe(loadBlogDetail);
+  safe(loadFacilities);
+  safe(loadGallery);
+  safe(loadClassSchedule);
+  safe(loadClassesList);
+  safe(loadTransformations);
+  safe(handleContactForm);
+  safe(handleFreeTrialForm);
+  safe(initBMICalculator);
+  safe(initCalorieCalculator);
+  safe(initBlogPage);
 });
 
 function loadBlogDetail() {
@@ -984,14 +1029,14 @@ function loadBlogDetail() {
   _localData.blogPosts.forEach(function(p) { if (p.slug === slug) post = p; });
   if (!post) { container.innerHTML = '<p>Article not found.</p>'; return; }
   var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var date = new Date();
+  var date = post.published_at ? new Date(post.published_at) : new Date();
   container.innerHTML = '<div class="blog-detail-header"><span class="blog-category">' + post.category + '</span>' +
     '<h1>' + post.title + '</h1>' +
     '<div class="blog-meta"><span><i class="fas fa-user"></i> Zacson Fitness Team</span>' +
     '<span><i class="fas fa-calendar"></i> ' + months[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear() + '</span>' +
-    '<span><i class="fas fa-clock"></i> ' + post.read_time + ' min read</span></div></div>' +
-    (post.featured_image ? '<div class="blog-detail-img"><img src="' + post.featured_image + '" alt="' + post.title + '"></div>' : '') +
-    '<div class="blog-detail-content">' + post.content + '</div>';
+    '<span><i class="fas fa-clock"></i> ' + (post.read_time || 5) + ' min read</span></div></div>' +
+    (post.featured_image ? '<div class="blog-detail-img"><img src="' + post.featured_image + '" alt="' + post.title + '" onerror="this.style.display=\'none\'"></div>' : '') +
+    '<div class="blog-detail-content">' + (post.content || '') + '</div>';
 }
 
 function initBlogPage() {
@@ -1016,14 +1061,14 @@ function initBlogPage() {
     if (!filtered.length) { container.innerHTML = '<div class="col-12 text-center"><p style="color:#666;padding:40px;">No articles found.</p></div>'; return; }
     container.innerHTML = filtered.map(function(p) {
       var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      var d = new Date();
+      var d = p.published_at ? new Date(p.published_at) : new Date();
       return '<div class="col-lg-6 col-md-6"><div class="blog-card mb-30">' +
-        '<div class="blog-card-img"><img src="' + (p.featured_image || 'assets/img/gallery/gallery1.png') + '" alt="' + p.title + '" loading="lazy"></div>' +
+        '<div class="blog-card-img"><img src="' + (p.featured_image || 'assets/img/gallery/gallery1.png') + '" alt="' + p.title + '" loading="lazy" onerror="this.src=\'assets/img/gallery/gallery1.png\'"></div>' +
         '<div class="blog-card-body"><span class="blog-cat">' + p.category + '</span>' +
         '<h3><a href="blog_details.html?slug=' + p.slug + '">' + p.title + '</a></h3>' +
         '<p class="blog-excerpt">' + p.excerpt + '</p>' +
-        '<div class="blog-meta-info"><span><i class="fas fa-calendar"></i> ' + months[d.getMonth()] + ' ' + d.getDate() + '</span>' +
-        '<span><i class="fas fa-clock"></i> ' + p.read_time + ' min</span></div>' +
+        '<div class="blog-meta-info"><span><i class="fas fa-calendar"></i> ' + months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() + '</span>' +
+        '<span><i class="fas fa-clock"></i> ' + (p.read_time || 5) + ' min</span></div>' +
         '<a href="blog_details.html?slug=' + p.slug + '" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>' +
         '</div></div></div>';
     }).join('');
@@ -1053,9 +1098,14 @@ function initBlogPage() {
   }
 
   if (searchInput) {
+    var searchTimeout;
     searchInput.addEventListener('input', function() {
-      var activeCat = catContainer ? catContainer.querySelector('.active a') : null;
-      renderPosts(activeCat ? activeCat.dataset.cat : 'All', this.value);
+      var self = this;
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(function() {
+        var activeCat = catContainer ? catContainer.querySelector('.active a') : null;
+        renderPosts(activeCat ? activeCat.dataset.cat : 'All', self.value);
+      }, 300);
     });
   }
 
@@ -1071,6 +1121,7 @@ function initBlogPage() {
    ============================================ */
 (function() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (!window.IntersectionObserver) return;
   var reveals = document.querySelectorAll('.reveal');
   if (!reveals.length) return;
   document.body.classList.add('reveal-init');

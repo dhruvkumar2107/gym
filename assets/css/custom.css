@@ -63,6 +63,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 .header-area.scrolled { background: rgba(0,0,0,0.98); }
 .main-header { padding: 0; z-index: var(--z-header); }
+.sticky-bar { display: none !important; }
 .menu-wrapper { height: var(--header-height); }
 .logo img { height: 45px; width: auto; }
 .main-menu nav ul { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; }
