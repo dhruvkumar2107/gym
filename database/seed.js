@@ -2,8 +2,9 @@ const { run, get, all, exec } = require('./db');
 const bcrypt = require('bcryptjs');
 
 function seedData() {
+  const existingRoles = get("SELECT COUNT(*) as c FROM roles").c;
   const existingAdmin = get("SELECT id FROM users WHERE email = 'admin@zacsonfitness.com'");
-  if (existingAdmin) return console.log('Database already seeded.');
+  if (existingRoles > 0 || existingAdmin) return console.log('Database already seeded.');
 
   const adminHash = bcrypt.hashSync('admin123', 10);
   const memberHash = bcrypt.hashSync('member123', 10);
@@ -29,12 +30,59 @@ function seedData() {
   });
 
   // ========== PERMISSIONS ==========
-  const modules = ['dashboard','members','memberships','plans','attendance','classes','pt','workouts','diet','leads','crm','sales','invoices','payments','expenses','inventory','pos','employees','leave','payroll','tasks','tickets','marketing','reports','settings','announcements','documents','audit_logs','blog','offers','coupons','referrals','calculators'];
+  const modules = ['dashboard','members','memberships','plans','attendance','classes','bookings','pt','workouts','diet','measurements','leads','followups','campaigns','offers','coupons','invoices','payments','expenses','refunds','products','inventory','pos','employees','leave','payroll','tasks','tickets','announcements','referrals','documents','reports','settings','branches','roles','audit'];
   const actions = ['view','create','edit','delete','approve','export'];
   modules.forEach(mod => {
     actions.forEach(action => {
       run("INSERT INTO permissions (name, module, description) VALUES (?, ?, ?)",
         [`${mod}_${action}`, mod, `${action} ${mod}`]);
+    });
+  });
+
+  const grantAll = ['view','create','edit','delete','approve','export'];
+  const roleModuleGrants = {
+    super_admin: Object.fromEntries(modules.map(m => [m, grantAll])),
+    admin: Object.fromEntries(modules.map(m => [m, grantAll])),
+    branch_manager: Object.fromEntries(modules.map(m => [m, m === 'roles' || m === 'audit' ? ['view'] : grantAll])),
+    receptionist: {
+      members: ['view','create','edit'], memberships: ['view','create','edit'],
+      attendance: ['view','create','edit'], classes: ['view'], bookings: ['view','create','edit'],
+      pos: ['view','create','edit'], payments: ['view','create','edit'], leads: ['view','create','edit'],
+      tickets: ['view','create','edit'], reports: ['view','export']
+    },
+    sales_manager: {
+      members: ['view'], memberships: ['view'], reports: ['view','export'],
+      leads: grantAll, followups: grantAll, campaigns: grantAll, offers: grantAll, coupons: grantAll
+    },
+    sales_executive: {
+      members: ['view'], offers: ['view'], coupons: ['view'],
+      leads: ['view','create','edit'], followups: ['view','create','edit']
+    },
+    trainer: {
+      members: ['view','create','edit'], attendance: ['view'], classes: ['view','create','edit'],
+      workouts: ['view','create','edit'], diet: ['view','create','edit'], measurements: ['view','create','edit'], pt: ['view','create','edit']
+    },
+    nutritionist: { members: ['view'], diet: ['view','create','edit'], measurements: ['view','create','edit'] },
+    accountant: {
+      memberships: ['view'], reports: ['view','export'],
+      invoices: grantAll, payments: grantAll, expenses: grantAll, refunds: grantAll
+    },
+    hr_manager: { employees: grantAll, attendance: grantAll, leave: grantAll, payroll: grantAll, tasks: ['view'] },
+    staff: { tasks: ['view'], announcements: ['view'] },
+    member: {}
+  };
+  Object.keys(roleModuleGrants).forEach(roleName => {
+    const role = get('SELECT id FROM roles WHERE name = ?', [roleName]);
+    if (!role) return;
+    const grants = roleModuleGrants[roleName];
+    modules.forEach(mod => {
+      const modActions = grants[mod] || [];
+      modActions.forEach(action => {
+        const permission = get("SELECT id FROM permissions WHERE module = ? AND name = ?", [mod, `${mod}_${action}`]);
+        if (permission) {
+          run("INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)", [role.id, permission.id]);
+        }
+      });
     });
   });
 
@@ -257,7 +305,7 @@ function seedData() {
 
   // ========== CLASS BOOKINGS ==========
   for (let i = 0; i < 50; i++) {
-    const userId = 31 + (i % 100);
+    const userId = 2 + (i % 100);
     const classId = (i % 12) + 1;
     const today = new Date();
     const daysAhead = i % 7;
@@ -353,7 +401,7 @@ function seedData() {
 
   // ========== PAYMENTS & INVOICES ==========
   for (let i = 0; i < 50; i++) {
-    const userId = 31 + (i % 100);
+    const userId = 2 + (i % 100);
     const planIdx = i % 7;
     const amount = plans[planIdx][3];
     const method = ['cash', 'upi', 'card', 'net_banking'][i % 4];
@@ -407,7 +455,7 @@ function seedData() {
   const ticketCategories = ['billing', 'membership', 'trainer', 'equipment', 'facility', 'general'];
   const ticketStatuses = ['open', 'in_progress', 'waiting', 'resolved', 'closed'];
   for (let i = 0; i < 15; i++) {
-    const userId = 31 + (i * 6);
+    const userId = 2 + ((i * 6) % 100);
     const cat = ticketCategories[i % ticketCategories.length];
     const status = ticketStatuses[i % ticketStatuses.length];
     const priority = ['low', 'medium', 'high', 'urgent'][i % 4];
@@ -616,10 +664,49 @@ function seedData() {
     ['sms_provider', '', 'notifications'],
     ['whatsapp_api_key', '', 'notifications'],
     ['gst_number', '27AABCU9603R1ZM', 'finance'],
-    ['pan_number', 'AABCU9603R', 'finance']
+    ['pan_number', 'AABCU9603R', 'finance'],
+    ['commission_pct', '5', 'finance'],
+    ['shift_start', '10:00', 'hr'],
+    ['leave_entitlement_casual', '12', 'hr'],
+    ['leave_entitlement_sick', '12', 'hr'],
+    ['leave_entitlement_earned', '12', 'hr'],
+    ['upi_id', '', 'payment'],
+    ['enable_registration', '1', 'general'],
+    ['razorpay_webhook_secret', '', 'payment']
   ];
   siteSettings.forEach(s => {
     run("INSERT INTO site_settings (key, value, category) VALUES (?, ?, ?)", s);
+  });
+
+  // ========== AUTOMATION RULES ==========
+  const automationRules = [
+    ['Membership expiring in 7 days', 'membership_expiring_7d',
+      JSON.stringify({ window_days: 7 }), 'send_notification',
+      JSON.stringify({ type: 'membership_expiring', title: 'Membership expiring soon', body: 'Your membership expires in {days} days. Renew today to avoid interruption.', user_specific: true })],
+    ['Membership expiring in 3 days', 'membership_expiring_3d',
+      JSON.stringify({ window_days: 3 }), 'send_email',
+      JSON.stringify({ type: 'membership_expiring', subject: 'Renew your membership', user_specific: true })],
+    ['Member inactive for 14 days', 'member_inactive_14d',
+      JSON.stringify({ days: 14 }), 'send_notification',
+      JSON.stringify({ type: 'member_inactive', title: 'We miss you', body: 'You have not visited the gym in {days} days. Come back for a workout!', user_specific: true })],
+    ['Lead uncontacted for 24 hours', 'lead_uncontacted_24h',
+      JSON.stringify({ hours: 24 }), 'send_notification',
+      JSON.stringify({ type: 'lead_uncontacted', title: 'Lead follow-up needed', body: 'Lead {lead_name} has not been contacted in 24 hours.', role: 'sales_manager' })],
+    ['Free trial not attended', 'trial_not_attended',
+      JSON.stringify({ days: 1 }), 'send_notification',
+      JSON.stringify({ type: 'trial_not_attended', title: 'Trial not attended', body: 'Trial lead {lead_name} did not attend their scheduled trial.', role: 'sales_manager' })],
+    ['Payment due reminder', 'payment_due',
+      JSON.stringify({ window_days: 3 }), 'send_notification',
+      JSON.stringify({ type: 'payment_due', title: 'Payment due', body: 'You have an outstanding payment of ₹{amount}.', user_specific: true })],
+    ['Low stock alert', 'low_stock',
+      JSON.stringify({ threshold: 'minimum_stock' }), 'send_notification',
+      JSON.stringify({ type: 'low_stock', title: 'Low stock alert', body: 'Product {product_name} is running low on stock.', role: 'receptionist' })],
+    ['Ticket SLA breach warning', 'ticket_sla_warning',
+      JSON.stringify({ hours: 24 }), 'send_notification',
+      JSON.stringify({ type: 'ticket_sla_warning', title: 'Ticket SLA warning', body: 'Ticket {ticket_id} is approaching its SLA deadline.', role: 'staff' })]
+  ];
+  automationRules.forEach(r => {
+    run("INSERT INTO automation_rules (name, trigger_type, trigger_config, action_type, action_config, is_active) VALUES (?, ?, ?, ?, ?, 1)", r);
   });
 
   console.log('Database seeded successfully with comprehensive Zacson Fitness data.');

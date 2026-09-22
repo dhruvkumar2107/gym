@@ -3,6 +3,50 @@ const router = express.Router();
 const { run, get, all } = require('../database/db');
 const { authMiddleware } = require('../middleware/auth');
 const { body, validationResult } = require('express-validator');
+const { createNotification, logAuditReq } = require('../services/notify');
+
+const GATEWAY_METHODS = ['razorpay', 'card', 'net_banking'];
+const OFFLINE_METHODS = ['cash', 'upi'];
+const ON_PAYMENT_NOT_CONFIGURED = 'Online payments are not configured. Please pay by cash/UPI at the gym or configure Razorpay keys.';
+
+function razorpayConfigured() {
+  return !!(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET);
+}
+
+function issueAndActivate(req, { userId, plan, amount, paymentMethod, couponCode, razorpay }) {
+  const paymentId = Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+
+  if (razorpay) {
+    run('INSERT INTO payments (payment_number, user_id, amount, method, razorpay_payment_id, razorpay_order_id, razorpay_signature, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [paymentId, userId, amount, paymentMethod, razorpay.razorpay_payment_id, razorpay.razorpay_order_id, razorpay.razorpay_signature, 'completed']);
+  } else {
+    run('INSERT INTO payments (payment_number, user_id, amount, method, status) VALUES (?, ?, ?, ?, ?)',
+      [paymentId, userId, amount, paymentMethod, 'completed']);
+  }
+
+  const startDate = new Date().toISOString().split('T')[0];
+  const endDateObj = new Date();
+  endDateObj.setMonth(endDateObj.getMonth() + plan.duration_months);
+  const endDate = endDateObj.toISOString().split('T')[0];
+
+  run("INSERT INTO memberships (membership_id, user_id, plan_id, status, start_date, end_date, final_amount, payment_method, notes) VALUES (?, ?, ?, 'active', ?, ?, ?, ?, ?)",
+    ['MEM-' + paymentId, userId, plan.id, startDate, endDate, amount, paymentMethod,
+      couponCode ? `Paid via ${paymentMethod} (coupon ${couponCode})` : `Paid via ${paymentMethod}`]);
+  const membership = get('SELECT id FROM memberships WHERE membership_id = ?', ['MEM-' + paymentId]);
+
+  const invoiceNumber = 'ZAC-' + Date.now();
+  run('INSERT INTO invoices (invoice_number, user_id, membership_id, subtotal, total, amount_paid, balance, status, due_date, notes) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?)',
+    [invoiceNumber, userId, membership ? membership.id : null, amount, amount, amount, 'paid', startDate, plan.name + ' membership']);
+
+  createNotification({ user_id: userId, type: 'success', title: 'Membership Activated', body: `Your ${plan.name} plan is now active!`, link: { module: 'membership' } });
+
+  logAuditReq(req, {
+    action: 'CREATE', entity_type: 'membership', entity_id: 'MEM-' + paymentId, entity_name: plan.name,
+    new_value: { plan: plan.name, amount, start: startDate, end: endDate, payment_method: paymentMethod }
+  });
+
+  return { invoice: invoiceNumber, amount, membership_id: 'MEM-' + paymentId };
+}
 
 router.get('/plans', (req, res) => {
   const plans = all('SELECT * FROM membership_plans WHERE is_active = 1 ORDER BY sort_order');
@@ -26,7 +70,14 @@ router.post('/purchase', authMiddleware, [
   const { plan_id, payment_method, razorpay_payment_id, razorpay_order_id, razorpay_signature, coupon_code } = req.body;
   const plan = get('SELECT * FROM membership_plans WHERE id = ?', [plan_id]);
   if (!plan) return res.status(404).json({ error: 'Plan not found' });
-  let amount = plan.price * plan.duration_months;
+  if (!OFFLINE_METHODS.includes(payment_method) && !GATEWAY_METHODS.includes(payment_method)) {
+    return res.status(400).json({ error: 'Unsupported payment method' });
+  }
+  if (GATEWAY_METHODS.includes(payment_method) && !razorpayConfigured()) {
+    return res.status(503).json({ error: ON_PAYMENT_NOT_CONFIGURED });
+  }
+
+  let amount = plan.price;
 
   if (coupon_code) {
     const coupon = get('SELECT * FROM coupons WHERE code = ? AND is_active = 1', [coupon_code.toUpperCase()]);
@@ -38,27 +89,27 @@ router.post('/purchase', authMiddleware, [
     }
   }
 
-  run("INSERT INTO payments (user_id, amount, method, razorpay_payment_id, razorpay_order_id, razorpay_signature, status) VALUES (?, ?, ?, ?, ?, ?, 'completed')",
-    [req.user.id, amount, payment_method, razorpay_payment_id || '', razorpay_order_id || '', razorpay_signature || '']);
-  const payment = get('SELECT * FROM payments WHERE user_id = ? ORDER BY id DESC LIMIT 1', [req.user.id]);
+  if (GATEWAY_METHODS.includes(payment_method)) {
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ error: 'Payment verification failed' });
+    }
+    const crypto = require('crypto');
+    const expected = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(razorpay_order_id + '|' + razorpay_payment_id).digest('hex');
+    const a = Buffer.from(expected, 'utf8');
+    const b = Buffer.from(String(razorpay_signature), 'utf8');
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+      return res.status(400).json({ error: 'Payment verification failed' });
+    }
+  }
 
-  const startDate = new Date().toISOString().split('T')[0];
-  const endDate = new Date(Date.now() + plan.duration_months * 30 * 24 * 60 * 60 * 1000).toISOString().split('0')[0];
-  const memId = 'MEM-' + Date.now().toString(36).toUpperCase();
-  run("INSERT INTO memberships (membership_id, user_id, plan_id, status, start_date, end_date, final_amount, payment_method, notes) VALUES (?, ?, ?, 'active', ?, ?, ?, ?, ?)",
-    [memId, req.user.id, plan_id, startDate, endDate, amount, payment_method, 'Paid via ' + (payment_method || 'online')]);
-
-  const invoiceNumber = 'ZAC-' + Date.now();
-  run('INSERT INTO invoices (invoice_number, user_id, membership_id, subtotal, total, amount_paid, balance, status, due_date, notes) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?)',
-    [invoiceNumber, req.user.id, get('SELECT id FROM memberships WHERE membership_id = ?', [memId])?.id || null, amount, amount, amount, 'paid', startDate, plan.name + ' membership']);
-
-  run("INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, 'success')",
-    [req.user.id, 'Membership Activated', 'Your ' + plan.name + ' plan is now active!']);
-
-  run("INSERT INTO audit_logs (user_id, user_name, action, entity_type, entity_id, entity_name, new_value) VALUES (?, ?, ?, ?, ?, ?, ?)",
-    [req.user.id, req.user.full_name || 'Member', 'CREATE', 'membership', memId, plan.name, JSON.stringify({ plan: plan.name, amount, start: startDate, end: endDate })]);
-
-  res.json({ message: 'Membership purchased successfully', invoice: invoiceNumber, amount, membership_id: memId });
+  const result = issueAndActivate(req, {
+    userId: req.user.id, plan, amount, paymentMethod: payment_method, couponCode: coupon_code,
+    razorpay: GATEWAY_METHODS.includes(payment_method)
+      ? { razorpay_payment_id, razorpay_order_id, razorpay_signature }
+      : null
+  });
+  res.json({ message: 'Membership purchased successfully', ...result });
 });
 
 router.get('/my-membership', authMiddleware, (req, res) => {
@@ -71,7 +122,8 @@ router.get('/my-membership', authMiddleware, (req, res) => {
 
 router.post('/validate-coupon', (req, res) => {
   const { code, plan_id } = req.body;
-  const coupon = get('SELECT * FROM coupons WHERE code = ? AND is_active = 1', [code.toUpperCase()]);
+  if (!code) return res.status(400).json({ error: 'Coupon code is required' });
+  const coupon = get('SELECT * FROM coupons WHERE code = ? AND is_active = 1', [String(code).toUpperCase()]);
   if (!coupon) return res.status(404).json({ error: 'Invalid coupon code' });
   if (coupon.used_count >= coupon.max_uses) return res.status(400).json({ error: 'Coupon usage limit reached' });
   const now = new Date().toISOString().split('T')[0];

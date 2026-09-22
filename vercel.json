@@ -1,5 +1,19 @@
 {
+  "version": 2,
+  "crons": [
+    {
+      "path": "/api/automation/run",
+      "schedule": "0 */6 * * *"
+    }
+  ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" }
+    {
+      "source": "/api/(.*)",
+      "destination": "/api"
+    },
+    {
+      "source": "/((?!api).*)",
+      "destination": "/api"
+    }
   ]
 }

@@ -1,8 +1,9 @@
 const { get } = require('../database/db');
 
-function generateInvoiceHTML(invoice, payment, user, plan) {
+function generateInvoiceHTML(invoice, payment, user, plan, endDate) {
   const invoiceDate = new Date(invoice.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' });
-  const expiryDate = payment.end_date ? new Date(payment.end_date).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
+  const expiryDate = endDate ? new Date(endDate).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' }) : (payment.end_date ? new Date(payment.end_date).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A');
+  const originalAmount = plan.price;
 
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Invoice ${invoice.invoice_number} | Zacson Fitness</title>
@@ -44,8 +45,8 @@ td{padding:12px;border-bottom:1px solid #eee;font-size:14px;}
 </div>
 <table><thead><tr><th>Description</th><th>Amount</th></tr></thead>
 <tbody>
-<tr><td>${plan.name} Membership (${plan.duration_months} month${plan.duration_months > 1 ? 's' : ''})</td><td>&#8377;${(plan.price * plan.duration_months).toLocaleString()}</td></tr>
-${payment.amount < (plan.price * plan.duration_months) ? `<tr><td>Discount Applied</td><td style="color:#27ae60;">-&#8377;${((plan.price * plan.duration_months) - payment.amount).toLocaleString()}</td></tr>` : ''}
+<tr><td>${plan.name} Membership (${plan.duration_months} month${plan.duration_months > 1 ? 's' : ''})</td><td>&#8377;${originalAmount.toLocaleString()}</td></tr>
+${payment.amount < originalAmount ? `<tr><td>Discount Applied</td><td style="color:#27ae60;">-&#8377;${(originalAmount - payment.amount).toLocaleString()}</td></tr>` : ''}
 </tbody></table>
 <div class="total"><p>Total Paid</p><p class="amount">&#8377;${payment.amount.toLocaleString()}</p></div>
 <div class="footer-note"><p>Thank you for choosing Zacson Fitness! For queries, email hello@zacsonfitness.com or call +91 98765 43210.</p><p style="margin-top:5px;">This is a computer-generated invoice and does not require a signature.</p></div>

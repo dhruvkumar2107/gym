@@ -1,62 +1,86 @@
 const express = require('express');
 const router = express.Router();
 const { run, get, all } = require('../database/db');
-const { authMiddleware, adminMiddleware } = require('../middleware/auth');
+const { authMiddleware, adminMiddleware, requirePerm } = require('../middleware/auth');
 const { body, validationResult, query } = require('express-validator');
 const upload = require('../middleware/upload');
 const bcrypt = require('bcryptjs');
+const { logAuditReq } = require('../services/notify');
 
 router.use(authMiddleware, adminMiddleware);
 
 // ========== DASHBOARD ==========
 router.get('/dashboard', (req, res) => {
   const today = new Date().toISOString().split('T')[0];
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
   const sevenDaysFromNow = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
 
-  const stats = {
-    totalMembers: get("SELECT COUNT(*) as c FROM memberships WHERE status = 'active'").c,
-    activeMembers: get("SELECT COUNT(*) as c FROM memberships WHERE status = 'active' AND end_date >= date('now')").c,
-    newMembersThisMonth: get("SELECT COUNT(*) as c FROM memberships WHERE created_at >= ?", [thirtyDaysAgo]).c,
-    expiringThisWeek: get("SELECT COUNT(*) as c FROM memberships WHERE status = 'active' AND end_date <= ? AND end_date >= ?", [sevenDaysFromNow, today]).c,
-    totalLeads: get("SELECT COUNT(*) as c FROM leads").c,
-    newLeads: get("SELECT COUNT(*) as c FROM leads WHERE status = 'NEW_LEAD'").c,
-    leadsThisMonth: get("SELECT COUNT(*) as c FROM leads WHERE created_at >= ?", [thirtyDaysAgo]).c,
-    convertedLeads: get("SELECT COUNT(*) as c FROM leads WHERE status = 'CONVERTED'").c,
-    todayRevenue: get("SELECT COALESCE(SUM(amount), 0) as t FROM payments WHERE status = 'completed' AND date(created_at) = ?", [today]).t,
-    monthlyRevenue: get("SELECT COALESCE(SUM(amount), 0) as t FROM payments WHERE status = 'completed' AND created_at >= ?", [thirtyDaysAgo]).t,
-    totalRevenue: get("SELECT COALESCE(SUM(amount), 0) as t FROM payments WHERE status = 'completed'").t,
-    outstandingPayments: get("SELECT COALESCE(SUM(balance), 0) as t FROM invoices WHERE status = 'pending'").t,
-    todayAttendance: get("SELECT COUNT(*) as c FROM attendance WHERE date = ?", [today]).c,
-    membersInsideGym: get("SELECT COUNT(*) as c FROM attendance WHERE date = ? AND check_out IS NULL", [today]).c,
-    activePTSessions: get("SELECT COUNT(*) as c FROM pt_sessions WHERE status = 'scheduled' AND scheduled_date = ?", [today]).c,
-    classesToday: get("SELECT COUNT(*) as c FROM class_schedules cs JOIN classes c ON cs.class_id = c.id WHERE cs.day_of_week = ? AND c.is_active = 1", [new Date().toLocaleDateString('en-US', { weekday: 'long' })]).c,
-    staffPresent: get("SELECT COUNT(*) as c FROM employee_attendance WHERE date = ? AND status = 'present'", [today]).c,
-    openTickets: get("SELECT COUNT(*) as c FROM tickets WHERE status IN ('open', 'in_progress')").c,
-    lowStockProducts: get("SELECT COUNT(*) as c FROM products WHERE stock <= minimum_stock AND is_active = 1").c,
-    pendingTasks: get("SELECT COUNT(*) as c FROM tasks WHERE status IN ('todo', 'in_progress')").c,
-    totalEmployees: get("SELECT COUNT(*) as c FROM employees WHERE is_active = 1").c,
-    totalProducts: get("SELECT COUNT(*) as c FROM products WHERE is_active = 1").c,
-    monthlyExpenses: get("SELECT COALESCE(SUM(amount), 0) as t FROM expenses WHERE date >= ?", [thirtyDaysAgo]).t,
-    recentLeads: all("SELECT * FROM leads ORDER BY created_at DESC LIMIT 5"),
-    recentPayments: all("SELECT p.*, u.full_name FROM payments p LEFT JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC LIMIT 5"),
-    recentAttendance: all("SELECT a.*, u.full_name FROM attendance a LEFT JOIN users u ON a.user_id = u.id WHERE a.date = ? ORDER BY a.check_in DESC LIMIT 10", [today]),
-    needsAttention: {
-      expiringMemberships: get("SELECT COUNT(*) as c FROM memberships WHERE status = 'active' AND end_date <= ? AND end_date >= ?", [sevenDaysFromNow, today]).c,
-      uncontactedLeads: get("SELECT COUNT(*) as c FROM leads WHERE status = 'NEW_LEAD' AND created_at <= datetime('now', '-24 hours')").c,
-      unpaidInvoices: get("SELECT COUNT(*) as c FROM invoices WHERE status = 'pending'").c,
-      inactiveMembers: get("SELECT COUNT(*) as c FROM users u WHERE u.role = 'member' AND u.id NOT IN (SELECT user_id FROM attendance WHERE date >= ?)", [thirtyDaysAgo]).c,
-      nearSLABreach: get("SELECT COUNT(*) as c FROM tickets WHERE status IN ('open', 'in_progress') AND sla_deadline <= datetime('now', '+24 hours')").c,
-      lowStock: get("SELECT COUNT(*) as c FROM products WHERE stock <= minimum_stock AND is_active = 1").c,
-      staffAbsent: get("SELECT COUNT(*) as c FROM employees WHERE is_active = 1 AND id NOT IN (SELECT employee_id FROM employee_attendance WHERE date = ?)", [today]).c
+  const staffTotal = get("SELECT COUNT(*) as c FROM employees WHERE is_active = 1").c;
+  const staffPresent = get("SELECT COUNT(*) as c FROM employee_attendance WHERE date = ? AND status = 'present'", [today]).c;
+  const leadsTotal = get("SELECT COUNT(*) as c FROM leads").c;
+  const leadsConverted = get("SELECT COUNT(*) as c FROM leads WHERE status = 'CONVERTED' OR status = 'converted'").c;
+  const funnelRows = all("SELECT CASE UPPER(status) WHEN 'NEW_LEAD' THEN 'new_lead' WHEN 'CONTACTED' THEN 'contacted' WHEN 'INTERESTED' THEN 'interested' WHEN 'TRIAL_BOOKED' THEN 'trial_booked' WHEN 'TRIAL_ATTENDED' THEN 'trial_attended' WHEN 'NEGOTIATION' THEN 'negotiation' WHEN 'PAYMENT_PENDING' THEN 'payment_pending' WHEN 'CONVERTED' THEN 'converted' WHEN 'LOST' THEN 'lost' END as stage, COUNT(*) as count FROM leads GROUP BY stage");
+  const funnelStages = ['new_lead', 'contacted', 'interested', 'trial_booked', 'trial_attended', 'negotiation', 'payment_pending', 'converted', 'lost'];
+  const funnelMap = {};
+  funnelRows.forEach(r => { if (r.stage) funnelMap[r.stage] = r.count; });
+  const leadFunnel = funnelStages.map(stage => ({ status: stage, count: funnelMap[stage] || 0 }));
+
+  const needsAttention = [
+    {
+      type: 'memberships',
+      label: 'Memberships expiring soon',
+      count: get("SELECT COUNT(*) as c FROM memberships WHERE status = 'active' AND end_date <= ? AND end_date >= ?", [sevenDaysFromNow, today]).c,
+      page: 'memberships'
     },
-    revenueTrend: all("SELECT date(created_at) as date, SUM(amount) as revenue FROM payments WHERE status = 'completed' AND created_at >= date('now', '-30 days') GROUP BY date(created_at) ORDER BY date"),
-    membershipGrowth: all("SELECT date(created_at) as date, COUNT(*) as count FROM memberships WHERE created_at >= date('now', '-30 days') GROUP BY date(created_at) ORDER BY date"),
-    leadFunnel: all("SELECT status, COUNT(*) as count FROM leads GROUP BY status"),
-    revenueByPlan: all("SELECT mp.name, SUM(p.amount) as revenue FROM payments p JOIN memberships m ON p.membership_id = m.id JOIN membership_plans mp ON m.plan_id = mp.id WHERE p.status = 'completed' GROUP BY mp.name"),
-    attendanceTrend: all("SELECT date, COUNT(*) as count FROM attendance WHERE date >= date('now', '-30 days') GROUP BY date ORDER BY date")
-  };
-  res.json(stats);
+    {
+      type: 'leads',
+      label: 'Uncontacted leads',
+      count: get("SELECT COUNT(*) as c FROM leads WHERE (status = 'NEW_LEAD' OR status = 'new_lead') AND created_at <= datetime('now', '-24 hours')").c,
+      page: 'leads'
+    },
+    {
+      type: 'payments',
+      label: 'Unpaid invoices',
+      count: get("SELECT COUNT(*) as c FROM invoices WHERE status = 'pending'").c,
+      page: 'payments'
+    },
+    {
+      type: 'inventory',
+      label: 'Low stock items',
+      count: get("SELECT COUNT(*) as c FROM products WHERE stock <= minimum_stock AND is_active = 1").c,
+      page: 'inventory'
+    },
+    {
+      type: 'tickets',
+      label: 'Open support tickets',
+      count: get("SELECT COUNT(*) as c FROM tickets WHERE status IN ('open', 'in_progress')").c,
+      page: 'tickets'
+    }
+  ].filter(n => n.count > 0);
+
+  res.json({
+    total_members: get("SELECT COUNT(*) as c FROM memberships WHERE status = 'active'").c,
+    active_members: get("SELECT COUNT(*) as c FROM memberships WHERE status = 'active' AND end_date >= date('now')").c,
+    new_members_this_month: get("SELECT COUNT(*) as c FROM memberships WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')").c,
+    expiring_memberships: get("SELECT COUNT(*) as c FROM memberships WHERE status = 'active' AND end_date <= ? AND end_date >= ?", [sevenDaysFromNow, today]).c,
+    new_leads: get("SELECT COUNT(*) as c FROM leads WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')").c,
+    conversion_rate: leadsTotal > 0 ? Math.round((leadsConverted / leadsTotal) * 1000) / 10 : 0,
+    today_revenue: get("SELECT COALESCE(SUM(amount), 0) as t FROM payments WHERE status = 'completed' AND date(created_at) = date('now')").t,
+    monthly_revenue: get("SELECT COALESCE(SUM(amount), 0) as t FROM payments WHERE status = 'completed' AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')").t,
+    outstanding_payments: get("SELECT COALESCE(SUM(balance), 0) as t FROM invoices WHERE status = 'pending'").t,
+    today_attendance: get("SELECT COUNT(*) as c FROM attendance WHERE date = ?", [today]).c,
+    active_pt_sessions: get("SELECT COUNT(*) as c FROM pt_sessions WHERE status = 'scheduled' AND scheduled_date = ?", [today]).c,
+    classes_today: get("SELECT COUNT(*) as c FROM class_schedules cs JOIN classes c ON cs.class_id = c.id WHERE cs.day_of_week = ? AND c.is_active = 1", [new Date().toLocaleDateString('en-US', { weekday: 'long' })]).c,
+    staff_present: staffPresent,
+    staff_absent: Math.max(staffTotal - staffPresent, 0),
+    open_tickets: get("SELECT COUNT(*) as c FROM tickets WHERE status IN ('open', 'in_progress')").c,
+    low_stock_count: get("SELECT COUNT(*) as c FROM products WHERE stock <= minimum_stock AND is_active = 1").c,
+    needs_attention: needsAttention,
+    revenue_trend: all("SELECT date(created_at) as period, SUM(amount) as total FROM payments WHERE status = 'completed' AND created_at >= date('now', '-30 days') GROUP BY period ORDER BY period"),
+    lead_funnel: leadFunnel,
+    recent_leads: all("SELECT * FROM leads ORDER BY created_at DESC LIMIT 5"),
+    recent_payments: all("SELECT p.*, u.full_name FROM payments p LEFT JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC LIMIT 5")
+  });
 });
 
 // ========== GLOBAL SEARCH ==========
@@ -97,27 +121,38 @@ router.get('/search', (req, res) => {
 });
 
 // ========== USERS / MEMBERS ==========
-router.get('/users', (req, res) => {
+router.get('/users', requirePerm('members', 'view'), (req, res) => {
   const { role, search, branch_id, status, page = 1, limit = 50 } = req.query;
-  let sql = 'SELECT id, username, email, role, full_name, phone, avatar, gender, date_of_birth, address, city, fitness_level, is_active, created_at, last_login FROM users';
+  const p = parseInt(page) || 1;
+  const l = Math.min(Math.max(parseInt(limit) || 50, 1), 200);
+  let sql = `SELECT u.*, mp.name as plan_name, m.status as membership_status, m.end_date as membership_end, b.name as branch_name
+    FROM users u
+    LEFT JOIN memberships m ON m.id = (SELECT id FROM memberships WHERE user_id = u.id ORDER BY created_at DESC LIMIT 1)
+    LEFT JOIN membership_plans mp ON m.plan_id = mp.id
+    LEFT JOIN branches b ON m.branch_id = b.id`;
   const params = [];
   const conditions = [];
-  if (role) { conditions.push('role = ?'); params.push(role); }
-  if (search) { conditions.push('(full_name LIKE ? OR email LIKE ? OR phone LIKE ?)'); params.push(`%${search}%`, `%${search}%`, `%${search}%`); }
-  if (status === 'active') { conditions.push('is_active = 1'); }
-  if (status === 'inactive') { conditions.push('is_active = 0'); }
+  if (role) { conditions.push('u.role = ?'); params.push(role); }
+  if (search) { conditions.push('(u.full_name LIKE ? OR u.email LIKE ? OR u.phone LIKE ?)'); params.push(`%${search}%`, `%${search}%`, `%${search}%`); }
+  if (branch_id) { conditions.push('m.branch_id = ?'); params.push(branch_id); }
+  if (status === 'active') { conditions.push('u.is_active = 1'); }
+  if (status === 'inactive') { conditions.push('u.is_active = 0'); }
   if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
-  const countSql = sql.replace('SELECT id, username, email, role, full_name, phone, avatar, gender, date_of_birth, address, city, fitness_level, is_active, created_at, last_login', 'SELECT COUNT(*) as total');
-  const total = get(countSql, params).total;
-  sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-  params.push(parseInt(limit), (parseInt(page) - 1) * parseInt(limit));
-  const users = all(sql, params);
-  res.json({ users, total, page: parseInt(page), limit: parseInt(limit) });
+  const countSource = `FROM users u
+    LEFT JOIN memberships m ON m.id = (SELECT id FROM memberships WHERE user_id = u.id ORDER BY created_at DESC LIMIT 1)
+    LEFT JOIN membership_plans mp ON m.plan_id = mp.id
+    LEFT JOIN branches b ON m.branch_id = b.id`;
+  const total = get('SELECT COUNT(*)' + ' ' + countSource + (conditions.length ? ' WHERE ' + conditions.join(' AND ') : ''), params).c;
+  sql += ' ORDER BY u.created_at DESC LIMIT ? OFFSET ?';
+  const users = all(sql, params.concat(l, (p - 1) * l));
+  users.forEach(u => delete u.password_hash);
+  res.json({ items: users, total, page: p, limit: l });
 });
 
-router.get('/users/:id', (req, res) => {
+router.get('/users/:id', requirePerm('members', 'view'), (req, res) => {
   const user = get('SELECT * FROM users WHERE id = ?', [req.params.id]);
   if (!user) return res.status(404).json({ error: 'User not found' });
+  delete user.password_hash;
   const membership = get('SELECT m.*, mp.name as plan_name FROM memberships m JOIN membership_plans mp ON m.plan_id = mp.id WHERE m.user_id = ? ORDER BY m.created_at DESC LIMIT 1', [req.params.id]);
   const recentAttendance = all('SELECT * FROM attendance WHERE user_id = ? ORDER BY date DESC LIMIT 10', [req.params.id]);
   const measurements = all('SELECT * FROM body_measurements WHERE user_id = ? ORDER BY measured_date DESC LIMIT 5', [req.params.id]);
@@ -131,13 +166,16 @@ router.get('/users/:id', (req, res) => {
   res.json({ user, membership, recentAttendance, measurements, ptAssignment, workoutPlan, dietPlan, invoices, payments, tickets, timeline });
 });
 
-router.post('/users', [
+router.post('/users', requirePerm('members', 'create'), [
   body('email').isEmail().normalizeEmail(),
   body('full_name').notEmpty()
 ], (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
   const { email, password, full_name, phone, role, gender, date_of_birth, address, city, fitness_goals } = req.body;
+  if (role === 'super_admin' && req.user.role !== 'super_admin') {
+    return res.status(403).json({ error: 'Only a super admin can create another super admin' });
+  }
   const existing = get('SELECT id FROM users WHERE email = ?', [email]);
   if (existing) return res.status(400).json({ error: 'Email already exists' });
   const hash = bcrypt.hashSync(password || 'password123', 10);
@@ -149,8 +187,11 @@ router.post('/users', [
   res.json({ message: 'User created', user });
 });
 
-router.put('/users/:id', (req, res) => {
+router.put('/users/:id', requirePerm('members', 'edit'), (req, res) => {
   const { full_name, phone, role, gender, date_of_birth, address, city, state, pincode, fitness_goals, height, weight, fitness_level, is_active } = req.body;
+  if (role === 'super_admin' && req.user.role !== 'super_admin') {
+    return res.status(403).json({ error: 'Only a super admin can create another super admin' });
+  }
   const prev = get('SELECT * FROM users WHERE id = ?', [req.params.id]);
   run('UPDATE users SET full_name=?, phone=?, role=?, gender=?, date_of_birth=?, address=?, city=?, state=?, pincode=?, fitness_goals=?, height=?, weight=?, fitness_level=?, is_active=?, updated_at=CURRENT_TIMESTAMP WHERE id=?',
     [full_name || prev.full_name, phone || prev.phone, role || prev.role, gender || prev.gender, date_of_birth || prev.date_of_birth, address || prev.address, city || prev.city, state || prev.state, pincode || prev.pincode, fitness_goals || prev.fitness_goals, height || prev.height, weight || prev.weight, fitness_level || prev.fitness_level, is_active !== undefined ? (is_active ? 1 : 0) : prev.is_active, req.params.id]);
@@ -159,13 +200,13 @@ router.put('/users/:id', (req, res) => {
   res.json({ message: 'User updated' });
 });
 
-router.delete('/users/:id', (req, res) => {
+router.delete('/users/:id', requirePerm('members', 'delete'), (req, res) => {
   run('UPDATE users SET is_active = 0 WHERE id = ?', [req.params.id]);
   res.json({ message: 'User deactivated' });
 });
 
 // ========== MEMBERSHIP PLANS ==========
-router.get('/plans', (req, res) => {
+router.get('/plans', requirePerm('plans', 'view'), (req, res) => {
   res.json(all('SELECT * FROM membership_plans ORDER BY sort_order'));
 });
 
@@ -177,28 +218,30 @@ router.get('/plans/:id', (req, res) => {
   res.json({ ...plan, memberCount, revenue });
 });
 
-router.post('/plans', (req, res) => {
+router.post('/plans', requirePerm('plans', 'create'), (req, res) => {
   const p = req.body;
   run('INSERT INTO membership_plans (name, slug, description, price, original_price, duration_months, features, gym_access, class_access, pt_sessions, sauna_access, locker_included, guest_passes, nutrition_consultation, freeze_days, branch_access, terms_conditions, is_popular, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     [p.name, p.slug, p.description, p.price, p.original_price, p.duration_months, JSON.stringify(p.features || []), p.gym_access ? 1 : 0, p.class_access ? 1 : 0, p.pt_sessions || 0, p.sauna_access ? 1 : 0, p.locker_included ? 1 : 0, p.guest_passes || 0, p.nutrition_consultation ? 1 : 0, p.freeze_days || 0, p.branch_access || 'all', p.terms_conditions || '', p.is_popular ? 1 : 0, p.is_active !== false ? 1 : 0, p.sort_order || 0]);
   res.json({ message: 'Plan created' });
 });
 
-router.put('/plans/:id', (req, res) => {
+router.put('/plans/:id', requirePerm('plans', 'edit'), (req, res) => {
   const p = req.body;
   run('UPDATE membership_plans SET name=?, slug=?, description=?, price=?, original_price=?, duration_months=?, features=?, gym_access=?, class_access=?, pt_sessions=?, sauna_access=?, locker_included=?, guest_passes=?, nutrition_consultation=?, freeze_days=?, branch_access=?, terms_conditions=?, is_popular=?, is_active=?, sort_order=? WHERE id=?',
     [p.name, p.slug, p.description, p.price, p.original_price, p.duration_months, JSON.stringify(p.features || []), p.gym_access ? 1 : 0, p.class_access ? 1 : 0, p.pt_sessions || 0, p.sauna_access ? 1 : 0, p.locker_included ? 1 : 0, p.guest_passes || 0, p.nutrition_consultation ? 1 : 0, p.freeze_days || 0, p.branch_access || 'all', p.terms_conditions || '', p.is_popular ? 1 : 0, p.is_active !== false ? 1 : 0, p.sort_order || 0, req.params.id]);
   res.json({ message: 'Plan updated' });
 });
 
-router.delete('/plans/:id', (req, res) => {
+router.delete('/plans/:id', requirePerm('plans', 'delete'), (req, res) => {
   run('UPDATE membership_plans SET is_active = 0 WHERE id = ?', [req.params.id]);
   res.json({ message: 'Plan deactivated' });
 });
 
 // ========== MEMBERSHIPS ==========
-router.get('/memberships', (req, res) => {
+router.get('/memberships', requirePerm('memberships', 'view'), (req, res) => {
   const { status, plan_id, branch_id, search, page = 1, limit = 50 } = req.query;
+  const p = parseInt(page) || 1;
+  const l = Math.min(Math.max(parseInt(limit) || 50, 1), 200);
   let sql = 'SELECT m.*, mp.name as plan_name, u.full_name, u.email, u.phone, b.name as branch_name FROM memberships m JOIN membership_plans mp ON m.plan_id = mp.id JOIN users u ON m.user_id = u.id LEFT JOIN branches b ON m.branch_id = b.id';
   const params = [];
   const conditions = [];
@@ -207,57 +250,124 @@ router.get('/memberships', (req, res) => {
   if (branch_id) { conditions.push('m.branch_id = ?'); params.push(branch_id); }
   if (search) { conditions.push('(u.full_name LIKE ? OR u.email LIKE ? OR u.phone LIKE ? OR m.membership_id LIKE ?)'); params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`); }
   if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
+  const total = get('SELECT COUNT(*) as c FROM memberships m JOIN membership_plans mp ON m.plan_id = mp.id JOIN users u ON m.user_id = u.id LEFT JOIN branches b ON m.branch_id = b.id' + (conditions.length ? ' WHERE ' + conditions.join(' AND ') : ''), params).c;
   sql += ' ORDER BY m.created_at DESC LIMIT ? OFFSET ?';
-  params.push(parseInt(limit), (parseInt(page) - 1) * parseInt(limit));
-  const memberships = all(sql, params);
-  res.json(memberships);
+  const memberships = all(sql, params.concat(l, (p - 1) * l));
+  res.json({ items: memberships, total, page: p, limit: l });
 });
 
-router.post('/memberships', (req, res) => {
-  const { user_id, plan_id, branch_id, start_date, end_date, discount, tax, payment_method, payment_reference, assigned_salesperson, assigned_trainer, notes } = req.body;
+router.get('/memberships/:id', requirePerm('memberships', 'view'), (req, res) => {
+  const membership = get('SELECT m.*, mp.name as plan_name, mp.duration_months, mp.features, u.full_name, u.email, u.phone, b.name as branch_name FROM memberships m JOIN membership_plans mp ON m.plan_id = mp.id JOIN users u ON m.user_id = u.id LEFT JOIN branches b ON m.branch_id = b.id WHERE m.id = ?', [req.params.id]);
+  if (!membership) return res.status(404).json({ error: 'Membership not found' });
+  try { membership.features = JSON.parse(membership.features); } catch(e) { membership.features = []; }
+  const payments = all("SELECT * FROM payments WHERE membership_id = ? OR user_id = ? ORDER BY created_at DESC LIMIT 10", [membership.id, membership.user_id]);
+  const invoices = all('SELECT * FROM invoices WHERE membership_id = ? ORDER BY created_at DESC LIMIT 10', [membership.id]);
+  const assignedTrainer = membership.assigned_trainer ? get('SELECT id, full_name FROM employees WHERE id = ?', [membership.assigned_trainer]) : null;
+  const assignedSalesperson = membership.assigned_salesperson ? get('SELECT id, full_name FROM employees WHERE id = ?', [membership.assigned_salesperson]) : null;
+  res.json({ membership, payments, invoices, assigned_trainer: assignedTrainer, assigned_salesperson: assignedSalesperson });
+});
+
+router.post('/memberships', requirePerm('memberships', 'create'), (req, res) => {
+  const { user_id, plan_id, branch_id, start_date, end_date, discount, tax, payment_method, payment_reference, assigned_salesperson, assigned_trainer, notes, is_complimentary } = req.body;
   const plan = get('SELECT * FROM membership_plans WHERE id = ?', [plan_id]);
   if (!plan) return res.status(404).json({ error: 'Plan not found' });
-  const finalAmount = plan.price - (discount || 0) + (tax || 0);
-  const memId = 'MEM-' + Date.now().toString(36).toUpperCase();
+  const user = get('SELECT id FROM users WHERE id = ?', [user_id]);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  const complimentary = !!is_complimentary;
+  const finalAmount = complimentary ? 0 : (plan.price - (discount || 0) + (tax || 0));
+  const memId = 'MEM-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 5).toUpperCase();
+  const dateAddition = (months) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() + (months || 1));
+    return d.toISOString().split('T')[0];
+  };
   const noteText = notes || (payment_reference ? 'Payment ref: ' + payment_reference : '');
+  const finalNotes = complimentary ? (noteText ? noteText + ' | Complimentary' : 'Complimentary membership') : noteText;
   run('INSERT INTO memberships (membership_id, user_id, plan_id, branch_id, status, start_date, end_date, assigned_salesperson, assigned_trainer, discount, tax, final_amount, payment_method, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [memId, user_id, plan_id, branch_id || 1, 'active', start_date || new Date().toISOString().split('T')[0], end_date, assigned_salesperson || null, assigned_trainer || null, discount || 0, tax || 0, finalAmount, payment_method || 'razorpay', noteText]);
+    [memId, user_id, plan_id, branch_id || 1, 'active', start_date || new Date().toISOString().split('T')[0], end_date || dateAddition(plan.duration_months), assigned_salesperson || null, assigned_trainer || null, complimentary ? 0 : (discount || 0), complimentary ? 0 : (tax || 0), finalAmount, complimentary ? 'complimentary' : (payment_method || 'cash'), finalNotes]);
   run('UPDATE users SET role = "member" WHERE id = ?', [user_id]);
+  const membershipRow = get('SELECT id FROM memberships WHERE membership_id = ?', [memId]);
   if (payment_reference) {
     run('INSERT INTO payments (user_id, membership_id, amount, method, transaction_ref, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [user_id, memId, finalAmount, payment_method || 'razorpay', payment_reference || '', 'completed', noteText]);
+      [user_id, membershipRow ? membershipRow.id : null, finalAmount || plan.price, payment_method || 'cash', payment_reference || '', 'completed', noteText]);
   }
+  logAuditReq(req, { action: 'CREATE', entity_type: 'membership', entity_id: memId, entity_name: plan.name, new_value: { user_id, plan_id, final_amount: finalAmount, complimentary } });
   res.json({ message: 'Membership created', membership_id: memId });
 });
 
-router.put('/memberships/:id', (req, res) => {
+router.put('/memberships/:id', requirePerm('memberships', 'edit'), (req, res) => {
   const { status, end_date, notes, freeze_reason } = req.body;
   const prev = get('SELECT * FROM memberships WHERE id = ?', [req.params.id]);
+  if (!prev) return res.status(404).json({ error: 'Membership not found' });
+  const nextStatus = status || prev.status;
   run('UPDATE memberships SET status=?, end_date=?, notes=?, freeze_reason=?, updated_at=CURRENT_TIMESTAMP WHERE id=?',
-    [status || prev.status, end_date || prev.end_date, notes || prev.notes, freeze_reason || prev.freeze_reason, req.params.id]);
-  if (status === 'frozen') run('UPDATE memberships SET freeze_date = CURRENT_TIMESTAMP WHERE id = ?', [req.params.id]);
-  run('INSERT INTO audit_logs (user_id, user_name, action, entity_type, entity_id, entity_name, previous_value, new_value) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    [req.user.id, req.user.full_name, 'UPDATE', 'membership', req.params.id, prev.membership_id, JSON.stringify({ status: prev.status }), JSON.stringify({ status })]);
+    [nextStatus, end_date || prev.end_date, notes || prev.notes, freeze_reason || prev.freeze_reason, req.params.id]);
+  if (nextStatus === 'frozen') run('UPDATE memberships SET freeze_date = CURRENT_TIMESTAMP WHERE id = ?', [req.params.id]);
+  const user = get('SELECT id, full_name FROM users WHERE id = ?', [prev.user_id]);
+  if (user) run("INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, 'info')",
+    [user.id, 'Membership updated', `Your membership has been updated (${nextStatus}).`]);
+  logAuditReq(req, { action: 'UPDATE', entity_type: 'membership', entity_id: req.params.id, entity_name: prev.membership_id, previous_value: { status: prev.status }, new_value: { status: nextStatus } });
   res.json({ message: 'Membership updated' });
 });
 
-router.post('/memberships/:id/renew', (req, res) => {
-  const mem = get('SELECT m.*, mp.duration_months FROM memberships m JOIN membership_plans mp ON m.plan_id = mp.id WHERE m.id = ?', [req.params.id]);
+router.post('/memberships/:id/freeze', requirePerm('memberships', 'edit'), (req, res) => {
+  const mem = get('SELECT * FROM memberships WHERE id = ?', [req.params.id]);
   if (!mem) return res.status(404).json({ error: 'Membership not found' });
-  const newStart = mem.end_date;
-  const newEnd = new Date(newStart);
+  if (mem.status === 'frozen') return res.status(400).json({ error: 'Membership already frozen' });
+  const { reason } = req.body;
+  run('UPDATE memberships SET status = "frozen", freeze_reason = ?, freeze_date = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+    [reason || '', req.params.id]);
+  const user = get('SELECT id FROM users WHERE id = ?', [mem.user_id]);
+  if (user) run("INSERT INTO notifications (user_id, title, message, type) VALUES (?, 'Membership frozen', ?, 'info')",
+    [user.id, reason ? `Your membership has been frozen. Reason: ${reason}` : 'Your membership has been frozen.']);
+  logAuditReq(req, { action: 'FREEZE', entity_type: 'membership', entity_id: req.params.id, entity_name: mem.membership_id, new_value: { reason } });
+  res.json({ message: 'Membership frozen' });
+});
+
+router.post('/memberships/:id/unfreeze', requirePerm('memberships', 'edit'), (req, res) => {
+  const mem = get('SELECT * FROM memberships WHERE id = ?', [req.params.id]);
+  if (!mem) return res.status(404).json({ error: 'Membership not found' });
+  if (mem.status !== 'frozen') return res.status(400).json({ error: 'Membership is not frozen' });
+  run('UPDATE memberships SET status = "active", freeze_reason = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [req.params.id]);
+  const user = get('SELECT id FROM users WHERE id = ?', [mem.user_id]);
+  if (user) run("INSERT INTO notifications (user_id, title, message, type) VALUES (?, 'Membership unfrozen', 'Your membership is active again.', 'info')", [user.id]);
+  logAuditReq(req, { action: 'UNFREEZE', entity_type: 'membership', entity_id: req.params.id, entity_name: mem.membership_id });
+  res.json({ message: 'Membership unfrozen' });
+});
+
+router.post('/memberships/:id/cancel', requirePerm('memberships', 'edit'), (req, res) => {
+  const mem = get('SELECT * FROM memberships WHERE id = ?', [req.params.id]);
+  if (!mem) return res.status(404).json({ error: 'Membership not found' });
+  const { reason } = req.body;
+  run('UPDATE memberships SET status = "cancelled", notes = CASE WHEN ? = "" THEN notes ELSE notes || " | Cancelled: " || ? END, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+    [reason || '', reason || '', req.params.id]);
+  const user = get('SELECT id FROM users WHERE id = ?', [mem.user_id]);
+  if (user) run("INSERT INTO notifications (user_id, title, message, type) VALUES (?, 'Membership cancelled', 'Your membership has been cancelled.', 'warning')", [user.id]);
+  logAuditReq(req, { action: 'CANCEL', entity_type: 'membership', entity_id: req.params.id, entity_name: mem.membership_id, new_value: { reason } });
+  res.json({ message: 'Membership cancelled' });
+});
+
+router.post('/memberships/:id/renew', requirePerm('memberships', 'edit'), (req, res) => {
+  const mem = get('SELECT m.*, mp.duration_months, mp.price, mp.name as plan_name FROM memberships m JOIN membership_plans mp ON m.plan_id = mp.id WHERE m.id = ?', [req.params.id]);
+  if (!mem) return res.status(404).json({ error: 'Membership not found' });
+  const base = new Date(mem.end_date > new Date().toISOString().split('T')[0] ? mem.end_date : new Date().toISOString().split('T')[0]);
+  const newEnd = new Date(base);
   newEnd.setMonth(newEnd.getMonth() + mem.duration_months);
   run('UPDATE memberships SET status = "active", start_date = ?, end_date = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-    [newStart, newEnd.toISOString().split('T')[0], req.params.id]);
+    [base.toISOString().split('T')[0], newEnd.toISOString().split('T')[0], req.params.id]);
+  const user = get('SELECT id FROM users WHERE id = ?', [mem.user_id]);
+  if (user) run("INSERT INTO notifications (user_id, title, message, type) VALUES (?, 'Membership renewed', ?, 'success')",
+    [user.id, `Your ${mem.plan_name} membership has been renewed.`]);
+  logAuditReq(req, { action: 'RENEW', entity_type: 'membership', entity_id: req.params.id, entity_name: mem.membership_id, new_value: { new_end: newEnd.toISOString().split('T')[0] } });
   res.json({ message: 'Membership renewed', new_end_date: newEnd.toISOString().split('T')[0] });
 });
 
-router.post('/memberships/:id/transfer', (req, res) => {
+router.post('/memberships/:id/transfer', requirePerm('memberships', 'edit'), (req, res) => {
   const { new_user_id } = req.body;
   const prev = get('SELECT * FROM memberships WHERE id = ?', [req.params.id]);
+  if (!prev) return res.status(404).json({ error: 'Membership not found' });
   run('UPDATE memberships SET user_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [new_user_id, req.params.id]);
-  run('INSERT INTO audit_logs (user_id, user_name, action, entity_type, entity_id, previous_value, new_value) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [req.user.id, req.user.full_name, 'TRANSFER', 'membership', req.params.id, JSON.stringify({ user_id: prev.user_id }), JSON.stringify({ user_id: new_user_id })]);
+  logAuditReq(req, { action: 'TRANSFER', entity_type: 'membership', entity_id: req.params.id, entity_name: prev.membership_id, previous_value: { user_id: prev.user_id }, new_value: { user_id: new_user_id } });
   res.json({ message: 'Membership transferred' });
 });
 
@@ -299,13 +409,14 @@ router.get('/attendance', (req, res) => {
   sql += ' ORDER BY a.check_in DESC LIMIT ? OFFSET ?';
   params.push(parseInt(limit), (parseInt(page) - 1) * parseInt(limit));
   const records = all(sql, params);
+  const total = get("SELECT COUNT(*) as c FROM attendance a JOIN users u ON a.user_id = u.id WHERE " + conditions.join(' AND '), params.slice(0, params.length - 2)).c;
   const summary = {
     total: get("SELECT COUNT(*) as c FROM attendance WHERE date = ?", [targetDate]).c,
     checkedIn: get("SELECT COUNT(*) as c FROM attendance WHERE date = ? AND check_out IS NULL", [targetDate]).c,
     checkedOut: get("SELECT COUNT(*) as c FROM attendance WHERE date = ? AND check_out IS NOT NULL", [targetDate]).c,
     peakHour: get("SELECT substr(check_in, 1, 2) as hour, COUNT(*) as count FROM attendance WHERE date = ? GROUP BY hour ORDER BY count DESC LIMIT 1", [targetDate])
   };
-  res.json({ records, summary });
+  res.json({ items: records, total, summary, page: 1, limit: records.length });
 });
 
 router.post('/attendance/checkin', (req, res) => {
@@ -544,31 +655,35 @@ router.post('/measurements', (req, res) => {
 // ========== CRM / LEADS ==========
 router.get('/leads', (req, res) => {
   const { status, source, assigned_salesperson, search, page = 1, limit = 50 } = req.query;
-  let sql = 'SELECT l.*, e.full_name as salesperson_name FROM leads l LEFT JOIN employees e ON l.assigned_salesperson = e.id';
-  const params = [];
-  const conditions = [];
-  if (status) { conditions.push('l.status = ?'); params.push(status); }
-  if (source) { conditions.push('l.source = ?'); params.push(source); }
-  if (assigned_salesperson) { conditions.push('l.assigned_salesperson = ?'); params.push(assigned_salesperson); }
-  if (search) { conditions.push('(l.name LIKE ? OR l.email LIKE ? OR l.phone LIKE ?)'); params.push(`%${search}%`, `%${search}%`, `%${search}%`); }
-  if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
-  sql += ' ORDER BY l.created_at DESC LIMIT ? OFFSET ?';
-  params.push(parseInt(limit), (parseInt(page) - 1) * parseInt(limit));
-  const leads = all(sql, params);
-  const total = get("SELECT COUNT(*) as c FROM leads" + (conditions.length ? ' WHERE ' + conditions.join(' AND ') : ''), params.slice(0, conditions.length)).c;
-  res.json({ leads, total });
+  const p2 = parseInt(page) || 1;
+  const l2 = Math.min(Math.max(parseInt(limit) || 50, 1), 200);
+  let sql2 = 'SELECT l.*, e.full_name as salesperson_name FROM leads l LEFT JOIN employees e ON l.assigned_salesperson = e.id';
+  const params2 = [];
+  const conditions2 = [];
+  if (status) { conditions2.push('l.status = ?'); params2.push(status); }
+  if (source) { conditions2.push('l.source = ?'); params2.push(source); }
+  if (assigned_salesperson) { conditions2.push('l.assigned_salesperson = ?'); params2.push(assigned_salesperson); }
+  if (search) { conditions2.push('(l.name LIKE ? OR l.email LIKE ? OR l.phone LIKE ?)'); params2.push(`%${search}%`, `%${search}%`, `%${search}%`); }
+  if (conditions2.length) sql2 += ' WHERE ' + conditions2.join(' AND ');
+  const total2 = get("SELECT COUNT(*) as c FROM leads" + (conditions2.length ? ' WHERE ' + conditions2.join(' AND ') : ''), params2).c;
+  sql2 += ' ORDER BY l.created_at DESC LIMIT ? OFFSET ?';
+  const leads = all(sql2, params2.concat(l2, (p2 - 1) * l2));
+  res.json({ items: leads, total: total2, page: p2, limit: l2 });
 });
 
 router.get('/leads/pipeline', (req, res) => {
-  const pipeline = ['NEW_LEAD', 'CONTACTED', 'INTERESTED', 'TRIAL_BOOKED', 'TRIAL_ATTENDED', 'NEGOTIATION', 'PAYMENT_PENDING', 'CONVERTED', 'LOST'];
-  const result = {};
+  const pipeline = ['new_lead', 'contacted', 'interested', 'trial_booked', 'trial_attended', 'negotiation', 'payment_pending', 'converted', 'lost'];
+  const upper = { new_lead: 'NEW_LEAD', contacted: 'CONTACTED', interested: 'INTERESTED', trial_booked: 'TRIAL_BOOKED', trial_attended: 'TRIAL_ATTENDED', negotiation: 'NEGOTIATION', payment_pending: 'PAYMENT_PENDING', converted: 'CONVERTED', lost: 'LOST' };
+  const result = { stages: pipeline };
   pipeline.forEach(stage => {
-    result[stage] = all('SELECT l.*, e.full_name as salesperson_name FROM leads l LEFT JOIN employees e ON l.assigned_salesperson = e.id WHERE l.status = ? ORDER BY l.created_at DESC', [stage]);
+    const leads = all(`SELECT l.*, e.full_name as salesperson_name FROM leads l LEFT JOIN employees e ON l.assigned_salesperson = e.id WHERE (l.status = ? OR l.status = ?) ORDER BY l.created_at DESC`, [stage, upper[stage]]);
+    result[stage] = leads;
+    result[upper[stage]] = leads;
   });
   res.json(result);
 });
 
-router.post('/leads', (req, res) => {
+router.post('/leads', requirePerm('leads', 'create'), (req, res) => {
   const { source, name, phone, email, gender, age, fitness_goal, interested_plan, preferred_branch, preferred_date, preferred_time, message, assigned_salesperson, notes, tags } = req.body;
   const leadId = 'LD-' + Date.now().toString(36).toUpperCase();
   run('INSERT INTO leads (lead_id, source, name, phone, email, gender, age, fitness_goal, interested_plan, preferred_branch, preferred_date, preferred_time, message, assigned_salesperson, notes, tags) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -578,16 +693,19 @@ router.post('/leads', (req, res) => {
   res.json({ message: 'Lead created', lead_id: leadId });
 });
 
-router.put('/leads/:id', (req, res) => {
+router.put('/leads/:id', requirePerm('leads', 'edit'), (req, res) => {
   const { status, notes, assigned_salesperson, lead_score, next_followup_date } = req.body;
   const prev = get('SELECT * FROM leads WHERE id = ?', [req.params.id]);
+  const canonical = {
+    NEW_LEAD: 'new_lead', CONTACTED: 'contacted', INTERESTED: 'interested', TRIAL_BOOKED: 'trial_booked', TRIAL_ATTENDED: 'trial_attended', NEGOTIATION: 'negotiation', PAYMENT_PENDING: 'payment_pending', CONVERTED: 'converted', LOST: 'lost'
+  };
+  const nextStatus = status ? (canonical[String(status).toUpperCase()] || status) : prev.status;
   run('UPDATE leads SET status=?, notes=?, assigned_salesperson=?, lead_score=?, next_followup_date=?, updated_at=CURRENT_TIMESTAMP WHERE id=?',
-    [status || prev.status, notes || prev.notes, assigned_salesperson || prev.assigned_salesperson, lead_score || prev.lead_score, next_followup_date || prev.next_followup_date, req.params.id]);
-  if (status === 'CONVERTED') {
+    [nextStatus, notes || prev.notes, assigned_salesperson || prev.assigned_salesperson, lead_score || prev.lead_score, next_followup_date || prev.next_followup_date, req.params.id]);
+  if (nextStatus === 'converted') {
     run("UPDATE leads SET conversion_date = CURRENT_TIMESTAMP WHERE id = ?", [req.params.id]);
   }
-  run('INSERT INTO audit_logs (user_id, user_name, action, entity_type, entity_id, entity_name, previous_value, new_value) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    [req.user.id, req.user.full_name, 'UPDATE', 'lead', req.params.id, prev.name, JSON.stringify({ status: prev.status }), JSON.stringify({ status })]);
+  logAuditReq(req, { action: 'UPDATE', entity_type: 'lead', entity_id: req.params.id, entity_name: prev.name, previous_value: { status: prev.status }, new_value: { status: nextStatus } });
   res.json({ message: 'Lead updated' });
 });
 
@@ -720,13 +838,13 @@ router.get('/invoices', (req, res) => {
   if (user_id) { conditions.push('i.user_id = ?'); params.push(user_id); }
   if (search) { conditions.push('(i.invoice_number LIKE ? OR u.full_name LIKE ?)'); params.push(`%${search}%`, `%${search}%`); }
   if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
+  const totalInv = get('SELECT COUNT(*) as c FROM invoices i JOIN users u ON i.user_id = u.id' + (conditions.length ? ' WHERE ' + conditions.join(' AND ') : ''), params).c;
   sql += ' ORDER BY i.created_at DESC LIMIT ? OFFSET ?';
-  params.push(parseInt(limit), (parseInt(page) - 1) * parseInt(limit));
-  const invoices = all(sql, params);
+  const invoices = all(sql, params.concat(parseInt(limit), (parseInt(page) - 1) * parseInt(limit)));
   invoices.forEach(inv => {
     inv.items = all('SELECT * FROM invoice_items WHERE invoice_id = ?', [inv.id]);
   });
-  res.json(invoices);
+  res.json({ items: invoices, total: totalInv, page: parseInt(page), limit: parseInt(limit) });
 });
 
 router.post('/invoices', (req, res) => {
@@ -753,7 +871,7 @@ router.post('/invoices', (req, res) => {
   res.json({ message: 'Invoice created', invoice_number: invoiceNumber });
 });
 
-router.get('/payments', (req, res) => {
+router.get('/payments', requirePerm('payments', 'view'), (req, res) => {
   const { status, method, user_id, date, page = 1, limit = 50 } = req.query;
   let sql = 'SELECT p.*, u.full_name FROM payments p JOIN users u ON p.user_id = u.id';
   const params = [];
@@ -763,12 +881,14 @@ router.get('/payments', (req, res) => {
   if (user_id) { conditions.push('p.user_id = ?'); params.push(user_id); }
   if (date) { conditions.push("date(p.created_at) = ?"); params.push(date); }
   if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
+  const totalPays = get('SELECT COUNT(*) as c FROM payments p JOIN users u ON p.user_id = u.id' + (conditions.length ? ' WHERE ' + conditions.join(' AND ') : ''), params).c;
   sql += ' ORDER BY p.created_at DESC LIMIT ? OFFSET ?';
   params.push(parseInt(limit), (parseInt(page) - 1) * parseInt(limit));
-  res.json(all(sql, params));
+  const payments = all(sql, params);
+  res.json({ items: payments, total: totalPays, page: parseInt(page), limit: parseInt(limit) });
 });
 
-router.post('/payments', (req, res) => {
+router.post('/payments', requirePerm('payments', 'create'), (req, res) => {
   const { invoice_id, user_id, amount, method, transaction_ref, membership_id, notes } = req.body;
   const paymentNumber = 'PAY-' + Date.now().toString(36).toUpperCase();
   run('INSERT INTO payments (payment_number, invoice_id, membership_id, user_id, amount, method, transaction_ref, status, branch_id, received_by, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -871,27 +991,34 @@ router.get('/inventory/transactions', (req, res) => {
 });
 
 // ========== POS ==========
-router.post('/pos/orders', (req, res) => {
+router.post('/pos/orders', requirePerm('pos', 'create'), (req, res) => {
   const { user_id, items, discount, payment_method } = req.body;
   if (!items || !items.length) return res.status(400).json({ error: 'No items' });
   const orderNumber = 'ORD-' + Date.now().toString(36).toUpperCase();
   let subtotal = 0;
-  items.forEach(item => { subtotal += (item.quantity || 1) * (item.unit_price || 0); });
+  const enriched = items.map(item => {
+    const product = get('SELECT * FROM products WHERE id = ?', [item.product_id]);
+    if (!product) return { ...item, unit_price: Number(item.unit_price) || 0, invalid: true };
+    const qty = parseInt(item.quantity) || 1;
+    const unitPrice = Number(product.selling_price) || 0;
+    subtotal += qty * unitPrice;
+    return { ...item, product, quantity: qty, unit_price: unitPrice };
+  });
   const discountAmount = discount || 0;
-  const tax = Math.round((subtotal - discountAmount) * 0.18);
-  const total = subtotal - discountAmount + tax;
+  const tax = Math.round((subtotal - discountAmount) * 0.18 * 100) / 100;
+  const total = Math.round((subtotal - discountAmount + tax) * 100) / 100;
 
   run('INSERT INTO pos_orders (order_number, user_id, branch_id, subtotal, discount, tax, total, payment_method, payment_status, cashier_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     [orderNumber, user_id || null, req.body.branch_id || 1, subtotal, discountAmount, tax, total, payment_method || 'cash', 'paid', req.user.id]);
   const orderId = get("SELECT last_insert_rowid() as id").id;
 
-  items.forEach(item => {
-    const itemTotal = (item.quantity || 1) * (item.unit_price || 0);
+  enriched.forEach(item => {
+    const itemTotal = item.quantity * item.unit_price;
     run('INSERT INTO pos_order_items (order_id, product_id, quantity, unit_price, total) VALUES (?, ?, ?, ?, ?)',
-      [orderId, item.product_id, item.quantity || 1, item.unit_price || 0, itemTotal]);
-    run('UPDATE products SET stock = stock - ? WHERE id = ?', [item.quantity || 1, item.product_id]);
+      [orderId, item.product_id, item.quantity, item.unit_price, itemTotal]);
+    run('UPDATE products SET stock = MAX(stock - ?, 0) WHERE id = ?', [item.quantity, item.product_id]);
     run('INSERT INTO inventory_transactions (product_id, transaction_type, quantity, reference_id, reference_type, created_by) VALUES (?, ?, ?, ?, ?, ?)',
-      [item.product_id, 'sale', item.quantity || 1, orderId, 'pos_order', req.user.id]);
+      [item.product_id, 'SALE', item.quantity, orderId, 'pos_order', req.user.id]);
   });
 
   if (user_id) {
@@ -899,7 +1026,7 @@ router.post('/pos/orders', (req, res) => {
       ['PAY-' + Date.now().toString(36).toUpperCase(), user_id, total, payment_method || 'cash', 'completed', `POS Order ${orderNumber}`]);
   }
 
-  res.json({ message: 'Order created', order_number: orderNumber, total });
+  res.json({ message: 'Order created', order_number: orderNumber, total, subtotal, tax, discount: discountAmount });
 });
 
 router.get('/pos/orders', (req, res) => {
@@ -1067,7 +1194,7 @@ router.get('/referrals', (req, res) => {
 // ========== NOTIFICATIONS ==========
 router.get('/notifications', (req, res) => {
   const notifs = all('SELECT * FROM notifications WHERE user_id = ? OR user_id IS NULL ORDER BY created_at DESC LIMIT 50', [req.user.id]);
-  res.json(notifs);
+  res.json({ items: notifs, total: notifs.length });
 });
 
 router.put('/notifications/:id/read', (req, res) => {
@@ -1081,7 +1208,7 @@ router.put('/notifications/read-all', (req, res) => {
 });
 
 // ========== AUDIT LOGS ==========
-router.get('/audit-logs', (req, res) => {
+router.get('/audit-logs', requirePerm('audit', 'view'), (req, res) => {
   const { entity_type, user_id, page = 1, limit = 100 } = req.query;
   let sql = 'SELECT * FROM audit_logs';
   const params = [];
@@ -1089,9 +1216,10 @@ router.get('/audit-logs', (req, res) => {
   if (entity_type) { conditions.push('entity_type = ?'); params.push(entity_type); }
   if (user_id) { conditions.push('user_id = ?'); params.push(user_id); }
   if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
+  const totalAudit = get('SELECT COUNT(*) as c FROM audit_logs' + (conditions.length ? ' WHERE ' + conditions.join(' AND ') : ''), params).c;
   sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
   params.push(parseInt(limit), (parseInt(page) - 1) * parseInt(limit));
-  res.json(all(sql, params));
+  res.json({ items: all(sql, params), total: totalAudit, page: parseInt(page), limit: parseInt(limit) });
 });
 
 // ========== SETTINGS ==========
@@ -1115,11 +1243,20 @@ router.get('/reports/sales', (req, res) => {
   const { start_date, end_date } = req.query;
   const start = start_date || new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
   const end = end_date || new Date().toISOString().split('T')[0];
-  const bySource = all("SELECT source, COUNT(*) as count FROM leads WHERE created_at BETWEEN ? AND ? GROUP BY source", [start, end]);
-  const byStatus = all("SELECT status, COUNT(*) as count FROM leads WHERE created_at BETWEEN ? AND ? GROUP BY status", [start, end]);
-  const conversionRate = get("SELECT COUNT(*) as converted, (SELECT COUNT(*) FROM leads WHERE created_at BETWEEN ? AND ?) as total FROM leads WHERE status = 'CONVERTED' AND created_at BETWEEN ? AND ?", [start, end, start, end]);
-  const bySalesperson = all("SELECT e.full_name, COUNT(l.id) as leads, SUM(CASE WHEN l.status = 'CONVERTED' THEN 1 ELSE 0 END) as conversions FROM leads l JOIN employees e ON l.assigned_salesperson = e.id WHERE l.created_at BETWEEN ? AND ? GROUP BY l.assigned_salesperson", [start, end]);
-  res.json({ bySource, byStatus, conversionRate, bySalesperson });
+  const leads = get("SELECT COUNT(*) as total FROM leads WHERE created_at BETWEEN ? AND ?", [start, end]).total;
+  const converted = get("SELECT COUNT(*) as c FROM leads WHERE (status = 'CONVERTED' OR status = 'converted') AND created_at BETWEEN ? AND ?", [start, end]).c;
+  const revenue = get("SELECT COALESCE(SUM(amount), 0) as t FROM payments WHERE status = 'completed' AND date(created_at) BETWEEN ? AND ?", [start, end]).t;
+  res.json({
+    summary: {
+      leads,
+      converted,
+      conversion_rate: leads > 0 ? Math.round((converted / leads) * 1000) / 10 : 0,
+      revenue
+    },
+    by_source: all("SELECT source, COUNT(*) as count FROM leads WHERE created_at BETWEEN ? AND ? GROUP BY source", [start, end]),
+    by_status: all("SELECT STATUS, COUNT(*) as count FROM leads WHERE created_at BETWEEN ? AND ? GROUP BY status", [start, end]),
+    by_salesperson: all("SELECT e.full_name, COUNT(l.id) as leads, SUM(CASE WHEN l.status = 'CONVERTED' OR l.status = 'converted' THEN 1 ELSE 0 END) as conversions FROM leads l JOIN employees e ON l.assigned_salesperson = e.id WHERE l.created_at BETWEEN ? AND ? GROUP BY l.assigned_salesperson", [start, end])
+  });
 });
 
 router.get('/reports/finance', (req, res) => {
@@ -1128,29 +1265,41 @@ router.get('/reports/finance', (req, res) => {
   const end = end_date || new Date().toISOString().split('T')[0];
   const revenue = get("SELECT COALESCE(SUM(amount), 0) as total FROM payments WHERE status = 'completed' AND date(created_at) BETWEEN ? AND ?", [start, end]).total;
   const expenses = get("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE date BETWEEN ? AND ?", [start, end]).total;
-  const byMethod = all("SELECT method, COUNT(*) as count, SUM(amount) as total FROM payments WHERE status = 'completed' AND date(created_at) BETWEEN ? AND ? GROUP BY method", [start, end]);
-  const byCategory = all("SELECT category, SUM(amount) as total FROM expenses WHERE date BETWEEN ? AND ? GROUP BY category", [start, end]);
   const outstanding = get("SELECT COALESCE(SUM(balance), 0) as total FROM invoices WHERE status = 'pending'").total;
   const refunds = get("SELECT COALESCE(SUM(amount), 0) as total FROM refunds WHERE status = 'processed' AND date(created_at) BETWEEN ? AND ?", [start, end]).total;
-  res.json({ revenue, expenses, profit: revenue - expenses, byMethod, byCategory, outstanding, refunds });
+  res.json({
+    summary: { revenue, expenses, profit: revenue - expenses, outstanding, refunds },
+    by_method: all("SELECT method, COUNT(*) as count, SUM(amount) as total FROM payments WHERE status = 'completed' AND date(created_at) BETWEEN ? AND ? GROUP BY method", [start, end]),
+    trend: all("SELECT date(created_at) as period, SUM(amount) as total FROM payments WHERE status = 'completed' AND date(created_at) BETWEEN ? AND ? GROUP BY period ORDER BY period", [start, end])
+  });
 });
 
 router.get('/reports/members', (req, res) => {
-  const byPlan = all("SELECT mp.name, COUNT(*) as count FROM memberships m JOIN membership_plans mp ON m.plan_id = mp.id WHERE m.status = 'active' GROUP BY mp.name");
-  const byBranch = all("SELECT b.name, COUNT(*) as count FROM memberships m JOIN branches b ON m.branch_id = b.id WHERE m.status = 'active' GROUP BY b.name");
-  const expiring = all("SELECT m.*, u.full_name, mp.name as plan_name FROM memberships m JOIN users u ON m.user_id = u.id JOIN membership_plans mp ON m.plan_id = mp.id WHERE m.status = 'active' AND m.end_date BETWEEN date('now') AND date('now', '+30 days') ORDER BY m.end_date");
-  const recentlyJoined = all("SELECT m.*, u.full_name, mp.name as plan_name FROM memberships m JOIN users u ON m.user_id = u.id JOIN membership_plans mp ON m.plan_id = mp.id WHERE m.created_at >= date('now', '-30 days') ORDER BY m.created_at DESC LIMIT 20");
-  res.json({ byPlan, byBranch, expiring, recentlyJoined });
+  const total = get("SELECT COUNT(*) as c FROM memberships").c;
+  const active = get("SELECT COUNT(*) as c FROM memberships WHERE status = 'active'").c;
+  const expired = get("SELECT COUNT(*) as c FROM memberships WHERE status = 'expired'").c;
+  const frozen = get("SELECT COUNT(*) as c FROM memberships WHERE status = 'frozen'").c;
+  const cancelled = get("SELECT COUNT(*) as c FROM memberships WHERE status = 'cancelled'").c;
+  res.json({
+    summary: { total, active, expired, frozen, cancelled },
+    by_plan: all("SELECT mp.name, COUNT(*) as count FROM memberships m JOIN membership_plans mp ON m.plan_id = mp.id GROUP BY mp.name"),
+    by_branch: all("SELECT b.name, COUNT(*) as count FROM memberships m JOIN branches b ON m.branch_id = b.id GROUP BY b.name"),
+    expiring: all("SELECT m.*, u.full_name, mp.name as plan_name FROM memberships m JOIN users u ON m.user_id = u.id JOIN membership_plans mp ON m.plan_id = mp.id WHERE m.status = 'active' AND m.end_date BETWEEN date('now') AND date('now', '+30 days') ORDER BY m.end_date")
+  });
 });
 
 router.get('/reports/attendance', (req, res) => {
   const { start_date, end_date } = req.query;
   const start = start_date || new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
   const end = end_date || new Date().toISOString().split('T')[0];
-  const daily = all("SELECT date, COUNT(*) as count FROM attendance WHERE date BETWEEN ? AND ? GROUP BY date ORDER BY date", [start, end]);
-  const byHour = all("SELECT substr(check_in, 1, 2) as hour, COUNT(*) as count FROM attendance WHERE date BETWEEN ? AND ? GROUP BY hour ORDER BY hour", [start, end]);
-  const topMembers = all("SELECT u.full_name, COUNT(*) as visits FROM attendance a JOIN users u ON a.user_id = u.id WHERE a.date BETWEEN ? AND ? GROUP BY a.user_id ORDER BY visits DESC LIMIT 10", [start, end]);
-  res.json({ daily, byHour, topMembers });
+  const checkins = get("SELECT COUNT(*) as t FROM attendance WHERE date BETWEEN ? AND ?", [start, end]).t;
+  const uniqueMembers = get("SELECT COUNT(DISTINCT user_id) as t FROM attendance WHERE date BETWEEN ? AND ?", [start, end]).t;
+  const days = get("SELECT COUNT(DISTINCT date) as d FROM attendance WHERE date BETWEEN ? AND ?", [start, end]).d;
+  res.json({
+    summary: { checkins, unique_members: uniqueMembers, avg_per_day: days > 0 ? Math.round(checkins / days * 10) / 10 : 0 },
+    trend: all("SELECT date, COUNT(*) as count FROM attendance WHERE date BETWEEN ? AND ? GROUP BY date ORDER BY date", [start, end]),
+    by_branch: all("SELECT b.name, COUNT(*) as count FROM attendance a LEFT JOIN branches b ON a.branch_id = b.id WHERE a.date BETWEEN ? AND ? GROUP BY a.branch_id", [start, end])
+  });
 });
 
 // ========== FILE UPLOAD ==========

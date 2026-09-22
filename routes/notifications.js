@@ -1,11 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { all, run } = require('../database/db');
+const { all, run, get } = require('../database/db');
 const { authMiddleware } = require('../middleware/auth');
 
 router.get('/', authMiddleware, (req, res) => {
   const notifications = all('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50', [req.user.id]);
-  res.json(notifications);
+  res.json({ items: notifications, total: notifications.length });
+});
+
+router.get('/unread-count', authMiddleware, (req, res) => {
+  const count = get('SELECT COUNT(*) as c FROM notifications WHERE user_id = ? AND is_read = 0', [req.user.id]).c;
+  res.json({ count });
 });
 
 router.put('/:id/read', authMiddleware, (req, res) => {

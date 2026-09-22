@@ -1048,6 +1048,94 @@ function createTables() {
       last_triggered TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    -- SALES TARGETS
+    CREATE TABLE IF NOT EXISTS sales_targets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      employee_id INTEGER,
+      branch_id INTEGER,
+      target_type TEXT DEFAULT 'monthly',
+      period TEXT NOT NULL,
+      target_amount REAL DEFAULT 0,
+      achieved_amount REAL DEFAULT 0,
+      status TEXT DEFAULT 'active',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (employee_id) REFERENCES employees(id),
+      FOREIGN KEY (branch_id) REFERENCES branches(id)
+    );
+
+    -- SUPPLIERS
+    CREATE TABLE IF NOT EXISTS suppliers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      contact_person TEXT,
+      phone TEXT,
+      email TEXT,
+      address TEXT,
+      gst_number TEXT,
+      payment_terms TEXT,
+      is_active INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- PURCHASE ORDERS
+    CREATE TABLE IF NOT EXISTS purchase_orders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      po_number TEXT UNIQUE NOT NULL,
+      supplier_id INTEGER,
+      branch_id INTEGER,
+      order_date TEXT NOT NULL,
+      expected_date TEXT,
+      status TEXT DEFAULT 'pending',
+      subtotal REAL DEFAULT 0,
+      tax REAL DEFAULT 0,
+      total REAL DEFAULT 0,
+      notes TEXT,
+      created_by INTEGER,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (supplier_id) REFERENCES suppliers(id),
+      FOREIGN KEY (branch_id) REFERENCES branches(id)
+    );
+
+    -- PURCHASE ORDER ITEMS
+    CREATE TABLE IF NOT EXISTS purchase_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      po_id INTEGER NOT NULL,
+      product_id INTEGER,
+      description TEXT,
+      quantity INTEGER DEFAULT 1,
+      unit_price REAL DEFAULT 0,
+      total REAL DEFAULT 0,
+      received INTEGER DEFAULT 0,
+      FOREIGN KEY (po_id) REFERENCES purchase_orders(id),
+      FOREIGN KEY (product_id) REFERENCES products(id)
+    );
+
+    -- AUTOMATION RUNS
+    CREATE TABLE IF NOT EXISTS automation_runs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      trigger_type TEXT NOT NULL,
+      name TEXT,
+      status TEXT DEFAULT 'success',
+      message TEXT,
+      triggered_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    -- ONE-TIME PASSWORDS (2FA / OTP VERIFICATION)
+    CREATE TABLE IF NOT EXISTS otps (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER,
+      email TEXT,
+      phone TEXT,
+      otp_code TEXT NOT NULL,
+      purpose TEXT NOT NULL,
+      expires_at DATETIME NOT NULL,
+      used INTEGER DEFAULT 0,
+      attempts INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
   `);
 }
 

@@ -143,4 +143,23 @@ async function sendAdminNotification(type, data) {
   await sendEmail(adminEmail.value, `[Zacson Fitness] ${subject}`, emailTemplate('Admin Notification', body));
 }
 
-module.exports = { sendEmail, sendFreeTrialConfirmation, sendContactConfirmation, sendMembershipConfirmation, sendAdminNotification, emailTemplate };
+async function sendOtpEmail(to, otp, purpose) {
+  const purposeLabel = purpose === '2fa' ? 'two-factor authentication'
+    : purpose === 'verify' ? 'account verification'
+    : purpose === 'reset' ? 'password reset' : purpose;
+  const body = `<h2>One-Time Password</h2>
+<p>You requested a one-time password for <span class="highlight">${purposeLabel}</span>.</p>
+<p style="font-size:28px;letter-spacing:6px;text-align:center;background:#1a1a1a;padding:15px;border-radius:6px;">${otp}</p>
+<p>This code is valid for <span class="highlight">10 minutes</span>. If you did not request this, please ignore this email and contact support immediately.</p>`;
+  return sendEmail(to, `Your Zacson Fitness OTP - ${purposeLabel}`, emailTemplate('One-Time Password', body));
+}
+
+async function sendPasswordResetEmail(to, resetLink) {
+  const body = `<h2>Reset Your Password</h2>
+<p>We received a request to reset your password for your Zacson Fitness account.</p>
+<a href="${resetLink}" class="btn">Reset Password</a>
+<p>This link is valid for <span class="highlight">1 hour</span>. If you did not request this, you can safely ignore this email.</p>`;
+  return sendEmail(to, 'Reset Your Password - Zacson Fitness', emailTemplate('Password Reset', body));
+}
+
+module.exports = { sendEmail, sendOtpEmail, sendPasswordResetEmail, sendFreeTrialConfirmation, sendContactConfirmation, sendMembershipConfirmation, sendAdminNotification, emailTemplate };
