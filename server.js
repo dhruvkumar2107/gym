@@ -42,76 +42,45 @@ if (!isVercel) {
   app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
   app.use('/assets', express.static(path.join(__dirname, 'assets')));
   app.use('/admin', express.static(path.join(__dirname, 'admin')));
+  app.use('/portal', express.static(path.join(__dirname, 'portal')));
+  app.use('/trainer-portal', express.static(path.join(__dirname, 'trainer-portal')));
+  app.use('/reception-portal', express.static(path.join(__dirname, 'reception-portal')));
+  app.use('/sales-portal', express.static(path.join(__dirname, 'sales-portal')));
   app.use('/site.webmanifest', express.static(path.join(__dirname, 'site.webmanifest')));
   app.use('/robots.txt', express.static(path.join(__dirname, 'robots.txt')));
   app.use('/sitemap.xml', express.static(path.join(__dirname, 'sitemap.xml')));
 }
 
-app.use('/api/auth', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/admin', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/membership', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/contact', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/blog', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/trainers', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/gallery', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/testimonials', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/faq', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/leads', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/classes', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/facilities', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/transformations', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/offers', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/locations', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/calculators', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/workouts', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/notifications', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/settings', (req, res, next) => ensureDb().then(() => next()).catch(next));
-app.use('/api/payment', (req, res, next) => ensureDb().then(() => next()).catch(next));
+// Ensure DB middleware for all API routes
+const dbMiddleware = (req, res, next) => ensureDb().then(() => next()).catch(next);
+app.use('/api/', dbMiddleware);
 
-const authRoutes = require('./routes/auth');
-const adminRoutes = require('./routes/admin');
-const membershipRoutes = require('./routes/membership');
-const contactRoutes = require('./routes/contact');
-const blogRoutes = require('./routes/blog');
-const trainerRoutes = require('./routes/trainers');
-const galleryRoutes = require('./routes/gallery');
-const testimonialRoutes = require('./routes/testimonials');
-const faqRoutes = require('./routes/faq');
-const leadRoutes = require('./routes/leads');
-const classRoutes = require('./routes/classes');
-const facilityRoutes = require('./routes/facilities');
-const transformationRoutes = require('./routes/transformations');
-const offerRoutes = require('./routes/offers');
-const locationRoutes = require('./routes/locations');
-const calculatorRoutes = require('./routes/calculators');
-const workoutRoutes = require('./routes/workouts');
-const notificationRoutes = require('./routes/notifications');
-const settingsRoutes = require('./routes/settings');
-const paymentRoutes = require('./routes/payment');
+// API Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/member', require('./routes/member'));
+app.use('/api/membership', require('./routes/membership'));
+app.use('/api/contact', require('./routes/contact'));
+app.use('/api/blog', require('./routes/blog'));
+app.use('/api/trainers', require('./routes/trainers'));
+app.use('/api/gallery', require('./routes/gallery'));
+app.use('/api/testimonials', require('./routes/testimonials'));
+app.use('/api/faq', require('./routes/faq'));
+app.use('/api/leads', require('./routes/leads'));
+app.use('/api/classes', require('./routes/classes'));
+app.use('/api/facilities', require('./routes/facilities'));
+app.use('/api/transformations', require('./routes/transformations'));
+app.use('/api/offers', require('./routes/offers'));
+app.use('/api/locations', require('./routes/locations'));
+app.use('/api/calculators', require('./routes/calculators'));
+app.use('/api/workouts', require('./routes/workouts'));
+app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/settings', require('./routes/settings'));
+app.use('/api/payment', require('./routes/payment'));
 
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/membership', membershipRoutes);
-app.use('/api/contact', contactRoutes);
-app.use('/api/blog', blogRoutes);
-app.use('/api/trainers', trainerRoutes);
-app.use('/api/gallery', galleryRoutes);
-app.use('/api/testimonials', testimonialRoutes);
-app.use('/api/faq', faqRoutes);
-app.use('/api/leads', leadRoutes);
-app.use('/api/classes', classRoutes);
-app.use('/api/facilities', facilityRoutes);
-app.use('/api/transformations', transformationRoutes);
-app.use('/api/offers', offerRoutes);
-app.use('/api/locations', locationRoutes);
-app.use('/api/calculators', calculatorRoutes);
-app.use('/api/workouts', workoutRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/settings', settingsRoutes);
-app.use('/api/payment', paymentRoutes);
+app.get('/api/health', (req, res) => res.json({ status: 'ok', brand: 'Zacson Fitness', version: '2.0.0' }));
 
-app.get('/api/health', (req, res) => res.json({ status: 'ok', brand: 'Zacson Fitness' }));
-
+// Static HTML routes
 app.get('/blog/:slug', (req, res) => {
   const filePath = path.join(__dirname, 'blog_details.html');
   if (fs.existsSync(filePath)) return res.sendFile(filePath);
@@ -122,6 +91,43 @@ app.get('/trainers/:slug', (req, res) => {
   const filePath = path.join(__dirname, 'trainers.html');
   if (fs.existsSync(filePath)) return res.sendFile(filePath);
   res.status(404).sendFile(path.join(__dirname, '404.html'));
+});
+
+// Portal routes - serve HTML for all portal pages
+app.get('/admin/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin', 'index.html'));
+});
+
+app.get('/portal', (req, res) => {
+  res.sendFile(path.join(__dirname, 'portal', 'index.html'));
+});
+
+app.get('/portal/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'portal', 'index.html'));
+});
+
+app.get('/trainer-portal', (req, res) => {
+  res.sendFile(path.join(__dirname, 'trainer-portal', 'index.html'));
+});
+
+app.get('/trainer-portal/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'trainer-portal', 'index.html'));
+});
+
+app.get('/reception-portal', (req, res) => {
+  res.sendFile(path.join(__dirname, 'reception-portal', 'index.html'));
+});
+
+app.get('/reception-portal/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'reception-portal', 'index.html'));
+});
+
+app.get('/sales-portal', (req, res) => {
+  res.sendFile(path.join(__dirname, 'sales-portal', 'index.html'));
+});
+
+app.get('/sales-portal/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'sales-portal', 'index.html'));
 });
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
@@ -146,6 +152,8 @@ if (!isVercel) {
   ensureDb().then(() => {
     app.listen(PORT, () => {
       console.log(`Zacson Fitness server running at http://localhost:${PORT}`);
+      console.log(`Admin: http://localhost:${PORT}/admin/`);
+      console.log(`Member Portal: http://localhost:${PORT}/portal/`);
     });
   }).catch(console.error);
 }

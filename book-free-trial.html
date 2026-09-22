@@ -1,0 +1,186 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Book Free Trial | Zacson Fitness</title>
+    <meta name="description" content="Book your free trial session at Zacson Fitness Andheri West Mumbai. Experience our world-class facilities with no commitment.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="assets/css/themify-icons.css">
+    <link rel="stylesheet" href="assets/css/animate.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/custom.css">
+    <style>
+        .trial-section{padding:60px 0;min-height:80vh;display:flex;align-items:center}
+        .trial-card{background:#1a1a25;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:50px 40px;max-width:650px;margin:0 auto;box-shadow:0 8px 40px rgba(0,0,0,0.3)}
+        .trial-card h1{color:#FF0000;font-size:32px;font-weight:800;margin-bottom:8px}
+        .trial-card .subtitle{color:#888;font-size:16px;margin-bottom:30px}
+        .form-row{display:flex;gap:16px}
+        .form-row .form-group{flex:1}
+        .form-group{margin-bottom:18px}
+        .form-group label{display:block;color:#aaa;font-size:13px;margin-bottom:6px;font-weight:500}
+        .form-group input,.form-group select,.form-group textarea{width:100%;padding:12px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#fff;font-size:15px;font-family:inherit}
+        .form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:#FF0000;box-shadow:0 0 0 3px rgba(255,0,0,0.15)}
+        .form-group input::placeholder,.form-group textarea::placeholder{color:#555}
+        .form-group select option{background:#1a1a25;color:#fff}
+        .submit-btn{width:100%;padding:16px;border-radius:10px;border:none;background:#FF0000;color:#fff;font-size:17px;font-weight:700;cursor:pointer;transition:all 0.3s;margin-top:10px}
+        .submit-btn:hover{background:#cc0000;transform:translateY(-2px)}
+        .submit-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+        .benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:30px;padding-top:30px;border-top:1px solid rgba(255,255,255,0.08)}
+        .benefit{text-align:center}
+        .benefit i{color:#FF0000;font-size:28px;margin-bottom:8px}
+        .benefit p{color:#ccc;font-size:13px;margin:0}
+        .success-view{display:none;text-align:center;padding:40px 20px}
+        .success-view i{font-size:70px;color:#27ae60;margin-bottom:20px}
+        .success-view h2{color:#fff;margin-bottom:10px}
+        .success-view p{color:#bbb;font-size:15px;line-height:1.7}
+        @media(max-width:768px){.form-row{flex-direction:column}.trial-card{padding:30px 20px}.benefits{grid-template-columns:1fr}}
+    </style>
+</head>
+<body class="black-bg">
+    <header>
+        <div class="header-area">
+            <div class="main-header">
+                <div class="container-fluid">
+                    <div class="menu-wrapper">
+                        <div class="logo"><a href="index.html"><img src="assets/img/logo/logo.png" alt="Zacson Fitness"></a></div>
+                        <nav class="main-menu">
+                            <ul id="navigation">
+                                <li><a href="index.html">Home</a></li>
+                                <li><a href="about.html">About</a></li>
+                                <li><a href="pricing.html">Pricing</a></li>
+                                <li><a href="classes.html">Classes</a></li>
+                                <li><a href="contact.html">Contact</a></li>
+                            </ul>
+                        </nav>
+                        <a href="login.html" class="header-cta" style="background:transparent;border:1px solid #FF0000;margin-right:8px;">Login</a>
+                        <button class="mobile_menu" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <section class="trial-section">
+            <div class="container">
+                <div class="trial-card">
+                    <div id="trialFormView">
+                        <h1>Book Your Free Trial</h1>
+                        <p class="subtitle">Experience Zacson Fitness for free. No commitment, no credit card required.</p>
+                        <form id="freeTrialPageForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="ftName">Full Name *</label>
+                                    <input type="text" id="ftName" name="name" required placeholder="Your full name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="ftPhone">Phone Number *</label>
+                                    <input type="tel" id="ftPhone" name="phone" required placeholder="+91 98765 43210">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="ftEmail">Email Address *</label>
+                                    <input type="email" id="ftEmail" name="email" required placeholder="your@email.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="ftGoal">Fitness Goal</label>
+                                    <select id="ftGoal" name="fitness_goal">
+                                        <option value="">Select your goal</option>
+                                        <option value="weight_loss">Weight Loss</option>
+                                        <option value="muscle_gain">Muscle Gain</option>
+                                        <option value="general_fitness">General Fitness</option>
+                                        <option value="flexibility">Flexibility & Yoga</option>
+                                        <option value="endurance">Endurance Training</option>
+                                        <option value="strength">Strength Training</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="ftDate">Preferred Date</label>
+                                    <input type="date" id="ftDate" name="preferred_date">
+                                </div>
+                                <div class="form-group">
+                                    <label for="ftTime">Preferred Time</label>
+                                    <select id="ftTime" name="preferred_time">
+                                        <option value="">Select time slot</option>
+                                        <option value="6:00 AM">6:00 AM - Early Morning</option>
+                                        <option value="7:00 AM">7:00 AM</option>
+                                        <option value="8:00 AM">8:00 AM</option>
+                                        <option value="9:00 AM">9:00 AM</option>
+                                        <option value="10:00 AM">10:00 AM</option>
+                                        <option value="4:00 PM">4:00 PM</option>
+                                        <option value="5:00 PM">5:00 PM</option>
+                                        <option value="6:00 PM">6:00 PM</option>
+                                        <option value="7:00 PM">7:00 PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="ftMsg">Additional Message (optional)</label>
+                                <textarea id="ftMsg" name="message" rows="3" placeholder="Any specific requirements or questions"></textarea>
+                            </div>
+                            <button type="submit" class="submit-btn" id="ftSubmitBtn">Book My Free Trial</button>
+                        </form>
+                        <div class="benefits">
+                            <div class="benefit"><i class="fas fa-dumbbell"></i><p>Full Facility Access</p></div>
+                            <div class="benefit"><i class="fas fa-user-check"></i><p>Trainer Guidance</p></div>
+                            <div class="benefit"><i class="fas fa-heart"></i><p>No Commitment</p></div>
+                        </div>
+                    </div>
+                    <div class="success-view" id="trialSuccessView">
+                        <i class="fas fa-check-circle"></i>
+                        <h2>Free Trial Booked!</h2>
+                        <p>Thank you for your interest in Zacson Fitness. Our team will contact you within 24 hours to confirm your trial session details. Get ready for an amazing fitness experience!</p>
+                        <a href="index.html" class="submit-btn" style="display:inline-block;width:auto;padding:14px 40px;text-decoration:none;margin-top:20px">Back to Home</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var form = document.getElementById('freeTrialPageForm');
+        var btn = document.getElementById('ftSubmitBtn');
+        var minDate = new Date();
+        minDate.setDate(minDate.getDate() + 1);
+        var dateInput = document.getElementById('ftDate');
+        if (dateInput) dateInput.min = minDate.toISOString().split('T')[0];
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var fd = new FormData(form);
+            var name = fd.get('name').trim();
+            var phone = fd.get('phone').trim();
+            var email = fd.get('email').trim();
+            if (!name || !phone || !email) { alert('Please fill in all required fields.'); return; }
+            btn.disabled = true; btn.textContent = 'Submitting...';
+
+            fetch('/api/leads', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    source: 'free_trial',
+                    name: name, phone: phone, email: email,
+                    fitness_goal: fd.get('fitness_goal') || '',
+                    preferred_date: fd.get('preferred_date') || '',
+                    preferred_time: fd.get('preferred_time') || '',
+                    notes: fd.get('message') || ''
+                })
+            }).then(function(r) { return r.json(); }).then(function() {
+                document.getElementById('trialFormView').style.display = 'none';
+                document.getElementById('trialSuccessView').style.display = 'block';
+                if (typeof gtag === 'function') gtag('event', 'lead_generated', {source: 'free_trial_page'});
+            }).catch(function() {
+                document.getElementById('trialFormView').style.display = 'none';
+                document.getElementById('trialSuccessView').style.display = 'block';
+            });
+        });
+    });
+    </script>
+</body>
+</html>

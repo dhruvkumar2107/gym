@@ -23,10 +23,11 @@ router.get('/:id', authMiddleware, adminMiddleware, (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const { source, name, phone, email, age, fitness_goal, preferred_date, preferred_time, message } = req.body;
+  const { source, name, phone, email, age, fitness_goal, preferred_date, preferred_time, message, notes } = req.body;
+  const leadNotes = notes || message || '';
   run('INSERT INTO leads (source, name, phone, email, age, fitness_goal, preferred_date, preferred_time, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [source || 'website', name, phone || '', email || '', age || null, fitness_goal || '', preferred_date || '', preferred_time || '', message || '']);
-  res.status(201).json({ message: 'Lead captured successfully' });
+    [source || 'website', name, phone || '', email || '', age || null, fitness_goal || '', preferred_date || '', preferred_time || '', leadNotes]);
+  res.status(201).json({ message: 'Lead captured successfully', id: Date.now() });
 });
 
 router.put('/:id/status', authMiddleware, adminMiddleware, (req, res) => {

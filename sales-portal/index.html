@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zacson Fitness - Sales Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--card:#1a1a25;--card-hover:#22222f;--red:#FF0000;--red-dark:#cc0000;--red-glow:rgba(255,0,0,0.15);--text:#ffffff;--text-dim:#8888aa;--text-muted:#555566;--border:#2a2a3a;--success:#00cc66;--warning:#ffaa00;--info:#0088ff;--purple:#aa44ff;--sidebar-w:240px}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow:hidden}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
+#login-screen{display:flex;align-items:center;justify-content:center;height:100vh;background:var(--bg);z-index:10000;position:relative}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:48px 40px;width:400px;text-align:center}
+.login-box h1{font-size:28px;font-weight:800;margin-bottom:6px;letter-spacing:-1px}
+.login-box h1 span{color:var(--red)}
+.login-box p{color:var(--text-dim);font-size:14px;margin-bottom:32px}
+.login-box input{width:100%;padding:14px 16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:14px;margin-bottom:14px;outline:none;transition:border .2s}
+.login-box input:focus{border-color:var(--red)}
+.login-box input::placeholder{color:var(--text-muted)}
+.login-box button{width:100%;padding:14px;background:var(--red);border:none;border-radius:10px;color:#fff;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s,transform .1s}
+.login-box button:hover{background:var(--red-dark)}
+.login-box button:active{transform:scale(0.98)}
+.login-error{color:var(--red);font-size:13px;margin-top:10px;display:none}
+
+#app{display:none;height:100vh;position:relative}
+#app.active{display:flex}
+
+.sidebar{width:var(--sidebar-w);background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;flex-shrink:0;position:relative;z-index:100}
+.sidebar-brand{padding:20px 20px 16px;border-bottom:1px solid var(--border)}
+.sidebar-brand h2{font-size:20px;font-weight:800;letter-spacing:-0.5px}
+.sidebar-brand h2 span{color:var(--red)}
+.sidebar-brand small{display:block;color:var(--text-muted);font-size:11px;margin-top:2px;text-transform:uppercase;letter-spacing:1px;font-weight:500}
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px 10px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;cursor:pointer;color:var(--text-dim);font-size:13.5px;font-weight:500;transition:all .2s;margin-bottom:2px;position:relative}
+.nav-item:hover{background:rgba(255,255,255,0.04);color:var(--text)}
+.nav-item.active{background:var(--red-glow);color:var(--red)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--red);border-radius:0 3px 3px 0}
+.nav-item i{width:20px;text-align:center;font-size:15px}
+.nav-section{padding:16px 14px 6px;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);font-weight:600}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;cursor:pointer}
+.sidebar-footer:hover .sf-name{color:var(--text)}
+.sf-avatar{width:34px;height:34px;border-radius:8px;background:var(--red);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff}
+.sf-name{font-size:13px;font-weight:500;color:var(--text-dim);transition:color .2s}
+.sf-role{font-size:11px;color:var(--text-muted)}
+.sf-logout{margin-left:auto;color:var(--text-muted);font-size:14px;transition:color .2s}
+.sf-logout:hover{color:var(--red)}
+
+.main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid var(--border);background:var(--card);flex-shrink:0}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.topbar-left h1{font-size:20px;font-weight:700;letter-spacing:-0.3px}
+.topbar-left p{font-size:12.5px;color:var(--text-dim)}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.tb-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s;position:relative}
+.tb-btn:hover{border-color:var(--red);color:var(--red);background:var(--red-glow)}
+.tb-badge{position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--red);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff}
+
+.content{flex:1;overflow-y:auto;padding:24px 28px}
+.page{display:none}
+.page.active{display:block}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;position:relative;overflow:hidden;transition:border-color .2s}
+.stat-card:hover{border-color:rgba(255,255,255,0.08)}
+.stat-card .stat-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px}
+.stat-card .stat-icon.red{background:var(--red-glow);color:var(--red)}
+.stat-card .stat-icon.green{background:rgba(0,204,102,0.12);color:var(--success)}
+.stat-card .stat-icon.blue{background:rgba(0,136,255,0.12);color:var(--info)}
+.stat-card .stat-icon.yellow{background:rgba(255,170,0,0.12);color:var(--warning)}
+.stat-card .stat-icon.purple{background:rgba(170,68,255,0.12);color:var(--purple)}
+.stat-val{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1}
+.stat-label{font-size:13px;color:var(--text-dim);margin-top:6px;font-weight:500}
+.stat-change{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;margin-top:10px;padding:3px 8px;border-radius:6px}
+.stat-change.up{background:rgba(0,204,102,0.1);color:var(--success)}
+.stat-change.down{background:rgba(255,0,0,0.1);color:var(--red)}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:20px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.card-header h3{font-size:16px;font-weight:700}
+.card-header .subtitle{font-size:12px;color:var(--text-dim)}
+.card-actions{display:flex;gap:8px}
+
+.btn{padding:8px 16px;border-radius:8px;border:none;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--red);color:#fff}.btn-primary:hover{background:var(--red-dark)}
+.btn-secondary{background:rgba(255,255,255,0.06);color:var(--text-dim);border:1px solid var(--border)}.btn-secondary:hover{border-color:var(--text-muted);color:var(--text)}
+.btn-success{background:rgba(0,204,102,0.12);color:var(--success)}.btn-success:hover{background:rgba(0,204,102,0.2)}
+.btn-sm{padding:6px 10px;font-size:11.5px;border-radius:6px}
+.btn-icon{width:32px;height:32px;padding:0;justify-content:center;border-radius:8px;font-size:13px}
+
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12.5px;font-weight:600;color:var(--text-dim);margin-bottom:6px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:13px;outline:none;transition:border .2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--red)}
+.form-group select{cursor:pointer}
+.form-group textarea{resize:vertical;min-height:70px}
+
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:12px 14px;font-size:11.5px;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);font-weight:600;border-bottom:1px solid var(--border)}
+td{padding:12px 14px;font-size:13px;border-bottom:1px solid rgba(42,42,58,0.5)}
+tr:hover td{background:rgba(255,255,255,0.02)}
+
+.badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600}
+.badge-red{background:rgba(255,0,0,0.12);color:#ff4444}
+.badge-green{background:rgba(0,204,102,0.12);color:#00cc66}
+.badge-blue{background:rgba(0,136,255,0.12);color:#0088ff}
+.badge-yellow{background:rgba(255,170,0,0.12);color:#ffaa00}
+.badge-purple{background:rgba(170,68,255,0.12);color:#aa44ff}
+.badge-gray{background:rgba(255,255,255,0.06);color:var(--text-dim)}
+
+.lead-score{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px}
+.lead-score.hot{background:rgba(255,0,0,0.15);color:#ff4444}
+.lead-score.warm{background:rgba(255,170,0,0.15);color:#ffaa00}
+.lead-score.cold{background:rgba(0,136,255,0.15);color:#0088ff}
+
+.action-btns{display:flex;gap:4px}
+.action-btns .btn-icon{font-size:12px}
+.action-btns .btn-icon.whatsapp{color:#25d366;border:1px solid rgba(37,211,102,0.3)}
+.action-btns .btn-icon.whatsapp:hover{background:rgba(37,211,102,0.15)}
+.action-btns .btn-icon.call{color:var(--success);border:1px solid rgba(0,204,102,0.3)}
+.action-btns .btn-icon.call:hover{background:rgba(0,204,102,0.15)}
+.action-btns .btn-icon.email{color:var(--info);border:1px solid rgba(0,136,255,0.3)}
+.action-btns .btn-icon.email:hover{background:rgba(0,136,255,0.15)}
+
+.progress-bar{height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;border-radius:4px;transition:width 0.6s ease}
+.progress-fill.red{background:var(--red)}
+.progress-fill.green{background:var(--success)}
+.progress-fill.blue{background:var(--info)}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+
+.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.filter-bar input,.filter-bar select{padding:9px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:13px;outline:none}
+.filter-bar input{min-width:260px}
+.filter-bar input:focus,.filter-bar select:focus{border-color:var(--red)}
+.search-icon{position:relative}
+.search-icon i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:13px}
+.search-icon input{padding-left:36px}
+
+.kanban-board{display:flex;gap:16px;overflow-x:auto;padding-bottom:16px;min-height:calc(100vh - 220px)}
+.kanban-col{min-width:290px;max-width:290px;background:rgba(26,26,37,0.5);border:1px solid var(--border);border-radius:12px;padding:14px;flex-shrink:0}
+.kanban-col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.kanban-col-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+.kanban-count{background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;color:var(--text-dim)}
+.kanban-col-header .dot{width:8px;height:8px;border-radius:50%}
+.kanban-cards{display:flex;flex-direction:column;gap:10px;min-height:60px}
+.kanban-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:grab;transition:all .2s;position:relative}
+.kanban-card:active{cursor:grabbing}
+.kanban-card:hover{border-color:rgba(255,255,255,0.1);transform:translateY(-1px)}
+.kanban-card.dragging{opacity:0.5;border-color:var(--red)}
+.kc-name{font-size:13.5px;font-weight:600;margin-bottom:4px}
+.kc-phone{font-size:12px;color:var(--text-dim);margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.kc-meta{display:flex;align-items:center;justify-content:space-between}
+.kc-source{font-size:10.5px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px}
+.kc-time{font-size:10.5px;color:var(--text-muted)}
+
+.followup-item{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;transition:border-color .2s}
+.followup-item:hover{border-color:rgba(255,255,255,0.08)}
+.fu-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.fu-info{flex:1}
+.fu-name{font-size:14px;font-weight:600}
+.fu-detail{font-size:12px;color:var(--text-dim);margin-top:2px}
+.fu-time{font-size:12px;font-weight:600;white-space:nowrap}
+.fu-time.overdue{color:var(--red)}
+.fu-time.today{color:var(--warning)}
+.fu-time.upcoming{color:var(--success)}
+.fu-actions{display:flex;gap:6px}
+
+.chart-placeholder{height:240px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:13px}
+
+.target-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;text-align:center}
+.target-card h4{font-size:14px;font-weight:600;margin-bottom:12px}
+.target-val{font-size:36px;font-weight:800;letter-spacing:-1px}
+.target-sub{font-size:12px;color:var(--text-dim);margin-top:4px}
+.target-bar{margin-top:16px}
+.target-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text-dim);margin-top:6px}
+
+.offer-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden}
+.offer-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.offer-card.red-offer::before{background:var(--red)}
+.offer-card.green-offer::before{background:var(--success)}
+.offer-card.blue-offer::before{background:var(--info)}
+.offer-card h4{font-size:15px;font-weight:700;margin-bottom:4px}
+.offer-card .offer-type{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px}
+.offer-card .offer-discount{font-size:24px;font-weight:800;color:var(--red);margin-bottom:6px}
+.offer-card .offer-desc{font-size:12.5px;color:var(--text-dim);line-height:1.5}
+.offer-card .offer-valid{font-size:11px;color:var(--text-muted);margin-top:10px;display:flex;align-items:center;gap:5px}
+
+.commission-item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid rgba(42,42,58,0.5)}
+.ci-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ci-info{flex:1}
+.ci-name{font-size:13.5px;font-weight:600}
+.ci-detail{font-size:12px;color:var(--text-dim);margin-top:2px}
+.ci-amount{font-size:16px;font-weight:700;color:var(--success)}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:10000;display:none;align-items:center;justify-content:center}
+.modal-overlay.active{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;width:500px;max-width:90vw;max-height:85vh;overflow-y:auto}
+.modal h2{font-size:18px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.modal h2 i{color:var(--red)}
+.modal-close{margin-left:auto;background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;transition:color .2s}
+.modal-close:hover{color:var(--text)}
+
+.tab-bar{display:flex;gap:4px;margin-bottom:20px;background:rgba(255,255,255,0.03);padding:4px;border-radius:10px;width:fit-content}
+.tab-btn{padding:8px 16px;border:none;background:transparent;color:var(--text-dim);font-family:inherit;font-size:12.5px;font-weight:600;border-radius:7px;cursor:pointer;transition:all .2s}
+.tab-btn.active{background:var(--red);color:#fff}
+.tab-btn:hover:not(.active){color:var(--text);background:rgba(255,255,255,0.04)}
+
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;text-align:center}
+.empty-state i{font-size:48px;color:var(--text-muted);margin-bottom:16px}
+.empty-state h3{font-size:16px;font-weight:600;margin-bottom:6px}
+.empty-state p{font-size:13px;color:var(--text-dim);max-width:360px}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 20px;display:flex;align-items:center;gap:10px;font-size:13px;z-index:20000;transform:translateY(100px);opacity:0;transition:all 0.3s ease;box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-left:3px solid var(--success)}
+.toast.error{border-left:3px solid var(--red)}
+.toast i{font-size:16px}
+.toast.success i{color:var(--success)}
+.toast.error i{color:var(--red)}
+
+@media(max-width:768px){
+  .sidebar{position:fixed;left:-260px;z-index:1000;transition:left .3s}
+  .sidebar.open{left:0}
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .content{padding:16px}
+  .kanban-col{min-width:260px;max-width:260px}
+  .mobile-toggle{display:flex !important}
+}
+.mobile-toggle{display:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;align-items:center;justify-content:center;font-size:15px}
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;display:none}
+.sidebar-overlay.active{display:block}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <h1>Zacson <span>Fitness</span></h1>
+    <p>Sales Portal - Sign in to continue</p>
+    <form id="login-form" onsubmit="return handleLogin(event)">
+      <input type="text" id="login-email" placeholder="Email or Username" autocomplete="username">
+      <input type="password" id="login-password" placeholder="Password" autocomplete="current-password">
+      <button type="submit" id="login-btn">Sign In</button>
+      <div class="login-error" id="login-error"></div>
+    </form>
+  </div>
+</div>
+
+<div id="app">
+  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <h2>Zacson <span>Fitness</span></h2>
+      <small>Sales Portal</small>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Main</div>
+      <div class="nav-item active" data-page="dashboard"><i class="fas fa-th-large"></i>Dashboard</div>
+      <div class="nav-item" data-page="leads"><i class="fas fa-users"></i>Leads</div>
+      <div class="nav-item" data-page="pipeline"><i class="fas fa-columns"></i>Pipeline</div>
+      <div class="nav-item" data-page="followups"><i class="fas fa-clock"></i>Follow-ups</div>
+      <div class="nav-section">Sales</div>
+      <div class="nav-item" data-page="trials"><i class="fas fa-dumbbell"></i>Trials</div>
+      <div class="nav-item" data-page="customers"><i class="fas fa-user-check"></i>Customers</div>
+      <div class="nav-item" data-page="memberships"><i class="fas fa-id-card"></i>Memberships</div>
+      <div class="nav-item" data-page="offers"><i class="fas fa-tags"></i>Offers</div>
+      <div class="nav-section">Performance</div>
+      <div class="nav-item" data-page="targets"><i class="fas fa-bullseye"></i>Targets</div>
+      <div class="nav-item" data-page="commissions"><i class="fas fa-coins"></i>Commissions</div>
+      <div class="nav-item" data-page="reports"><i class="fas fa-chart-bar"></i>Reports</div>
+    </nav>
+    <div class="sidebar-footer" onclick="handleLogout()">
+      <div class="sf-avatar" id="user-avatar">S</div>
+      <div>
+        <div class="sf-name" id="user-name">Sales User</div>
+        <div class="sf-role">Sales Executive</div>
+      </div>
+      <div class="sf-logout" title="Logout"><i class="fas fa-sign-out-alt"></i></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <div>
+          <h1 id="page-title">Dashboard</h1>
+          <p id="page-subtitle">Welcome back — here's your overview</p>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="tb-btn" onclick="openModal('add-lead')" title="Add Lead"><i class="fas fa-plus"></i></button>
+        <button class="tb-btn" title="Notifications"><i class="fas fa-bell"></i><span class="tb-badge" id="notif-count">3</span></button>
+        <button class="tb-btn" title="Settings"><i class="fas fa-cog"></i></button>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon red"><i class="fas fa-users"></i></div><div class="stat-val" id="d-total-leads">248</div><div class="stat-label">Total Leads</div><div class="stat-change up"><i class="fas fa-arrow-up"></i>12% this week</div></div>
+          <div class="stat-card"><div class="stat-icon green"><i class="fas fa-user-check"></i></div><div class="stat-val" id="d-conversions">42</div><div class="stat-label">Conversions</div><div class="stat-change up"><i class="fas fa-arrow-up"></i>8% this week</div></div>
+          <div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-percentage"></i></div><div class="stat-val" id="d-conversion-rate">16.9%</div><div class="stat-label">Conversion Rate</div><div class="stat-change down"><i class="fas fa-arrow-down"></i>2% from last week</div></div>
+          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-indian-rupee-sign"></i></div><div class="stat-val" id="d-revenue">₹3.2L</div><div class="stat-label">Revenue This Month</div><div class="stat-change up"><i class="fas fa-arrow-up"></i>18% from last month</div></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><h3>Daily Target Progress</h3><span class="subtitle">Today</span></div>
+            <div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:28px;font-weight:800" id="d-daily-leads">8</span><span style="color:var(--text-dim);font-size:13px">/ 15 leads contacted</span></div>
+            <div class="progress-bar"><div class="progress-fill red" style="width:53%"></div></div>
+            <div style="display:flex;align-items:baseline;gap:8px;margin-top:18px"><span style="font-size:28px;font-weight:800" id="d-daily-sales">2</span><span style="color:var(--text-dim);font-size:13px">/ 5 daily sales target</span></div>
+            <div class="progress-bar"><div class="progress-fill green" style="width:40%"></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Lead Sources</h3><span class="subtitle">This month</span></div>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px">
+              <div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:3px;background:var(--red)"></div><span style="font-size:13px">Walk-in</span></div><span style="font-size:13px;font-weight:700">92 <span style="color:var(--text-dim);font-weight:400">(37%)</span></span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:3px;background:var(--info)"></div><span style="font-size:13px">Instagram</span></div><span style="font-size:13px;font-weight:700">74 <span style="color:var(--text-dim);font-weight:400">(30%)</span></span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:3px;background:var(--purple)"></div><span style="font-size:13px">Google Ads</span></div><span style="font-size:13px;font-weight:700">48 <span style="color:var(--text-dim);font-weight:400">(19%)</span></span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:3px;background:var(--success)"></div><span style="font-size:13px">Referral</span></div><span style="font-size:13px;font-weight:700">34 <span style="color:var(--text-dim);font-weight:400">(14%)</span></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>Recent Activity</h3><button class="btn btn-secondary btn-sm">View All</button></div>
+          <div id="d-activity-list">
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(42,42,58,0.5)"><div style="width:34px;height:34px;border-radius:8px;background:rgba(0,204,102,0.12);display:flex;align-items:center;justify-content:center;color:var(--success);font-size:13px;flex-shrink:0"><i class="fas fa-check"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:500">Rahul Sharma converted to Premium membership</div><div style="font-size:11.5px;color:var(--text-dim)">2 minutes ago</div></div><span class="badge badge-green">Converted</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(42,42,58,0.5)"><div style="width:34px;height:34px;border-radius:8px;background:rgba(0,136,255,0.12);display:flex;align-items:center;justify-content:center;color:var(--info);font-size:13px;flex-shrink:0"><i class="fas fa-phone"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:500">Follow-up completed with Priya Patel</div><div style="font-size:11.5px;color:var(--text-dim)">18 minutes ago</div></div><span class="badge badge-blue">Follow-up</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(42,42,58,0.5)"><div style="width:34px;height:34px;border-radius:8px;background:var(--red-glow);display:flex;align-items:center;justify-content:center;color:var(--red);font-size:13px;flex-shrink:0"><i class="fas fa-user-plus"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:500">New lead: Amit Kumar from Instagram</div><div style="font-size:11.5px;color:var(--text-dim)">45 minutes ago</div></div><span class="badge badge-red">New Lead</span></div>
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 0"><div style="width:34px;height:34px;border-radius:8px;background:rgba(255,170,0,0.12);display:flex;align-items:center;justify-content:center;color:var(--warning);font-size:13px;flex-shrink:0"><i class="fas fa-calendar-check"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:500">Trial booked for Sneha Reddy</div><div style="font-size:11.5px;color:var(--text-dim)">1 hour ago</div></div><span class="badge badge-yellow">Trial</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEADS -->
+      <div class="page" id="page-leads">
+        <div class="filter-bar">
+          <div class="search-icon"><i class="fas fa-search"></i><input type="text" id="leads-search" placeholder="Search leads by name, phone, email..." oninput="filterLeads()"></div>
+          <select id="leads-source-filter" onchange="filterLeads()"><option value="">All Sources</option><option value="Walk-in">Walk-in</option><option value="Instagram">Instagram</option><option value="Google Ads">Google Ads</option><option value="Referral">Referral</option><option value="JustDial">JustDial</option><option value="Website">Website</option></select>
+          <select id="leads-status-filter" onchange="filterLeads()"><option value="">All Status</option><option value="new">New</option><option value="contacted">Contacted</option><option value="qualified">Qualified</option><option value="trial">Trial</option><option value="converted">Converted</option><option value="lost">Lost</option></select>
+          <select id="leads-score-filter" onchange="filterLeads()"><option value="">All Scores</option><option value="hot">Hot</option><option value="warm">Warm</option><option value="cold">Cold</option></select>
+          <button class="btn btn-primary" onclick="openModal('add-lead')"><i class="fas fa-plus"></i> Add Lead</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <div class="table-wrap">
+            <table id="leads-table">
+              <thead><tr><th>Lead</th><th>Contact</th><th>Source</th><th>Score</th><th>Status</th><th>Last Contact</th><th>Actions</th></tr></thead>
+              <tbody id="leads-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PIPELINE -->
+      <div class="page" id="page-pipeline">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div class="tab-bar">
+            <button class="tab-btn active" onclick="setPipelineView('kanban',this)">Kanban</button>
+            <button class="tab-btn" onclick="setPipelineView('list',this)">List</button>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('add-lead')"><i class="fas fa-plus"></i> Add Lead</button>
+        </div>
+        <div class="kanban-board" id="kanban-board"></div>
+      </div>
+
+      <!-- FOLLOW-UPS -->
+      <div class="page" id="page-followups">
+        <div class="tab-bar" style="margin-bottom:20px">
+          <button class="tab-btn active" onclick="filterFollowups('overdue',this)">Overdue</button>
+          <button class="tab-btn" onclick="filterFollowups('today',this)">Today</button>
+          <button class="tab-btn" onclick="filterFollowups('upcoming',this)">Upcoming</button>
+          <button class="tab-btn" onclick="filterFollowups('all',this)">All</button>
+        </div>
+        <div id="followups-list"></div>
+      </div>
+
+      <!-- TRIALS -->
+      <div class="page" id="page-trials">
+        <div class="filter-bar">
+          <div class="search-icon"><i class="fas fa-search"></i><input type="text" placeholder="Search trials..." oninput="filterTrials(this.value)"></div>
+          <select onchange="filterTrialsStatus(this.value)"><option value="">All Status</option><option value="scheduled">Scheduled</option><option value="attended">Attended</option><option value="no-show">No Show</option><option value="converted">Converted</option></select>
+          <button class="btn btn-primary" onclick="openModal('book-trial')"><i class="fas fa-plus"></i> Book Trial</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <div class="table-wrap">
+            <table><thead><tr><th>Member</th><th>Trial Date</th><th>Time</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody id="trials-tbody"></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CUSTOMERS -->
+      <div class="page" id="page-customers">
+        <div class="filter-bar">
+          <div class="search-icon"><i class="fas fa-search"></i><input type="text" placeholder="Search customers..." oninput="filterCustomers(this.value)"></div>
+          <select onchange="filterCustomerType(this.value)"><option value="">All Types</option><option value="active">Active</option><option value="expired">Expired</option><option value="frozen">Frozen</option></select>
+        </div>
+        <div class="stats-grid" style="margin-bottom:20px">
+          <div class="stat-card"><div class="stat-icon green"><i class="fas fa-users"></i></div><div class="stat-val">186</div><div class="stat-label">Total Customers</div></div>
+          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-user-clock"></i></div><div class="stat-val">152</div><div class="stat-label">Active Members</div></div>
+          <div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-user-pause"></i></div><div class="stat-val">24</div><div class="stat-label">Expired</div></div>
+          <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-snowflake"></i></div><div class="stat-val">10</div><div class="stat-label">Frozen</div></div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <div class="table-wrap">
+            <table><thead><tr><th>Customer</th><th>Membership</th><th>Join Date</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead><tbody id="customers-tbody"></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEMBERSHIPS -->
+      <div class="page" id="page-memberships">
+        <div class="card-header" style="margin-bottom:20px"><h3>Membership Plans</h3><button class="btn btn-primary btn-sm" onclick="openModal('add-membership')"><i class="fas fa-plus"></i> Add Plan</button></div>
+        <div class="grid-3" id="memberships-grid"></div>
+        <div class="card" style="margin-top:24px">
+          <div class="card-header"><h3>Recent Sales</h3></div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Customer</th><th>Plan</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead><tbody id="membership-sales-tbody"></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- OFFERS -->
+      <div class="page" id="page-offers">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <h3>Current Offers</h3>
+          <button class="btn btn-primary btn-sm" onclick="openModal('add-offer')"><i class="fas fa-plus"></i> Create Offer</button>
+        </div>
+        <div class="grid-3" id="offers-grid"></div>
+      </div>
+
+      <!-- TARGETS -->
+      <div class="page" id="page-targets">
+        <div class="stats-grid" style="margin-bottom:24px">
+          <div class="stat-card"><div class="stat-icon red"><i class="fas fa-bullseye"></i></div><div class="stat-val">₹4,00,000</div><div class="stat-label">Monthly Revenue Target</div></div>
+          <div class="stat-card"><div class="stat-icon green"><i class="fas fa-chart-line"></i></div><div class="stat-val">₹3,20,000</div><div class="stat-label">Achieved</div><div class="stat-change up"><i class="fas fa-arrow-up"></i>80% completed</div></div>
+          <div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-clock"></i></div><div class="stat-val">₹80,000</div><div class="stat-label">Remaining</div></div>
+          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-calendar-day"></i></div><div class="stat-val">10 days</div><div class="stat-label">Days Left</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><h3>Daily Target</h3><span class="subtitle">Today's Progress</span></div>
+            <div class="target-bar">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">Leads Contacted</span><span style="font-size:13px;font-weight:700">8 / 15</span></div>
+              <div class="progress-bar"><div class="progress-fill red" style="width:53%"></div></div>
+            </div>
+            <div class="target-bar" style="margin-top:16px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">Sales</span><span style="font-size:13px;font-weight:700">2 / 5</span></div>
+              <div class="progress-bar"><div class="progress-fill green" style="width:40%"></div></div>
+            </div>
+            <div class="target-bar" style="margin-top:16px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">Revenue</span><span style="font-size:13px;font-weight:700">₹12,000 / ₹20,000</span></div>
+              <div class="progress-bar"><div class="progress-fill blue" style="width:60%"></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Weekly Target</h3><span class="subtitle">Mon - Sun</span></div>
+            <div class="target-bar">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">Leads Contacted</span><span style="font-size:13px;font-weight:700">52 / 75</span></div>
+              <div class="progress-bar"><div class="progress-fill red" style="width:69%"></div></div>
+            </div>
+            <div class="target-bar" style="margin-top:16px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">Sales</span><span style="font-size:13px;font-weight:700">12 / 25</span></div>
+              <div class="progress-bar"><div class="progress-fill green" style="width:48%"></div></div>
+            </div>
+            <div class="target-bar" style="margin-top:16px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">Revenue</span><span style="font-size:13px;font-weight:700">₹1,80,000 / ₹2,50,000</span></div>
+              <div class="progress-bar"><div class="progress-fill blue" style="width:72%"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:4px">
+          <div class="card-header"><h3>Sales Team Targets</h3></div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Sales Person</th><th>Target</th><th>Achieved</th><th>Progress</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td style="font-weight:600">Rahul Verma</td><td>₹1,00,000</td><td style="font-weight:600">₹92,000</td><td><div class="progress-bar" style="width:160px"><div class="progress-fill green" style="width:92%"></div></div></td><td><span class="badge badge-green">On Track</span></td></tr>
+                <tr><td style="font-weight:600">Priya Singh</td><td>₹1,00,000</td><td style="font-weight:600">₹78,000</td><td><div class="progress-bar" style="width:160px"><div class="progress-fill yellow" style="width:78%"></div></div></td><td><span class="badge badge-yellow">Behind</span></td></tr>
+                <tr><td style="font-weight:600">Amit Sharma</td><td>₹1,00,000</td><td style="font-weight:600">₹1,10,000</td><td><div class="progress-bar" style="width:160px"><div class="progress-fill green" style="width:100%"></div></div></td><td><span class="badge badge-green">Achieved</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMMISSIONS -->
+      <div class="page" id="page-commissions">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon green"><i class="fas fa-coins"></i></div><div class="stat-val">₹28,500</div><div class="stat-label">Total Earned</div></div>
+          <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-wallet"></i></div><div class="stat-val">₹18,500</div><div class="stat-label">Paid Out</div></div>
+          <div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-hourglass-half"></i></div><div class="stat-val">₹10,000</div><div class="stat-label">Pending</div></div>
+          <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-receipt"></i></div><div class="stat-val">34</div><div class="stat-label">Total Commissions</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Commission History</h3></div>
+          <div id="commissions-list"></div>
+        </div>
+      </div>
+
+      <!-- REPORTS -->
+      <div class="page" id="page-reports">
+        <div class="tab-bar" style="margin-bottom:20px">
+          <button class="tab-btn active" onclick="setReportPeriod('monthly',this)">Monthly</button>
+          <button class="tab-btn" onclick="setReportPeriod('weekly',this)">Weekly</button>
+          <button class="tab-btn" onclick="setReportPeriod('daily',this)">Daily</button>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><h3>Lead Sources Breakdown</h3></div>
+            <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px">
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">Walk-in</span><span style="font-size:13px;font-weight:700">92 (37%)</span></div><div class="progress-bar"><div class="progress-fill red" style="width:37%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">Instagram</span><span style="font-size:13px;font-weight:700">74 (30%)</span></div><div class="progress-bar"><div class="progress-fill purple" style="width:30%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">Google Ads</span><span style="font-size:13px;font-weight:700">48 (19%)</span></div><div class="progress-bar"><div class="progress-fill blue" style="width:19%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">Referral</span><span style="font-size:13px;font-weight:700">34 (14%)</span></div><div class="progress-bar"><div class="progress-fill green" style="width:14%"></div></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Conversion Funnel</h3></div>
+            <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px">
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">Total Leads</span><span style="font-size:13px;font-weight:700">248</span></div><div class="progress-bar"><div class="progress-fill red" style="width:100%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">Contacted</span><span style="font-size:13px;font-weight:700">198 (80%)</span></div><div class="progress-bar"><div class="progress-fill red" style="width:80%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">Qualified</span><span style="font-size:13px;font-weight:700">124 (50%)</span></div><div class="progress-bar"><div class="progress-fill yellow" style="width:50%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">Trial</span><span style="font-size:13px;font-weight:700">78 (31%)</span></div><div class="progress-bar"><div class="progress-fill blue" style="width:31%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">Converted</span><span style="font-size:13px;font-weight:700">42 (17%)</span></div><div class="progress-bar"><div class="progress-fill green" style="width:17%"></div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Sales Summary</h3></div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Period</th><th>Leads</th><th>Contacted</th><th>Converted</th><th>Rate</th><th>Revenue</th></tr></thead>
+              <tbody id="reports-tbody">
+                <tr><td style="font-weight:600">Week 3 (Sep)</td><td>58</td><td>48</td><td>12</td><td style="font-weight:600;color:var(--success)">20.7%</td><td style="font-weight:700">₹96,000</td></tr>
+                <tr><td style="font-weight:600">Week 2 (Sep)</td><td>62</td><td>52</td><td>10</td><td style="font-weight:600;color:var(--warning)">16.1%</td><td style="font-weight:700">₹78,000</td></tr>
+                <tr><td style="font-weight:600">Week 1 (Sep)</td><td>54</td><td>44</td><td>8</td><td style="font-weight:600;color:var(--warning)">14.8%</td><td style="font-weight:700">₹64,000</td></tr>
+                <tr><td style="font-weight:600">Week 4 (Aug)</td><td>74</td><td>54</td><td>12</td><td style="font-weight:600;color:var(--success)">16.2%</td><td style="font-weight:700">₹82,000</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD LEAD MODAL -->
+<div class="modal-overlay" id="modal-add-lead">
+  <div class="modal">
+    <h2><i class="fas fa-user-plus"></i> Add New Lead <button class="modal-close" onclick="closeModal('add-lead')">&times;</button></h2>
+    <form id="add-lead-form" onsubmit="return handleAddLead(event)">
+      <div class="grid-2">
+        <div class="form-group"><label>Full Name *</label><input type="text" id="al-name" required placeholder="e.g. Rahul Sharma"></div>
+        <div class="form-group"><label>Phone *</label><input type="tel" id="al-phone" required placeholder="+91 98765 43210"></div>
+      </div>
+      <div class="form-group"><label>Email</label><input type="email" id="al-email" placeholder="email@example.com"></div>
+      <div class="grid-2">
+        <div class="form-group"><label>Source *</label><select id="al-source" required><option value="">Select source</option><option value="Walk-in">Walk-in</option><option value="Instagram">Instagram</option><option value="Google Ads">Google Ads</option><option value="Referral">Referral</option><option value="JustDial">JustDial</option><option value="Website">Website</option></select></div>
+        <div class="form-group"><label>Lead Score</label><select id="al-score"><option value="warm">Warm</option><option value="hot">Hot</option><option value="cold">Cold</option></select></div>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="al-notes" placeholder="Any additional notes..."></textarea></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px"><button type="button" class="btn btn-secondary" onclick="closeModal('add-lead')">Cancel</button><button type="submit" class="btn btn-primary">Add Lead</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- FOLLOW-UP MODAL -->
+<div class="modal-overlay" id="modal-followup">
+  <div class="modal">
+    <h2><i class="fas fa-clock"></i> Record Follow-up <button class="modal-close" onclick="closeModal('followup')">&times;</button></h2>
+    <form id="followup-form" onsubmit="return handleFollowup(event)">
+      <input type="hidden" id="fu-lead-id">
+      <div class="form-group"><label>Lead</label><input type="text" id="fu-lead-name" readonly style="opacity:0.7"></div>
+      <div class="form-group"><label>Follow-up Type *</label><select id="fu-type" required><option value="call">Phone Call</option><option value="whatsapp">WhatsApp</option><option value="email">Email</option><option value="meeting">Meeting</option><option value="visit">Gym Visit</option></select></div>
+      <div class="form-group"><label>Notes *</label><textarea id="fu-notes" required placeholder="What was discussed?"></textarea></div>
+      <div class="form-group"><label>Outcome *</label><select id="fu-outcome" required><option value="interested">Interested</option><option value="callback">Call Back</option><option value="not-interested">Not Interested</option><option value="booked-trial">Booked Trial</option><option value="converted">Converted</option></select></div>
+      <div class="form-group"><label>Next Follow-up Date</label><input type="datetime-local" id="fu-next-date"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px"><button type="button" class="btn btn-secondary" onclick="closeModal('followup')">Cancel</button><button type="submit" class="btn btn-primary">Save Follow-up</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- BOOK TRIAL MODAL -->
+<div class="modal-overlay" id="modal-book-trial">
+  <div class="modal">
+    <h2><i class="fas fa-dumbbell"></i> Book Trial <button class="modal-close" onclick="closeModal('book-trial')">&times;</button></h2>
+    <form id="book-trial-form" onsubmit="return handleBookTrial(event)">
+      <div class="form-group"><label>Lead / Customer *</label><select id="bt-lead" required><option value="">Select a lead</option></select></div>
+      <div class="grid-2">
+        <div class="form-group"><label>Date *</label><input type="date" id="bt-date" required></div>
+        <div class="form-group"><label>Time *</label><input type="time" id="bt-time" required></div>
+      </div>
+      <div class="form-group"><label>Trial Type</label><select id="bt-type"><option value="gym">Gym Session</option><option value="yoga">Yoga Class</option><option value="cardio">Cardio Session</option><option value="crossfit">CrossFit</option><option value="personal">Personal Training</option></select></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px"><button type="button" class="btn btn-secondary" onclick="closeModal('book-trial')">Cancel</button><button type="submit" class="btn btn-primary">Book Trial</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- ADD MEMBERSHIP MODAL -->
+<div class="modal-overlay" id="modal-add-membership">
+  <div class="modal">
+    <h2><i class="fas fa-id-card"></i> Add Membership Plan <button class="modal-close" onclick="closeModal('add-membership')">&times;</button></h2>
+    <form id="add-membership-form" onsubmit="return handleAddMembership(event)">
+      <div class="form-group"><label>Plan Name *</label><input type="text" id="am-name" required placeholder="e.g. 6 Month Premium"></div>
+      <div class="grid-2">
+        <div class="form-group"><label>Duration (months) *</label><input type="number" id="am-duration" required min="1" placeholder="6"></div>
+        <div class="form-group"><label>Price (₹) *</label><input type="number" id="am-price" required min="0" placeholder="15000"></div>
+      </div>
+      <div class="form-group"><label>Commission (%)</label><input type="number" id="am-commission" min="0" max="100" placeholder="10"></div>
+      <div class="form-group"><label>Features</label><textarea id="am-features" placeholder="Enter features separated by new lines"></textarea></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px"><button type="button" class="btn btn-secondary" onclick="closeModal('add-membership')">Cancel</button><button type="submit" class="btn btn-primary">Create Plan</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- ADD OFFER MODAL -->
+<div class="modal-overlay" id="modal-add-offer">
+  <div class="modal">
+    <h2><i class="fas fa-tags"></i> Create Offer <button class="modal-close" onclick="closeModal('add-offer')">&times;</button></h2>
+    <form id="add-offer-form" onsubmit="return handleAddOffer(event)">
+      <div class="form-group"><label>Offer Title *</label><input type="text" id="ao-title" required placeholder="e.g. Festive Season Offer"></div>
+      <div class="grid-2">
+        <div class="form-group"><label>Discount (%)</label><input type="number" id="ao-discount" min="0" max="100" placeholder="20"></div>
+        <div class="form-group"><label>Offer Type *</label><select id="ao-type" required><option value="percentage">Percentage Off</option><option value="flat">Flat Discount</option><option value="bogo">Buy 1 Get 1</option><option value="addon">Free Add-on</option></select></div>
+      </div>
+      <div class="form-group"><label>Description</label><textarea id="ao-desc" placeholder="Offer details..."></textarea></div>
+      <div class="grid-2">
+        <div class="form-group"><label>Valid From *</label><input type="date" id="ao-from" required></div>
+        <div class="form-group"><label>Valid Until *</label><input type="date" id="ao-to" required></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px"><button type="button" class="btn btn-secondary" onclick="closeModal('add-offer')">Cancel</button><button type="submit" class="btn btn-primary">Create Offer</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- QUICK FOLLOWUP MODAL -->
+<div class="modal-overlay" id="modal-quick-followup">
+  <div class="modal" style="width:420px">
+    <h2><i class="fas fa-bolt"></i> Quick Follow-up <button class="modal-close" onclick="closeModal('quick-followup')">&times;</button></h2>
+    <form id="quick-followup-form" onsubmit="return handleQuickFollowup(event)">
+      <input type="hidden" id="qf-lead-id">
+      <div class="form-group"><label>Lead</label><input type="text" id="qf-lead-name" readonly style="opacity:0.7"></div>
+      <div class="form-group"><label>Quick Action</label>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <button type="button" class="btn btn-success btn-sm" onclick="setQfType('called')"><i class="fas fa-phone"></i> Called</button>
+          <button type="button" class="btn btn-sm" style="background:rgba(37,211,102,0.12);color:#25d366;border:1px solid rgba(37,211,102,0.3)" onclick="setQfType('whatsapp')"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+          <button type="button" class="btn btn-sm" style="background:rgba(0,136,255,0.12);color:var(--info);border:1px solid rgba(0,136,255,0.3)" onclick="setQfType('emailed')"><i class="fas fa-envelope"></i> Email</button>
+        </div>
+      </div>
+      <div class="form-group"><label>Note</label><input type="text" id="qf-note" placeholder="Brief note..."></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px"><button type="button" class="btn btn-secondary" onclick="closeModal('quick-followup')">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="fas fa-check-circle"></i><span id="toast-msg"></span></div>
+
+<script>
+const API = '/api';
+let currentUser = null;
+let leads = [];
+let filteredLeads = [];
+let followupsData = [];
+let trialsData = [];
+let customersData = [];
+let membershipsData = [];
+let offersData = [];
+let commissionsData = [];
+let currentPage = 'dashboard';
+let quickFollowupType = 'called';
+
+// AUTH
+async function handleLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('login-btn');
+  const errEl = document.getElementById('login-error');
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value.trim();
+  if (!email || !password) { errEl.textContent = 'Please fill in all fields'; errEl.style.display = 'block'; return false; }
+  btn.textContent = 'Signing in...'; btn.disabled = true; errEl.style.display = 'none';
+  try {
+    const res = await fetch(`${API}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+    const data = await res.json();
+    if (res.ok && data.token) {
+      localStorage.setItem('sales_token', data.token);
+      currentUser = data.user || { name: 'Sales User', email: email };
+      showApp();
+    } else {
+      errEl.textContent = data.message || 'Invalid credentials'; errEl.style.display = 'block';
+    }
+  } catch (err) {
+    // Fallback for demo mode
+    currentUser = { name: 'Sales User', email: email };
+    localStorage.setItem('sales_token', 'demo_token');
+    showApp();
+  }
+  btn.textContent = 'Sign In'; btn.disabled = false;
+  return false;
+}
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.add('active');
+  const initials = (currentUser.name || 'S').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  document.getElementById('user-avatar').textContent = initials;
+  document.getElementById('user-name').textContent = currentUser.name || 'Sales User';
+  loadAllData();
+}
+
+function handleLogout() {
+  localStorage.removeItem('sales_token');
+  currentUser = null;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-password').value = '';
+}
+
+// NAVIGATION
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const page = item.dataset.page;
+    if (!page) return;
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(`page-${page}`).classList.add('active');
+    currentPage = page;
+    const titles = { dashboard: ['Dashboard', 'Welcome back — here\'s your overview'], leads: ['Leads', 'Manage and track all your leads'], pipeline: ['Pipeline', 'Visualize your sales funnel'], followups: ['Follow-ups', 'Stay on top of pending follow-ups'], trials: ['Trials', 'Manage trial bookings and attendance'], customers: ['Customers', 'View converted customers and members'], memberships: ['Memberships', 'Manage membership plans and sales'], offers: ['Offers', 'Current promotional offers'], targets: ['Targets', 'Track daily, weekly and monthly targets'], commissions: ['Commissions', 'Your commission earnings and history'], reports: ['Reports', 'Sales analytics and performance reports'] };
+    const t = titles[page] || ['', ''];
+    document.getElementById('page-title').textContent = t[0];
+    document.getElementById('page-subtitle').textContent = t[1];
+    document.getElementById('sidebar').classList.remove('open');
+    document.querySelector('.sidebar-overlay').classList.remove('active');
+  });
+});
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.querySelector('.sidebar-overlay').classList.toggle('active');
+}
+
+// DATA LOADING
+async function loadAllData() {
+  const token = localStorage.getItem('sales_token');
+  const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+  try {
+    const [leadsRes, pipelineRes, followupsRes, membershipsRes, offersRes, dashRes] = await Promise.allSettled([
+      fetch(`${API}/admin/leads`, { headers }),
+      fetch(`${API}/admin/leads/pipeline`, { headers }),
+      fetch(`${API}/admin/leads?followups=pending`, { headers }),
+      fetch(`${API}/admin/memberships`, { headers }),
+      fetch(`${API}/admin/offers`, { headers }),
+      fetch(`${API}/admin/dashboard`, { headers })
+    ]);
+
+    if (leadsRes.status === 'fulfilled' && leadsRes.value.ok) {
+      const d = await leadsRes.value.json();
+      leads = Array.isArray(d) ? d : (d.leads || d.data || []);
+    } else { leads = getDemoLeads(); }
+
+    filteredLeads = [...leads];
+    renderLeads();
+    renderPipeline();
+    renderFollowups();
+    renderTrials();
+    renderCustomers();
+    renderMemberships();
+    renderOffers();
+    renderCommissions();
+  } catch (e) {
+    leads = getDemoLeads();
+    filteredLeads = [...leads];
+    renderLeads();
+    renderPipeline();
+    renderFollowups();
+    renderTrials();
+    renderCustomers();
+    renderMemberships();
+    renderOffers();
+    renderCommissions();
+  }
+}
+
+function getDemoLeads() {
+  return [
+    { id: 1, name: 'Rahul Sharma', phone: '+91 98765 43210', email: 'rahul@email.com', source: 'Walk-in', score: 'hot', status: 'qualified', lastContact: '2 hours ago', lastContactDate: new Date(Date.now()-7200000), notes: 'Interested in Premium plan' },
+    { id: 2, name: 'Priya Patel', phone: '+91 87654 32109', email: 'priya@email.com', source: 'Instagram', score: 'warm', status: 'contacted', lastContact: '1 day ago', lastContactDate: new Date(Date.now()-86400000), notes: 'Asked about yoga classes' },
+    { id: 3, name: 'Amit Kumar', phone: '+91 76543 21098', email: 'amit@email.com', source: 'Google Ads', score: 'cold', status: 'new', lastContact: 'Never', lastContactDate: null, notes: 'Came from Google Ad' },
+    { id: 4, name: 'Sneha Reddy', phone: '+91 65432 10987', email: 'sneha@email.com', source: 'Referral', score: 'hot', status: 'trial', lastContact: '3 hours ago', lastContactDate: new Date(Date.now()-10800000), notes: 'Trial completed, very interested' },
+    { id: 5, name: 'Vikram Singh', phone: '+91 54321 09876', email: 'vikram@email.com', source: 'Walk-in', score: 'warm', status: 'contacted', lastContact: '2 days ago', lastContactDate: new Date(Date.now()-172800000), notes: 'Comparing with other gyms' },
+    { id: 6, name: 'Neha Gupta', phone: '+91 43210 98765', email: 'neha@email.com', source: 'JustDial', score: 'cold', status: 'new', lastContact: 'Never', lastContactDate: null, notes: '' },
+    { id: 7, name: 'Arjun Nair', phone: '+91 32109 87654', email: 'arjun@email.com', source: 'Instagram', score: 'hot', status: 'converted', lastContact: '5 hours ago', lastContactDate: new Date(Date.now()-18000000), notes: 'Converted to 6-month plan' },
+    { id: 8, name: 'Kavita Joshi', phone: '+91 21098 76543', email: 'kavita@email.com', source: 'Website', score: 'warm', status: 'qualified', lastContact: '12 hours ago', lastContactDate: new Date(Date.now()-43200000), notes: 'Interested in couples plan' },
+    { id: 9, name: 'Rohan Mehta', phone: '+91 10987 65432', email: 'rohan@email.com', source: 'Walk-in', score: 'cold', status: 'lost', lastContact: '1 week ago', lastContactDate: new Date(Date.now()-604800000), notes: 'Chose another gym' },
+    { id: 10, name: 'Deepika Rao', phone: '+91 09876 54321', email: 'deepika@email.com', source: 'Referral', score: 'warm', status: 'contacted', lastContact: '4 hours ago', lastContactDate: new Date(Date.now()-14400000), notes: 'Friend referral, wants personal training' },
+    { id: 11, name: 'Sanjay Verma', phone: '+91 98712 34567', email: 'sanjay@email.com', source: 'Google Ads', score: 'hot', status: 'trial', lastContact: '1 hour ago', lastContactDate: new Date(Date.now()-3600000), notes: 'Trial session today, loved CrossFit' },
+    { id: 12, name: 'Pooja Desai', phone: '+91 87612 34567', email: 'pooja@email.com', source: 'Instagram', score: 'warm', status: 'new', lastContact: 'Never', lastContactDate: null, notes: 'DM about membership prices' }
+  ];
+}
+
+// RENDER LEADS TABLE
+function renderLeads() {
+  const tbody = document.getElementById('leads-tbody');
+  if (!filteredLeads.length) { tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-users"></i><h3>No leads found</h3><p>Try adjusting your filters or add a new lead.</p></div></td></tr>'; return; }
+  tbody.innerHTML = filteredLeads.map(l => `
+    <tr>
+      <td><div style="font-weight:600;font-size:13.5px">${esc(l.name)}</div></td>
+      <td><div style="font-size:12.5px">${esc(l.phone)}</div><div style="font-size:11.5px;color:var(--text-dim)">${esc(l.email||'')}</div></td>
+      <td><span class="badge badge-gray">${esc(l.source)}</span></td>
+      <td><span class="lead-score ${l.score}"><i class="fas fa-circle" style="font-size:6px"></i>${capitalize(l.score)}</span></td>
+      <td><span class="badge ${statusBadge(l.status)}">${capitalize(l.status)}</span></td>
+      <td style="font-size:12px;color:var(--text-dim)">${esc(l.lastContact)}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-icon call" onclick="quickAction('call','${esc(l.phone)}')" title="Call"><i class="fas fa-phone"></i></button>
+          <button class="btn btn-icon whatsapp" onclick="quickAction('whatsapp','${esc(l.phone)}')" title="WhatsApp"><i class="fab fa-whatsapp"></i></button>
+          <button class="btn btn-icon email" onclick="quickAction('email','${esc(l.email||'')}')" title="Email"><i class="fas fa-envelope"></i></button>
+          <button class="btn btn-icon btn-secondary" onclick="openFollowupModal(${l.id})" title="Follow-up"><i class="fas fa-clock"></i></button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterLeads() {
+  const q = (document.getElementById('leads-search').value || '').toLowerCase();
+  const src = document.getElementById('leads-source-filter').value;
+  const status = document.getElementById('leads-status-filter').value;
+  const score = document.getElementById('leads-score-filter').value;
+  filteredLeads = leads.filter(l => {
+    if (q && !l.name.toLowerCase().includes(q) && !(l.phone||'').toLowerCase().includes(q) && !(l.email||'').toLowerCase().includes(q)) return false;
+    if (src && l.source !== src) return false;
+    if (status && l.status !== status) return false;
+    if (score && l.score !== score) return false;
+    return true;
+  });
+  renderLeads();
+}
+
+// KANBAN PIPELINE
+function renderPipeline() {
+  const board = document.getElementById('kanban-board');
+  const cols = [
+    { key: 'new', title: 'New Leads', color: 'var(--info)', icon: 'fa-plus-circle' },
+    { key: 'contacted', title: 'Contacted', color: 'var(--warning)', icon: 'fa-phone' },
+    { key: 'qualified', title: 'Qualified', color: 'var(--purple)', icon: 'fa-check-circle' },
+    { key: 'trial', title: 'Trial', color: 'var(--red)', icon: 'fa-dumbbell' },
+    { key: 'converted', title: 'Converted', color: 'var(--success)', icon: 'fa-trophy' },
+    { key: 'lost', title: 'Lost', color: 'var(--text-muted)', icon: 'fa-times-circle' }
+  ];
+  board.innerHTML = cols.map(col => {
+    const colLeads = leads.filter(l => l.status === col.key);
+    return `
+      <div class="kanban-col" data-status="${col.key}" ondragover="event.preventDefault();this.style.borderColor='var(--red)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="handleDrop(event,'${col.key}');this.style.borderColor='var(--border)'">
+        <div class="kanban-col-header">
+          <div class="kanban-col-title"><div class="dot" style="background:${col.color}"></div>${col.title}<span class="kanban-count">${colLeads.length}</span></div>
+        </div>
+        <div class="kanban-cards">
+          ${colLeads.map(l => `
+            <div class="kanban-card" draggable="true" ondragstart="handleDragStart(event,${l.id})" ondragend="this.classList.remove('dragging')">
+              <div class="kc-name">${esc(l.name)}</div>
+              <div class="kc-phone"><i class="fas fa-phone" style="font-size:10px"></i>${esc(l.phone)}</div>
+              <div class="kc-meta">
+                <span class="kc-source">${esc(l.source)}</span>
+                <span class="lead-score ${l.score}" style="font-size:10px;padding:2px 6px"><i class="fas fa-circle" style="font-size:5px"></i>${capitalize(l.score)}</span>
+              </div>
+              <div style="display:flex;gap:4px;margin-top:10px">
+                <button class="btn btn-icon btn-sm call" onclick="quickAction('call','${esc(l.phone)}')" title="Call" style="width:28px;height:28px;font-size:11px"><i class="fas fa-phone"></i></button>
+                <button class="btn btn-icon btn-sm whatsapp" onclick="quickAction('whatsapp','${esc(l.phone)}')" title="WhatsApp" style="width:28px;height:28px;font-size:11px"><i class="fab fa-whatsapp"></i></button>
+                <button class="btn btn-icon btn-sm" onclick="openFollowupModal(${l.id})" title="Follow-up" style="width:28px;height:28px;font-size:11px"><i class="fas fa-clock"></i></button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+let draggedLeadId = null;
+function handleDragStart(e, id) {
+  draggedLeadId = id;
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+async function handleDrop(e, newStatus) {
+  e.preventDefault();
+  if (!draggedLeadId) return;
+  const lead = leads.find(l => l.id === draggedLeadId);
+  if (lead) {
+    lead.status = newStatus;
+    renderPipeline();
+    renderLeads();
+    showToast(`Lead moved to ${capitalize(newStatus)}`, 'success');
+    const token = localStorage.getItem('sales_token');
+    try {
+      await fetch(`${API}/admin/leads/${draggedLeadId}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+    } catch(e) {}
+  }
+  draggedLeadId = null;
+}
+
+function setPipelineView(view, btn) {
+  document.querySelectorAll('#page-pipeline .tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (view === 'list') {
+    document.getElementById('kanban-board').style.display = 'none';
+    document.getElementById('page-leads').classList.add('active');
+  } else {
+    document.getElementById('kanban-board').style.display = 'flex';
+  }
+}
+
+// FOLLOW-UPS
+function renderFollowups(filter = 'all') {
+  const list = document.getElementById('followups-list');
+  const now = new Date();
+  const demoFollowups = [
+    { id: 1, leadId: 1, leadName: 'Rahul Sharma', type: 'call', note: 'Discuss premium plan pricing', date: new Date(Date.now() - 3600000), status: 'pending', category: 'overdue' },
+    { id: 2, leadId: 2, leadName: 'Priya Patel', type: 'whatsapp', note: 'Send yoga class schedule', date: new Date(), status: 'pending', category: 'today' },
+    { id: 3, leadId: 5, leadName: 'Vikram Singh', type: 'email', note: 'Send comparison chart', date: new Date(Date.now() + 86400000), status: 'pending', category: 'upcoming' },
+    { id: 4, leadId: 10, leadName: 'Deepika Rao', type: 'call', note: 'Follow up on personal training query', date: new Date(Date.now() + 172800000), status: 'pending', category: 'upcoming' },
+    { id: 5, leadId: 8, leadName: 'Kavita Joshi', type: 'meeting', note: 'Couples plan discussion at gym', date: new Date(Date.now() + 259200000), status: 'pending', category: 'upcoming' },
+    { id: 6, leadId: 3, leadName: 'Amit Kumar', type: 'call', note: 'First contact call', date: new Date(Date.now() - 172800000), status: 'pending', category: 'overdue' },
+  ];
+  followupsData = demoFollowups;
+  const filtered = filter === 'all' ? followupsData : followupsData.filter(f => f.category === filter);
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state"><i class="fas fa-clock"></i><h3>No follow-ups</h3><p>All clear! No pending follow-ups for this filter.</p></div>';
+    return;
+  }
+  const icons = { call: { icon: 'fa-phone', bg: 'rgba(0,204,102,0.12)', color: 'var(--success)' }, whatsapp: { icon: 'fa-whatsapp', bg: 'rgba(37,211,102,0.12)', color: '#25d366' }, email: { icon: 'fa-envelope', bg: 'rgba(0,136,255,0.12)', color: 'var(--info)' }, meeting: { icon: 'fa-handshake', bg: 'rgba(170,68,255,0.12)', color: 'var(--purple)' }, visit: { icon: 'fa-building', bg: 'rgba(255,170,0,0.12)', color: 'var(--warning)' } };
+  list.innerHTML = filtered.map(f => {
+    const ic = icons[f.type] || icons.call;
+    const timeClass = f.category === 'overdue' ? 'overdue' : f.category === 'today' ? 'today' : 'upcoming';
+    const timeText = f.category === 'overdue' ? 'Overdue' : f.category === 'today' ? 'Today' : formatDate(f.date);
+    return `
+      <div class="followup-item">
+        <div class="fu-icon" style="background:${ic.bg};color:${ic.color}"><i class="fas ${ic.icon}"></i></div>
+        <div class="fu-info"><div class="fu-name">${esc(f.leadName)}</div><div class="fu-detail">${esc(f.note)}</div></div>
+        <div class="fu-time ${timeClass}">${timeText}</div>
+        <div class="fu-actions">
+          <button class="btn btn-sm btn-primary" onclick="completeFollowup(${f.id})">Done</button>
+          <button class="btn btn-sm btn-secondary" onclick="openFollowupModal(${f.leadId})">Reschedule</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function filterFollowups(filter, btn) {
+  document.querySelectorAll('#page-followups .tab-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderFollowups(filter);
+}
+
+function completeFollowup(id) {
+  followupsData = followupsData.filter(f => f.id !== id);
+  renderFollowups();
+  showToast('Follow-up completed!', 'success');
+}
+
+// TRIALS
+function renderTrials() {
+  trialsData = [
+    { id: 1, leadName: 'Sneha Reddy', date: '2026-09-22', time: '10:00 AM', type: 'Gym Session', status: 'scheduled' },
+    { id: 2, leadName: 'Sanjay Verma', date: '2026-09-21', time: '6:00 PM', type: 'CrossFit', status: 'attended' },
+    { id: 3, leadName: 'Kavita Joshi', date: '2026-09-20', time: '9:00 AM', type: 'Yoga Class', status: 'attended' },
+    { id: 4, leadName: 'Amit Kumar', date: '2026-09-19', time: '5:00 PM', type: 'Gym Session', status: 'no-show' },
+    { id: 5, leadName: 'Rahul Sharma', date: '2026-09-18', time: '7:00 AM', type: 'Personal Training', status: 'converted' },
+  ];
+  const tbody = document.getElementById('trials-tbody');
+  const sb = { scheduled: 'badge-blue', attended: 'badge-green', 'no-show': 'badge-red', converted: 'badge-purple' };
+  tbody.innerHTML = trialsData.map(t => `
+    <tr>
+      <td style="font-weight:600">${esc(t.leadName)}</td>
+      <td>${esc(t.date)}</td>
+      <td>${esc(t.time)}</td>
+      <td><span class="badge badge-gray">${esc(t.type)}</span></td>
+      <td><span class="badge ${sb[t.status]||'badge-gray'}">${capitalize(t.status.replace('-',' '))}</span></td>
+      <td><div class="action-btns"><button class="btn btn-icon btn-sm call" title="Call"><i class="fas fa-phone"></i></button><button class="btn btn-icon btn-sm whatsapp" title="WhatsApp"><i class="fab fa-whatsapp"></i></button></div></td>
+    </tr>
+  `).join('');
+}
+function filterTrials() {}
+function filterTrialsStatus() {}
+
+// CUSTOMERS
+function renderCustomers() {
+  customersData = [
+    { id: 1, name: 'Arjun Nair', membership: '6 Month Premium', joinDate: '2026-08-01', expiry: '2027-02-01', status: 'active' },
+    { id: 2, name: 'Rahul Sharma', membership: '1 Year VIP', joinDate: '2026-09-18', expiry: '2027-09-18', status: 'active' },
+    { id: 3, name: 'Priya Patel', membership: '3 Month Basic', joinDate: '2026-06-15', expiry: '2026-09-15', status: 'expired' },
+    { id: 4, name: 'Sneha Reddy', membership: '1 Month Trial', joinDate: '2026-09-01', expiry: '2026-10-01', status: 'active' },
+    { id: 5, name: 'Vikram Singh', membership: '6 Month Standard', joinDate: '2026-04-10', expiry: '2026-10-10', status: 'active' },
+    { id: 6, name: 'Deepika Rao', membership: '3 Month Premium', joinDate: '2026-07-20', expiry: '2026-10-20', status: 'frozen' },
+  ];
+  const tbody = document.getElementById('customers-tbody');
+  const sb = { active: 'badge-green', expired: 'badge-red', frozen: 'badge-yellow' };
+  tbody.innerHTML = customersData.map(c => `
+    <tr>
+      <td style="font-weight:600">${esc(c.name)}</td>
+      <td><span class="badge badge-gray">${esc(c.membership)}</span></td>
+      <td>${esc(c.joinDate)}</td>
+      <td>${esc(c.expiry)}</td>
+      <td><span class="badge ${sb[c.status]}">${capitalize(c.status)}</span></td>
+      <td><div class="action-btns"><button class="btn btn-sm btn-secondary"><i class="fas fa-eye"></i></button><button class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></button></div></td>
+    </tr>
+  `).join('');
+}
+function filterCustomers() {}
+function filterCustomerType() {}
+
+// MEMBERSHIPS
+function renderMemberships() {
+  membershipsData = [
+    { id: 1, name: '1 Month Basic', duration: 1, price: 2500, commission: 8, features: ['Gym Access', 'Locker'], color: 'var(--text-dim)' },
+    { id: 2, name: '3 Month Standard', duration: 3, price: 6000, commission: 10, features: ['Gym Access', 'Locker', '1 Class/mo'], color: 'var(--info)' },
+    { id: 3, name: '6 Month Premium', duration: 6, price: 12000, commission: 12, features: ['Unlimited Access', 'Locker', 'All Classes', 'Steam'], color: 'var(--warning)' },
+    { id: 4, name: '1 Year VIP', duration: 12, price: 20000, commission: 15, features: ['Unlimited Access', 'Personal Locker', 'All Classes', 'Steam', 'Sauna', 'Pool'], color: 'var(--red)' },
+  ];
+  const grid = document.getElementById('memberships-grid');
+  grid.innerHTML = membershipsData.map(m => `
+    <div class="card" style="position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${m.color}"></div>
+      <h3 style="font-size:17px;font-weight:700;margin-bottom:4px">${esc(m.name)}</h3>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:14px">${m.duration} month${m.duration>1?'s':''}</div>
+      <div style="font-size:32px;font-weight:800;letter-spacing:-1px">₹${m.price.toLocaleString()}</div>
+      <div style="font-size:12px;color:var(--success);margin-top:4px;margin-bottom:14px">${m.commission}% commission</div>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">
+        ${m.features.map(f => `<div style="font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:6px"><i class="fas fa-check" style="color:var(--success);font-size:10px;width:14px"></i>${esc(f)}</div>`).join('')}
+      </div>
+      <button class="btn btn-secondary btn-sm" style="width:100%">Edit Plan</button>
+    </div>
+  `).join('');
+
+  const salesTbody = document.getElementById('membership-sales-tbody');
+  const sales = [
+    { customer: 'Arjun Nair', plan: '6 Month Premium', amount: 12000, date: '2026-08-01', status: 'confirmed' },
+    { customer: 'Rahul Sharma', plan: '1 Year VIP', amount: 20000, date: '2026-09-18', status: 'confirmed' },
+    { customer: 'Sneha Reddy', plan: '1 Month Basic', amount: 2500, date: '2026-09-01', status: 'confirmed' },
+  ];
+  salesTbody.innerHTML = sales.map(s => `
+    <tr>
+      <td style="font-weight:600">${esc(s.customer)}</td>
+      <td><span class="badge badge-gray">${esc(s.plan)}</span></td>
+      <td style="font-weight:700">₹${s.amount.toLocaleString()}</td>
+      <td>${esc(s.date)}</td>
+      <td><span class="badge badge-green">${capitalize(s.status)}</span></td>
+    </tr>
+  `).join('');
+}
+
+// OFFERS
+function renderOffers() {
+  offersData = [
+    { id: 1, title: 'Festive Season Bonanza', type: 'percentage', discount: 20, desc: 'Get 20% off on all annual plans. Limited period offer for festive season.', validFrom: '2026-09-15', validTo: '2026-10-15', color: 'red-offer' },
+    { id: 2, title: 'Refer & Earn', type: 'flat', discount: 500, desc: 'Refer a friend and both get ₹500 off on your next renewal.', validFrom: '2026-09-01', validTo: '2026-12-31', color: 'green-offer' },
+    { id: 3, title: 'First Month Free', type: 'bogo', discount: 0, desc: 'Sign up for 6+ months and get your first month absolutely free.', validFrom: '2026-09-20', validTo: '2026-10-20', color: 'blue-offer' },
+    { id: 4, title: 'Couples Combo', type: 'addon', discount: 15, desc: '15% off when two family members join together. Plus free personal training session.', validFrom: '2026-09-10', validTo: '2026-11-10', color: 'red-offer' },
+  ];
+  const grid = document.getElementById('offers-grid');
+  const icons = { percentage: 'fa-percent', flat: 'fa-indian-rupee-sign', bogo: 'fa-gift', addon: 'fa-plus-circle' };
+  grid.innerHTML = offersData.map(o => `
+    <div class="offer-card ${o.color}">
+      <h4>${esc(o.title)}</h4>
+      <div class="offer-type"><i class="fas ${icons[o.type]||'fa-tag'}"></i> ${capitalize(o.type)}</div>
+      <div class="offer-discount">${o.discount ? (o.type==='flat'?'₹'+o.discount:o.discount+'%') : 'FREE'}</div>
+      <div class="offer-desc">${esc(o.desc)}</div>
+      <div class="offer-valid"><i class="fas fa-calendar"></i> Valid: ${esc(o.validFrom)} to ${esc(o.validTo)}</div>
+    </div>
+  `).join('');
+}
+
+// COMMISSIONS
+function renderCommissions() {
+  commissionsData = [
+    { id: 1, leadName: 'Arjun Nair', plan: '6 Month Premium', amount: 1440, date: '2026-08-01', status: 'paid' },
+    { id: 2, leadName: 'Rahul Sharma', plan: '1 Year VIP', amount: 3000, date: '2026-09-18', status: 'pending' },
+    { id: 3, leadName: 'Sneha Reddy', plan: '1 Month Basic', amount: 200, date: '2026-09-01', status: 'paid' },
+    { id: 4, leadName: 'Deepika Rao', plan: '3 Month Premium', amount: 432, date: '2026-07-20', status: 'paid' },
+    { id: 5, leadName: 'Vikram Singh', plan: '6 Month Standard', amount: 720, date: '2026-04-10', status: 'paid' },
+    { id: 6, leadName: 'Kavita Joshi', plan: '3 Month Standard', amount: 180, date: '2026-09-15', status: 'pending' },
+  ];
+  const list = document.getElementById('commissions-list');
+  const sb = { paid: 'badge-green', pending: 'badge-yellow' };
+  const icons = { paid: { icon: 'fa-check-circle', bg: 'rgba(0,204,102,0.12)', color: 'var(--success)' }, pending: { icon: 'fa-hourglass-half', bg: 'rgba(255,170,0,0.12)', color: 'var(--warning)' } };
+  list.innerHTML = commissionsData.map(c => {
+    const ic = icons[c.status];
+    return `
+      <div class="commission-item">
+        <div class="ci-icon" style="background:${ic.bg};color:${ic.color}"><i class="fas ${ic.icon}"></i></div>
+        <div class="ci-info"><div class="ci-name">${esc(c.leadName)} — ${esc(c.plan)}</div><div class="ci-detail">${esc(c.date)}</div></div>
+        <span class="badge ${sb[c.status]}">${capitalize(c.status)}</span>
+        <div class="ci-amount">₹${c.amount.toLocaleString()}</div>
+      </div>`;
+  }).join('');
+}
+
+// REPORTS
+function setReportPeriod(period, btn) {
+  document.querySelectorAll('#page-reports .tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// MODALS
+function openModal(name) {
+  document.getElementById(`modal-${name}`).classList.add('active');
+}
+function closeModal(name) {
+  document.getElementById(`modal-${name}`).classList.remove('active');
+}
+
+function openFollowupModal(leadId) {
+  const lead = leads.find(l => l.id === leadId);
+  if (!lead) return;
+  document.getElementById('fu-lead-id').value = leadId;
+  document.getElementById('fu-lead-name').value = lead.name;
+  openModal('followup');
+}
+
+// FORM HANDLERS
+async function handleAddLead(e) {
+  e.preventDefault();
+  const lead = {
+    name: document.getElementById('al-name').value.trim(),
+    phone: document.getElementById('al-phone').value.trim(),
+    email: document.getElementById('al-email').value.trim(),
+    source: document.getElementById('al-source').value,
+    score: document.getElementById('al-score').value,
+    status: 'new',
+    notes: document.getElementById('al-notes').value.trim(),
+    lastContact: 'Just now',
+    lastContactDate: new Date()
+  };
+  const token = localStorage.getItem('sales_token');
+  try {
+    const res = await fetch(`${API}/admin/leads`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(lead)
+    });
+    if (res.ok) { const d = await res.json(); leads.unshift(d.lead || d || { ...lead, id: Date.now() }); }
+    else { lead.id = Date.now(); leads.unshift(lead); }
+  } catch(e) { lead.id = Date.now(); leads.unshift(lead); }
+  filteredLeads = [...leads];
+  renderLeads();
+  renderPipeline();
+  e.target.reset();
+  closeModal('add-lead');
+  showToast('Lead added successfully!', 'success');
+  return false;
+}
+
+async function handleFollowup(e) {
+  e.preventDefault();
+  const leadId = parseInt(document.getElementById('fu-lead-id').value);
+  const lead = leads.find(l => l.id === leadId);
+  const data = {
+    type: document.getElementById('fu-type').value,
+    notes: document.getElementById('fu-notes').value.trim(),
+    outcome: document.getElementById('fu-outcome').value,
+    nextDate: document.getElementById('fu-next-date').value
+  };
+  if (lead) {
+    lead.lastContact = 'Just now';
+    lead.lastContactDate = new Date();
+  }
+  const token = localStorage.getItem('sales_token');
+  try {
+    await fetch(`${API}/admin/leads/${leadId}/followup`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch(e) {}
+  e.target.reset();
+  closeModal('followup');
+  renderLeads();
+  showToast('Follow-up recorded!', 'success');
+  return false;
+}
+
+async function handleBookTrial(e) {
+  e.preventDefault();
+  const data = {
+    leadId: document.getElementById('bt-lead').value,
+    date: document.getElementById('bt-date').value,
+    time: document.getElementById('bt-time').value,
+    type: document.getElementById('bt-type').value
+  };
+  trialsData.unshift({ id: Date.now(), leadName: getLeadName(data.leadId), date: data.date, time: data.time, type: document.getElementById('bt-type').selectedOptions[0].text, status: 'scheduled' });
+  renderTrials();
+  e.target.reset();
+  closeModal('book-trial');
+  showToast('Trial booked successfully!', 'success');
+  return false;
+}
+
+async function handleAddMembership(e) {
+  e.preventDefault();
+  const plan = {
+    id: Date.now(),
+    name: document.getElementById('am-name').value.trim(),
+    duration: parseInt(document.getElementById('am-duration').value),
+    price: parseFloat(document.getElementById('am-price').value),
+    commission: parseInt(document.getElementById('am-commission').value || 0),
+    features: (document.getElementById('am-features').value || '').split('\n').filter(Boolean),
+    color: 'var(--info)'
+  };
+  membershipsData.push(plan);
+  renderMemberships();
+  e.target.reset();
+  closeModal('add-membership');
+  showToast('Membership plan created!', 'success');
+  return false;
+}
+
+async function handleAddOffer(e) {
+  e.preventDefault();
+  const offer = {
+    id: Date.now(),
+    title: document.getElementById('ao-title').value.trim(),
+    type: document.getElementById('ao-type').value,
+    discount: parseFloat(document.getElementById('ao-discount').value || 0),
+    desc: document.getElementById('ao-desc').value.trim(),
+    validFrom: document.getElementById('ao-from').value,
+    validTo: document.getElementById('ao-to').value,
+    color: ['red-offer','green-offer','blue-offer'][Math.floor(Math.random()*3)]
+  };
+  offersData.push(offer);
+  renderOffers();
+  e.target.reset();
+  closeModal('add-offer');
+  showToast('Offer created!', 'success');
+  return false;
+}
+
+// QUICK FOLLOWUP
+function openQuickFollowup(leadId) {
+  const lead = leads.find(l => l.id === leadId);
+  if (!lead) return;
+  document.getElementById('qf-lead-id').value = leadId;
+  document.getElementById('qf-lead-name').value = lead.name;
+  quickFollowupType = 'called';
+  openModal('quick-followup');
+}
+function setQfType(type) { quickFollowupType = type; }
+async function handleQuickFollowup(e) {
+  e.preventDefault();
+  const leadId = parseInt(document.getElementById('qf-lead-id').value);
+  const lead = leads.find(l => l.id === leadId);
+  if (lead) { lead.lastContact = 'Just now'; lead.lastContactDate = new Date(); }
+  closeModal('quick-followup');
+  renderLeads();
+  showToast(`Follow-up recorded: ${capitalize(quickFollowupType)}`, 'success');
+  e.target.reset();
+  return false;
+}
+
+// ACTIONS
+function quickAction(type, value) {
+  if (type === 'call') { window.open(`tel:${value}`, '_self'); }
+  else if (type === 'whatsapp') { const num = value.replace(/[^0-9]/g, ''); window.open(`https://wa.me/${num}`, '_blank'); }
+  else if (type === 'email') { window.open(`mailto:${value}`, '_self'); }
+}
+
+// HELPERS
+function esc(s) { if (!s) return ''; const el = document.createElement('span'); el.textContent = s; return el.innerHTML; }
+function capitalize(s) { if (!s) return ''; return s.charAt(0).toUpperCase() + s.slice(1); }
+function statusBadge(status) {
+  const map = { new: 'badge-blue', contacted: 'badge-yellow', qualified: 'badge-purple', trial: 'badge-red', converted: 'badge-green', lost: 'badge-gray' };
+  return map[status] || 'badge-gray';
+}
+function formatDate(d) {
+  if (!d) return '';
+  const date = new Date(d);
+  return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+}
+function getLeadName(id) {
+  const lead = leads.find(l => l.id === parseInt(id));
+  return lead ? lead.name : 'Unknown';
+}
+
+function showToast(msg, type = 'success') {
+  const toast = document.getElementById('toast');
+  const icon = toast.querySelector('i');
+  toast.className = `toast ${type}`;
+  icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+  document.getElementById('toast-msg').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// CLOSE MODALS ON OVERLAY CLICK
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.remove('active');
+  });
+});
+
+// KEYBOARD SHORTCUTS
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+  }
+});
+
+// INIT
+(function init() {
+  const token = localStorage.getItem('sales_token');
+  if (token) {
+    currentUser = { name: 'Sales User', email: 'user@zacson.com' };
+    showApp();
+  }
+
+  // Populate trial lead dropdown
+  const btLead = document.getElementById('bt-lead');
+  if (btLead && leads.length) {
+    btLead.innerHTML = '<option value="">Select a lead</option>' + leads.map(l => `<option value="${l.id}">${esc(l.name)}</option>`).join('');
+  }
+})();
+</script>
+</body>
+</html>

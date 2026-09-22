@@ -1,0 +1,2579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zacson Fitness - Trainer Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a25;
+            --bg-tertiary: #252535;
+            --bg-hover: #2a2a3a;
+            --brand-red: #FF0000;
+            --brand-red-dark: #cc0000;
+            --brand-red-glow: rgba(255, 0, 0, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --text-muted: #6a6a7a;
+            --border-color: #2a2a3a;
+            --success: #00cc66;
+            --warning: #ffaa00;
+            --danger: #ff4444;
+            --info: #4488ff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: var(--brand-red); border-radius: 3px; }
+
+        /* Login Screen */
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, #12121a 100%);
+            padding: 20px;
+        }
+
+        .login-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .login-logo i {
+            font-size: 48px;
+            color: var(--brand-red);
+            margin-bottom: 16px;
+            display: block;
+            filter: drop-shadow(0 0 20px var(--brand-red-glow));
+        }
+
+        .login-logo h1 {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .login-logo h1 span { color: var(--brand-red); }
+
+        .login-logo p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--brand-red);
+            box-shadow: 0 0 0 3px var(--brand-red-glow);
+        }
+
+        .form-group textarea { resize: vertical; min-height: 100px; }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--brand-red);
+            color: white;
+            width: 100%;
+            justify-content: center;
+            padding: 14px;
+        }
+
+        .btn-primary:hover {
+            background: var(--brand-red-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px var(--brand-red-glow);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover { background: var(--bg-hover); }
+
+        .btn-sm { padding: 8px 16px; font-size: 12px; }
+
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: #000; }
+
+        .login-error {
+            background: rgba(255, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--danger);
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        /* Main App Layout */
+        .app-layout {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .app-layout.active { display: flex; }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-brand i {
+            font-size: 28px;
+            color: var(--brand-red);
+        }
+
+        .sidebar-brand h2 {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .sidebar-brand h2 span { color: var(--brand-red); }
+
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 12px;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            padding: 0 12px;
+            margin-bottom: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 0, 0, 0.1);
+            color: var(--brand-red);
+        }
+
+        .nav-item i { width: 20px; text-align: center; font-size: 14px; }
+
+        .sidebar-footer {
+            padding: 16px 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .trainer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+        }
+
+        .trainer-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--brand-red);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .trainer-details { flex: 1; min-width: 0; }
+        .trainer-details h4 { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .trainer-details p { font-size: 11px; color: var(--text-muted); }
+
+        .logout-btn {
+            width: 100%;
+            margin-top: 8px;
+            padding: 10px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover { border-color: var(--danger); color: var(--danger); }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+
+        .top-bar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .page-title h2 { font-size: 20px; font-weight: 700; }
+        .page-title p { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+
+        .top-bar-actions { display: flex; align-items: center; gap: 16px; }
+
+        .notification-btn {
+            position: relative;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .notification-btn:hover { border-color: var(--brand-red); color: var(--brand-red); }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--brand-red);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .content-area {
+            padding: 32px;
+        }
+
+        /* Pages */
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--brand-red);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .stat-icon.red { background: rgba(255, 0, 0, 0.1); color: var(--brand-red); }
+        .stat-icon.green { background: rgba(0, 204, 102, 0.1); color: var(--success); }
+        .stat-icon.blue { background: rgba(68, 136, 255, 0.1); color: var(--info); }
+        .stat-icon.orange { background: rgba(255, 170, 0, 0.1); color: var(--warning); }
+
+        .stat-card h3 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .stat-card p { font-size: 13px; color: var(--text-secondary); }
+
+        /* Cards */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-header h3 { font-size: 16px; font-weight: 600; }
+
+        .card-body { padding: 24px; }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 24px;
+        }
+
+        /* Tables */
+        .table-container { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 14px 16px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tr:hover td { background: var(--bg-hover); }
+
+        tr:last-child td { border-bottom: none; }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-success { background: rgba(0, 204, 102, 0.15); color: var(--success); }
+        .badge-danger { background: rgba(255, 68, 68, 0.15); color: var(--danger); }
+        .badge-warning { background: rgba(255, 170, 0, 0.15); color: var(--warning); }
+        .badge-info { background: rgba(68, 136, 255, 0.15); color: var(--info); }
+        .badge-neutral { background: rgba(160, 160, 176, 0.15); color: var(--text-secondary); }
+
+        /* Member Cards */
+        .members-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .member-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .member-card:hover {
+            border-color: var(--brand-red);
+            transform: translateY(-2px);
+        }
+
+        .member-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .member-avatar {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, var(--brand-red), var(--brand-red-dark));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .member-info h4 { font-size: 15px; font-weight: 600; }
+        .member-info p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+        .member-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .member-stat {
+            text-align: center;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+
+        .member-stat strong { display: block; font-size: 16px; font-weight: 700; }
+        .member-stat span { font-size: 11px; color: var(--text-muted); }
+
+        /* Session Cards */
+        .session-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .session-card {
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .session-card:hover { background: var(--bg-hover); }
+
+        .session-info { flex: 1; }
+        .session-info h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .session-info p { font-size: 12px; color: var(--text-secondary); }
+
+        .session-time {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-right: 20px;
+            white-space: nowrap;
+        }
+
+        .session-actions { display: flex; gap: 8px; }
+
+        /* Schedule Grid */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .schedule-slot {
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            padding: 16px;
+            border-left: 3px solid var(--brand-red);
+        }
+
+        .schedule-slot h4 { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+        .schedule-slot p { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+
+        /* Workout Plan Builder */
+        .workout-builder {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .exercise-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 12px;
+            align-items: end;
+            margin-bottom: 12px;
+        }
+
+        .exercise-row .form-group { margin-bottom: 0; }
+
+        .add-exercise-btn {
+            background: transparent;
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            width: 100%;
+            color: var(--text-muted);
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .add-exercise-btn:hover { border-color: var(--brand-red); color: var(--brand-red); }
+
+        /* Progress Charts */
+        .progress-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .chart-card {
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .chart-header h4 { font-size: 14px; font-weight: 600; }
+
+        .chart-placeholder {
+            height: 160px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        /* Task List */
+        .task-list { display: flex; flex-direction: column; gap: 8px; }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .task-item:hover { background: var(--bg-hover); }
+
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .task-checkbox.checked {
+            background: var(--brand-red);
+            border-color: var(--brand-red);
+        }
+
+        .task-checkbox.checked i { display: block; }
+        .task-checkbox i { display: none; color: white; font-size: 11px; }
+
+        .task-content { flex: 1; }
+        .task-content h4 { font-size: 13px; font-weight: 500; }
+        .task-content h4.completed { text-decoration: line-through; color: var(--text-muted); }
+        .task-content p { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+        .task-priority {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .task-priority.high { background: var(--danger); }
+        .task-priority.medium { background: var(--warning); }
+        .task-priority.low { background: var(--success); }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 { font-size: 18px; font-weight: 600; }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .modal-close:hover { color: var(--text-primary); }
+
+        .modal-body { padding: 24px; }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar input, .filter-bar select {
+            padding: 10px 14px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+        }
+
+        .filter-bar input:focus, .filter-bar select:focus {
+            outline: none;
+            border-color: var(--brand-red);
+        }
+
+        .filter-bar input { flex: 1; min-width: 200px; }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state i { font-size: 48px; margin-bottom: 16px; color: var(--border-color); }
+        .empty-state h3 { font-size: 18px; margin-bottom: 8px; color: var(--text-secondary); }
+        .empty-state p { font-size: 14px; }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success { border-left: 3px solid var(--success); }
+        .toast.error { border-left: 3px solid var(--danger); }
+        .toast.info { border-left: 3px solid var(--info); }
+
+        .toast i { font-size: 18px; }
+        .toast.success i { color: var(--success); }
+        .toast.error i { color: var(--danger); }
+        .toast.info i { color: var(--info); }
+        .toast span { font-size: 13px; flex: 1; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-top-color: var(--brand-red);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-overlay {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+        }
+
+        /* Search Highlight */
+        .search-highlight { color: var(--brand-red); font-weight: 600; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .menu-toggle { display: block; }
+        }
+
+        @media (max-width: 768px) {
+            .content-area { padding: 20px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .card-grid { grid-template-columns: 1fr; }
+            .members-grid { grid-template-columns: 1fr; }
+            .exercise-row { grid-template-columns: 1fr; }
+            .session-card { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .session-time { margin-right: 0; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .top-bar { padding: 12px 16px; }
+            .content-area { padding: 16px; }
+            .login-container { padding: 32px 24px; }
+        }
+
+        /* Member Detail Tabs */
+        .tab-nav {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-tertiary);
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 16px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--brand-red);
+            color: white;
+        }
+
+        .tab-btn:hover:not(.active) { color: var(--text-primary); }
+
+        /* Measurement Cards */
+        .measurement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .measurement-item {
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .measurement-item .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--brand-red);
+        }
+
+        .measurement-item .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Attendance Calendar */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            padding: 8px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 13px;
+            background: var(--bg-tertiary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .calendar-day:hover { background: var(--bg-hover); }
+        .calendar-day.present { background: rgba(0, 204, 102, 0.2); color: var(--success); }
+        .calendar-day.absent { background: rgba(255, 68, 68, 0.2); color: var(--danger); }
+        .calendar-day.today { border: 2px solid var(--brand-red); }
+    </style>
+</head>
+<body>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="login-logo">
+                <i class="fas fa-dumbbell"></i>
+                <h1>Zacson <span>Fitness</span></h1>
+                <p>Trainer Portal</p>
+            </div>
+            <div id="loginError" class="login-error"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="appLayout" class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand">
+                    <i class="fas fa-dumbbell"></i>
+                    <h2>Zacson <span>Fitness</span></h2>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <div class="nav-item active" data-page="dashboard">
+                        <i class="fas fa-th-large"></i> Dashboard
+                    </div>
+                    <div class="nav-item" data-page="members">
+                        <i class="fas fa-users"></i> My Members
+                    </div>
+                    <div class="nav-item" data-page="today-sessions">
+                        <i class="fas fa-calendar-check"></i> Today's Sessions
+                    </div>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Training</div>
+                    <div class="nav-item" data-page="classes">
+                        <i class="fas fa-chalkboard-teacher"></i> Classes
+                    </div>
+                    <div class="nav-item" data-page="pt-sessions">
+                        <i class="fas fa-stopwatch"></i> PT Sessions
+                    </div>
+                    <div class="nav-item" data-page="workout-plans">
+                        <i class="fas fa-clipboard-list"></i> Workout Plans
+                    </div>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Management</div>
+                    <div class="nav-item" data-page="progress">
+                        <i class="fas fa-chart-line"></i> Progress
+                    </div>
+                    <div class="nav-item" data-page="attendance">
+                        <i class="fas fa-fingerprint"></i> Attendance
+                    </div>
+                    <div class="nav-item" data-page="tasks">
+                        <i class="fas fa-tasks"></i> Tasks
+                    </div>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="trainer-info">
+                    <div class="trainer-avatar" id="trainerAvatar">T</div>
+                    <div class="trainer-details">
+                        <h4 id="trainerName">Trainer</h4>
+                        <p>Trainer</p>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Sign Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="top-bar">
+                <div style="display:flex;align-items:center;gap:16px;">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="page-title" id="pageTitle">
+                        <h2>Dashboard</h2>
+                        <p id="pageSubtitle">Welcome back!</p>
+                    </div>
+                </div>
+                <div class="top-bar-actions">
+                    <div class="notification-btn" onclick="showToast('No new notifications', 'info')">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notifBadge" style="display:none;">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- Dashboard Page -->
+                <div id="page-dashboard" class="page active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon red"><i class="fas fa-calendar-day"></i></div>
+                            </div>
+                            <h3 id="statTodaySessions">0</h3>
+                            <p>Today's Sessions</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon green"><i class="fas fa-users"></i></div>
+                            </div>
+                            <h3 id="statAssignedMembers">0</h3>
+                            <p>Assigned Members</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon blue"><i class="fas fa-chalkboard"></i></div>
+                            </div>
+                            <h3 id="statTodayClasses">0</h3>
+                            <p>Today's Classes</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-icon orange"><i class="fas fa-check-circle"></i></div>
+                            </div>
+                            <h3 id="statCompletedSessions">0</h3>
+                            <p>Completed Today</p>
+                        </div>
+                    </div>
+                    <div class="card-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-clock" style="color:var(--brand-red);margin-right:8px;"></i> Upcoming Sessions</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="dashboardUpcoming" class="session-list">
+                                    <div class="loading-overlay"><div class="spinner"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-tasks" style="color:var(--warning);margin-right:8px;"></i> Pending Tasks</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="dashboardTasks" class="task-list">
+                                    <div class="loading-overlay"><div class="spinner"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Members Page -->
+                <div id="page-members" class="page">
+                    <div class="filter-bar">
+                        <input type="text" id="memberSearch" placeholder="Search members..." oninput="filterMembers()">
+                        <select id="memberFilter" onchange="filterMembers()">
+                            <option value="all">All Members</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <div id="membersContainer" class="members-grid">
+                        <div class="loading-overlay"><div class="spinner"></div></div>
+                    </div>
+                </div>
+
+                <!-- Today's Sessions Page -->
+                <div id="page-today-sessions" class="page">
+                    <div class="filter-bar">
+                        <select id="sessionFilter" onchange="filterTodaySessions()">
+                            <option value="all">All Sessions</option>
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
+                            <option value="missed">Missed</option>
+                        </select>
+                    </div>
+                    <div id="todaySessionsContainer" class="session-list">
+                        <div class="loading-overlay"><div class="spinner"></div></div>
+                    </div>
+                </div>
+
+                <!-- Classes Page -->
+                <div id="page-classes" class="page">
+                    <div class="filter-bar">
+                        <input type="text" id="classSearch" placeholder="Search classes..." oninput="filterClasses()">
+                        <select id="classDayFilter" onchange="filterClasses()">
+                            <option value="all">All Days</option>
+                            <option value="monday">Monday</option>
+                            <option value="tuesday">Tuesday</option>
+                            <option value="wednesday">Wednesday</option>
+                            <option value="thursday">Thursday</option>
+                            <option value="friday">Friday</option>
+                            <option value="saturday">Saturday</option>
+                            <option value="sunday">Sunday</option>
+                        </select>
+                    </div>
+                    <div id="classesContainer">
+                        <div class="loading-overlay"><div class="spinner"></div></div>
+                    </div>
+                </div>
+
+                <!-- PT Sessions Page -->
+                <div id="page-pt-sessions" class="page">
+                    <div class="filter-bar">
+                        <input type="text" id="ptSearch" placeholder="Search sessions..." oninput="filterPTSessions()">
+                        <select id="ptStatusFilter" onchange="filterPTSessions()">
+                            <option value="all">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
+                            <option value="missed">Missed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Time</th>
+                                            <th>Member</th>
+                                            <th>Type</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ptSessionsTable">
+                                        <tr><td colspan="6"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Workout Plans Page -->
+                <div id="page-workout-plans" class="page">
+                    <div class="filter-bar">
+                        <input type="text" id="planSearch" placeholder="Search plans..." oninput="filterWorkoutPlans()">
+                        <button class="btn btn-primary btn-sm" onclick="openWorkoutPlanModal()">
+                            <i class="fas fa-plus"></i> New Plan
+                        </button>
+                    </div>
+                    <div id="workoutPlansContainer">
+                        <div class="loading-overlay"><div class="spinner"></div></div>
+                    </div>
+                </div>
+
+                <!-- Progress Page -->
+                <div id="page-progress" class="page">
+                    <div class="filter-bar">
+                        <select id="progressMember" onchange="loadMemberProgress()">
+                            <option value="">Select Member</option>
+                        </select>
+                    </div>
+                    <div id="progressContainer">
+                        <div class="empty-state">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Select a member</h3>
+                            <p>Choose a member from the dropdown to view their progress</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance Page -->
+                <div id="page-attendance" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>My Attendance</h3>
+                            <div>
+                                <button class="btn btn-secondary btn-sm" onclick="prevMonth()"><i class="fas fa-chevron-left"></i></button>
+                                <span id="attendanceMonth" style="margin:0 16px;font-weight:600;"></span>
+                                <button class="btn btn-secondary btn-sm" onclick="nextMonth()"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="calendar-grid" id="attendanceCalendar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tasks Page -->
+                <div id="page-tasks" class="page">
+                    <div class="filter-bar">
+                        <select id="taskFilter" onchange="filterTasks()">
+                            <option value="all">All Tasks</option>
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                        <select id="taskPriorityFilter" onchange="filterTasks()">
+                            <option value="all">All Priority</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                    <div id="tasksContainer" class="task-list">
+                        <div class="loading-overlay"><div class="spinner"></div></div>
+                    </div>
+                </div>
+
+                <!-- Profile Page -->
+                <div id="page-profile" class="page">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Profile Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="profileContent">
+                                <div class="loading-overlay"><div class="spinner"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Workout Plan Modal -->
+    <div id="workoutPlanModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="planModalTitle">Create Workout Plan</h3>
+                <button class="modal-close" onclick="closeModal('workoutPlanModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="workoutPlanForm">
+                    <input type="hidden" id="planId">
+                    <div class="form-group">
+                        <label>Member</label>
+                        <select id="planMember" required>
+                            <option value="">Select Member</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Plan Name</label>
+                        <input type="text" id="planName" placeholder="e.g., Strength Training Week 1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="planDescription" placeholder="Plan description..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Duration (weeks)</label>
+                        <input type="number" id="planDuration" placeholder="4" min="1" max="52">
+                    </div>
+                    <h4 style="margin-bottom:16px;font-size:14px;">Exercises</h4>
+                    <div id="exercisesContainer">
+                        <div class="exercise-row">
+                            <div class="form-group">
+                                <label>Exercise Name</label>
+                                <input type="text" class="exercise-name" placeholder="e.g., Bench Press" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Sets</label>
+                                <input type="number" class="exercise-sets" placeholder="3" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Reps</label>
+                                <input type="number" class="exercise-reps" placeholder="10" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Weight (kg)</label>
+                                <input type="number" class="exercise-weight" placeholder="60" min="0" step="0.5">
+                            </div>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="removeExercise(this)" style="margin-bottom:16px;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" class="add-exercise-btn" onclick="addExerciseRow()">
+                        <i class="fas fa-plus"></i> Add Exercise
+                    </button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('workoutPlanModal')">Cancel</button>
+                <button class="btn btn-primary" style="width:auto;" onclick="saveWorkoutPlan()">
+                    <i class="fas fa-save"></i> Save Plan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Measurement Modal -->
+    <div id="measurementModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Add Measurement</h3>
+                <button class="modal-close" onclick="closeModal('measurementModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="measurementForm">
+                    <div class="form-group">
+                        <label>Member</label>
+                        <select id="measurementMember" required>
+                            <option value="">Select Member</option>
+                        </select>
+                    </div>
+                    <div class="measurement-grid">
+                        <div class="measurement-item">
+                            <div class="form-group">
+                                <label>Weight (kg)</label>
+                                <input type="number" id="measureWeight" step="0.1">
+                            </div>
+                        </div>
+                        <div class="measurement-item">
+                            <div class="form-group">
+                                <label>Body Fat %</label>
+                                <input type="number" id="measureBodyFat" step="0.1">
+                            </div>
+                        </div>
+                        <div class="measurement-item">
+                            <div class="form-group">
+                                <label>Chest (cm)</label>
+                                <input type="number" id="measureChest" step="0.1">
+                            </div>
+                        </div>
+                        <div class="measurement-item">
+                            <div class="form-group">
+                                <label>Waist (cm)</label>
+                                <input type="number" id="measureWaist" step="0.1">
+                            </div>
+                        </div>
+                        <div class="measurement-item">
+                            <div class="form-group">
+                                <label>Hips (cm)</label>
+                                <input type="number" id="measureHips" step="0.1">
+                            </div>
+                        </div>
+                        <div class="measurement-item">
+                            <div class="form-group">
+                                <label>Biceps (cm)</label>
+                                <input type="number" id="measureBiceps" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea id="measureNotes" placeholder="Additional notes..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('measurementModal')">Cancel</button>
+                <button class="btn btn-primary" style="width:auto;" onclick="saveMeasurement()">
+                    <i class="fas fa-save"></i> Save Measurement
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Session Detail Modal -->
+    <div id="sessionDetailModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Session Details</h3>
+                <button class="modal-close" onclick="closeModal('sessionDetailModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="sessionDetailContent"></div>
+            <div class="modal-footer" id="sessionDetailFooter"></div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        const API_BASE = '/api';
+        let currentUser = null;
+        let trainerId = null;
+        let allMembers = [];
+        let allSessions = [];
+        let allClasses = [];
+        let allWorkoutPlans = [];
+        let allTasks = [];
+        let allMeasurements = [];
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+
+        // ==================== AUTH ====================
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const loginError = document.getElementById('loginError');
+
+            loginBtn.innerHTML = '<div class="spinner"></div> Signing in...';
+            loginBtn.disabled = true;
+            loginError.style.display = 'none';
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error || data.message || 'Login failed');
+
+                if (data.user && data.user.role !== 'trainer') {
+                    throw new Error('Access denied. Trainer accounts only.');
+                }
+
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                currentUser = data.user;
+                trainerId = data.user.id || data.user._id;
+                initApp();
+            } catch (err) {
+                loginError.textContent = err.message;
+                loginError.style.display = 'block';
+            } finally {
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+                loginBtn.disabled = false;
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            currentUser = null;
+            trainerId = null;
+            document.getElementById('appLayout').classList.remove('active');
+            document.getElementById('loginScreen').style.display = 'flex';
+        }
+
+        // ==================== INIT ====================
+        async function initApp() {
+            if (!currentUser) {
+                const token = localStorage.getItem('token');
+                const savedUser = localStorage.getItem('user');
+                if (!token || !savedUser) return;
+                currentUser = JSON.parse(savedUser);
+                trainerId = currentUser.id || currentUser._id;
+            }
+
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appLayout').classList.add('active');
+
+            const name = currentUser.name || currentUser.email || 'Trainer';
+            document.getElementById('trainerName').textContent = name;
+            document.getElementById('trainerAvatar').textContent = name.charAt(0).toUpperCase();
+            document.getElementById('pageSubtitle').textContent = `Welcome back, ${name.split(' ')[0]}!`;
+
+            await Promise.all([
+                loadDashboard(),
+                loadMembers(),
+                loadSessions(),
+                loadClasses(),
+                loadWorkoutPlans(),
+                loadTasks(),
+                loadMeasurements()
+            ]);
+        }
+
+        // ==================== API HELPERS ====================
+        function getAuthHeaders() {
+            return {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        async function apiGet(endpoint) {
+            const res = await fetch(`${API_BASE}${endpoint}`, { headers: getAuthHeaders() });
+            if (res.status === 401) { logout(); throw new Error('Session expired'); }
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || err.message || `HTTP ${res.status}`);
+            }
+            return res.json();
+        }
+
+        async function apiPost(endpoint, body) {
+            const res = await fetch(`${API_BASE}${endpoint}`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(body)
+            });
+            if (res.status === 401) { logout(); throw new Error('Session expired'); }
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || err.message || `HTTP ${res.status}`);
+            }
+            return res.json();
+        }
+
+        async function apiPut(endpoint, body) {
+            const res = await fetch(`${API_BASE}${endpoint}`, {
+                method: 'PUT',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(body)
+            });
+            if (res.status === 401) { logout(); throw new Error('Session expired'); }
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || err.message || `HTTP ${res.status}`);
+            }
+            return res.json();
+        }
+
+        async function apiDelete(endpoint) {
+            const res = await fetch(`${API_BASE}${endpoint}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
+            if (res.status === 401) { logout(); throw new Error('Session expired'); }
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || err.message || `HTTP ${res.status}`);
+            }
+            return res.json();
+        }
+
+        // ==================== TOAST ====================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fas ${icons[type]}"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // ==================== NAVIGATION ====================
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                const page = item.dataset.page;
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById(`page-${page}`).classList.add('active');
+
+                const titles = {
+                    'dashboard': ['Dashboard', 'Welcome back!'],
+                    'members': ['My Members', 'Manage your assigned members'],
+                    'today-sessions': ["Today's Sessions", 'Track and manage PT sessions'],
+                    'classes': ['Classes', 'Your assigned classes'],
+                    'pt-sessions': ['PT Sessions', 'Session history'],
+                    'workout-plans': ['Workout Plans', 'Create and manage workout plans'],
+                    'progress': ['Progress', 'Track member progress'],
+                    'attendance': ['Attendance', 'Your attendance records'],
+                    'tasks': ['Tasks', 'Your assigned tasks'],
+                    'profile': ['Profile', 'Your profile information']
+                };
+                document.getElementById('pageTitle').querySelector('h2').textContent = titles[page][0];
+                document.getElementById('pageSubtitle').textContent = titles[page][1];
+
+                document.getElementById('sidebar').classList.remove('open');
+
+                if (page === 'today-sessions') renderTodaySessions();
+                if (page === 'pt-sessions') renderPTSessions();
+                if (page === 'classes') renderClasses();
+                if (page === 'members') renderMembers();
+                if (page === 'workout-plans') renderWorkoutPlans();
+                if (page === 'progress') populateProgressMemberSelect();
+                if (page === 'attendance') renderAttendance();
+                if (page === 'tasks') renderTasks();
+                if (page === 'profile') renderProfile();
+            });
+        });
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // ==================== DASHBOARD ====================
+        async function loadDashboard() {
+            try {
+                const [assignments, sessions, classes, tasks] = await Promise.all([
+                    apiGet(`/admin/pt/assignments?trainer_id=${trainerId}`).catch(() => []),
+                    apiGet(`/admin/pt/sessions?trainer_id=${trainerId}`).catch(() => []),
+                    apiGet('/admin/classes').catch(() => []),
+                    apiGet('/admin/tasks').catch(() => [])
+                ]);
+
+                const today = new Date().toISOString().split('T')[0];
+                const todaySessions = (Array.isArray(sessions) ? sessions : (sessions.data || [])).filter(s => {
+                    const sDate = new Date(s.date || s.session_date).toISOString().split('T')[0];
+                    return sDate === today;
+                });
+                const completedToday = todaySessions.filter(s => s.status === 'completed');
+                const todayClasses = (Array.isArray(classes) ? classes : (classes.data || [])).filter(c => {
+                    const days = Array.isArray(c.days) ? c.days : (c.day ? [c.day.toLowerCase()] : []);
+                    return days.includes(new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase());
+                });
+
+                const memberSet = new Set((Array.isArray(assignments) ? assignments : (assignments.data || [])).map(a => a.member_id));
+
+                document.getElementById('statTodaySessions').textContent = todaySessions.length;
+                document.getElementById('statAssignedMembers').textContent = memberSet.size;
+                document.getElementById('statTodayClasses').textContent = todayClasses.length;
+                document.getElementById('statCompletedSessions').textContent = completedToday.length;
+
+                // Upcoming sessions
+                const upcoming = todaySessions
+                    .filter(s => s.status !== 'completed' && s.status !== 'missed')
+                    .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+                const upcomingHtml = upcoming.length ? upcoming.map(s => `
+                    <div class="session-card">
+                        <div class="session-info">
+                            <h4>${s.member_name || s.memberName || 'Member'}</h4>
+                            <p>${s.type || s.session_type || 'PT Session'}</p>
+                        </div>
+                        <div class="session-time">${s.time || s.session_time || '--:--'}</div>
+                        <span class="badge badge-warning">Pending</span>
+                    </div>
+                `).join('') : '<div class="empty-state" style="padding:20px;"><i class="fas fa-check-circle" style="color:var(--success);font-size:24px;margin-bottom:8px;"></i><p>No upcoming sessions</p></div>';
+                document.getElementById('dashboardUpcoming').innerHTML = upcomingHtml;
+
+                // Tasks
+                const taskList = (Array.isArray(tasks) ? tasks : (tasks.data || [])).filter(t => !t.completed).slice(0, 5);
+                const tasksHtml = taskList.length ? taskList.map(t => `
+                    <div class="task-item">
+                        <div class="task-priority ${t.priority || 'medium'}"></div>
+                        <div class="task-content">
+                            <h4>${t.title || t.name || 'Task'}</h4>
+                            <p>${t.due_date || t.dueDate || ''}</p>
+                        </div>
+                    </div>
+                `).join('') : '<div class="empty-state" style="padding:20px;"><p>No pending tasks</p></div>';
+                document.getElementById('dashboardTasks').innerHTML = tasksHtml;
+            } catch (err) {
+                console.error('Dashboard load error:', err);
+            }
+        }
+
+        // ==================== MEMBERS ====================
+        async function loadMembers() {
+            try {
+                const [assignments, members] = await Promise.all([
+                    apiGet(`/admin/pt/assignments?trainer_id=${trainerId}`).catch(() => []),
+                    apiGet('/admin/members').catch(() => [])
+                ]);
+
+                const assignmentList = Array.isArray(assignments) ? assignments : (assignments.data || []);
+                const memberList = Array.isArray(members) ? members : (members.data || []);
+
+                const assignedIds = new Set(assignmentList.map(a => a.member_id));
+                allMembers = memberList.filter(m => assignedIds.has(m.id || m._id));
+                if (!allMembers.length && assignmentList.length) {
+                    allMembers = assignmentList.map(a => ({
+                        id: a.member_id,
+                        name: a.member_name || a.memberName || 'Member',
+                        email: a.member_email || '',
+                        phone: a.member_phone || ''
+                    }));
+                }
+                renderMembers();
+            } catch (err) {
+                console.error('Members load error:', err);
+                allMembers = [];
+                renderMembers();
+            }
+        }
+
+        function renderMembers() {
+            const container = document.getElementById('membersContainer');
+            if (!allMembers.length) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-users"></i><h3>No assigned members</h3><p>You don\'t have any members assigned yet</p></div>';
+                return;
+            }
+
+            const search = document.getElementById('memberSearch').value.toLowerCase();
+            const filter = document.getElementById('memberFilter').value;
+            let filtered = allMembers.filter(m => {
+                const matchSearch = !search || (m.name || '').toLowerCase().includes(search) || (m.email || '').toLowerCase().includes(search);
+                const matchFilter = filter === 'all' || (m.status || 'active') === filter;
+                return matchSearch && matchFilter;
+            });
+
+            container.innerHTML = filtered.map(m => `
+                <div class="member-card">
+                    <div class="member-header">
+                        <div class="member-avatar">${(m.name || 'M').charAt(0).toUpperCase()}</div>
+                        <div class="member-info">
+                            <h4>${m.name || 'Member'}</h4>
+                            <p>${m.email || ''}</p>
+                        </div>
+                    </div>
+                    <div class="member-stats">
+                        <div class="member-stat">
+                            <strong>${m.age || '--'}</strong>
+                            <span>Age</span>
+                        </div>
+                        <div class="member-stat">
+                            <strong>${m.weight || '--'}<small>kg</small></strong>
+                            <span>Weight</span>
+                        </div>
+                        <div class="member-stat">
+                            <strong>${m.height || '--'}<small>cm</small></strong>
+                            <span>Height</span>
+                        </div>
+                    </div>
+                    <div style="margin-top:16px;display:flex;gap:8px;">
+                        <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="viewMemberProgress('${m.id || m._id}')">
+                            <i class="fas fa-chart-line"></i> Progress
+                        </button>
+                        <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="createPlanForMember('${m.id || m._id}')">
+                            <i class="fas fa-clipboard-list"></i> Plan
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterMembers() { renderMembers(); }
+
+        function viewMemberProgress(memberId) {
+            document.querySelector('[data-page="progress"]').click();
+            setTimeout(() => {
+                document.getElementById('progressMember').value = memberId;
+                loadMemberProgress();
+            }, 100);
+        }
+
+        function createPlanForMember(memberId) {
+            document.querySelector('[data-page="workout-plans"]').click();
+            setTimeout(() => {
+                openWorkoutPlanModal();
+                document.getElementById('planMember').value = memberId;
+            }, 100);
+        }
+
+        // ==================== TODAY'S SESSIONS ====================
+        async function loadSessions() {
+            try {
+                const data = await apiGet(`/admin/pt/sessions?trainer_id=${trainerId}`);
+                allSessions = Array.isArray(data) ? data : (data.data || []);
+            } catch (err) {
+                console.error('Sessions load error:', err);
+                allSessions = [];
+            }
+            renderTodaySessions();
+        }
+
+        function renderTodaySessions() {
+            const container = document.getElementById('todaySessionsContainer');
+            const today = new Date().toISOString().split('T')[0];
+            let sessions = allSessions.filter(s => {
+                const sDate = new Date(s.date || s.session_date).toISOString().split('T')[0];
+                return sDate === today;
+            });
+
+            const filter = document.getElementById('sessionFilter').value;
+            if (filter !== 'all') sessions = sessions.filter(s => s.status === filter);
+
+            if (!sessions.length) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-check"></i><h3>No sessions for today</h3><p>You have no PT sessions scheduled for today</p></div>';
+                return;
+            }
+
+            container.innerHTML = sessions.sort((a, b) => (a.time || '').localeCompare(b.time || '')).map(s => `
+                <div class="session-card">
+                    <div class="session-info">
+                        <h4>${s.member_name || s.memberName || 'Member'}</h4>
+                        <p>${s.type || s.session_type || 'PT Session'} ${s.notes ? '— ' + s.notes : ''}</p>
+                    </div>
+                    <div class="session-time"><i class="fas fa-clock"></i> ${s.time || s.session_time || '--:--'}</div>
+                    <span class="badge badge-${s.status === 'completed' ? 'success' : s.status === 'missed' ? 'danger' : 'warning'}">${s.status || 'pending'}</span>
+                    <div class="session-actions">
+                        ${s.status === 'pending' ? `
+                            <button class="btn btn-success btn-sm" onclick="updateSessionStatus('${s.id || s._id}', 'completed')">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="updateSessionStatus('${s.id || s._id}', 'missed')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-secondary btn-sm" onclick="showSessionDetail('${s.id || s._id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterTodaySessions() { renderTodaySessions(); }
+
+        async function updateSessionStatus(sessionId, status) {
+            try {
+                await apiPut(`/admin/pt/sessions/${sessionId}`, { status });
+                const session = allSessions.find(s => (s.id || s._id) === sessionId);
+                if (session) session.status = status;
+                renderTodaySessions();
+                showToast(`Session marked as ${status}`, 'success');
+                loadDashboard();
+            } catch (err) {
+                showToast('Failed to update session', 'error');
+            }
+        }
+
+        function showSessionDetail(sessionId) {
+            const session = allSessions.find(s => (s.id || s._id) === sessionId);
+            if (!session) return;
+
+            const content = document.getElementById('sessionDetailContent');
+            const footer = document.getElementById('sessionDetailFooter');
+
+            content.innerHTML = `
+                <div class="measurement-grid">
+                    <div class="measurement-item">
+                        <div class="value" style="font-size:16px;color:var(--text-primary);">${session.member_name || session.memberName || 'N/A'}</div>
+                        <div class="label">Member</div>
+                    </div>
+                    <div class="measurement-item">
+                        <div class="value" style="font-size:16px;color:var(--text-primary);">${session.date ? new Date(session.date || session.session_date).toLocaleDateString() : 'N/A'}</div>
+                        <div class="label">Date</div>
+                    </div>
+                    <div class="measurement-item">
+                        <div class="value" style="font-size:16px;color:var(--text-primary);">${session.time || session.session_time || 'N/A'}</div>
+                        <div class="label">Time</div>
+                    </div>
+                    <div class="measurement-item">
+                        <div class="value" style="font-size:16px;"><span class="badge badge-${session.status === 'completed' ? 'success' : session.status === 'missed' ? 'danger' : 'warning'}">${session.status || 'pending'}</span></div>
+                        <div class="label">Status</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <p style="font-size:14px;">${session.type || session.session_type || 'PT Session'}</p>
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <p style="font-size:14px;">${session.notes || 'No notes'}</p>
+                </div>
+            `;
+
+            if (session.status === 'pending') {
+                footer.innerHTML = `
+                    <button class="btn btn-secondary" onclick="closeModal('sessionDetailModal')">Close</button>
+                    <button class="btn btn-danger btn-sm" onclick="updateSessionStatus('${session.id || session._id}', 'missed'); closeModal('sessionDetailModal');">Mark Missed</button>
+                    <button class="btn btn-success btn-sm" onclick="updateSessionStatus('${session.id || session._id}', 'completed'); closeModal('sessionDetailModal');">Mark Complete</button>
+                `;
+            } else {
+                footer.innerHTML = '<button class="btn btn-secondary" onclick="closeModal(\'sessionDetailModal\')">Close</button>';
+            }
+
+            openModal('sessionDetailModal');
+        }
+
+        // ==================== PT SESSIONS (HISTORY) ====================
+        function renderPTSessions() {
+            const container = document.getElementById('ptSessionsTable');
+            const search = document.getElementById('ptSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('ptStatusFilter').value;
+
+            let sessions = [...allSessions];
+            if (search) sessions = sessions.filter(s => (s.member_name || s.memberName || '').toLowerCase().includes(search) || (s.type || s.session_type || '').toLowerCase().includes(search));
+            if (statusFilter !== 'all') sessions = sessions.filter(s => s.status === statusFilter);
+            sessions.sort((a, b) => new Date(b.date || b.session_date) - new Date(a.date || a.session_date));
+
+            if (!sessions.length) {
+                container.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-stopwatch"></i><h3>No sessions found</h3></div></td></tr>';
+                return;
+            }
+
+            container.innerHTML = sessions.map(s => `
+                <tr>
+                    <td>${s.date || s.session_date ? new Date(s.date || s.session_date).toLocaleDateString() : '--'}</td>
+                    <td>${s.time || s.session_time || '--'}</td>
+                    <td>${s.member_name || s.memberName || 'Member'}</td>
+                    <td>${s.type || s.session_type || 'PT'}</td>
+                    <td><span class="badge badge-${s.status === 'completed' ? 'success' : s.status === 'missed' ? 'danger' : s.status === 'cancelled' ? 'neutral' : 'warning'}">${s.status || 'pending'}</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm" onclick="showSessionDetail('${s.id || s._id}')"><i class="fas fa-eye"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterPTSessions() { renderPTSessions(); }
+
+        // ==================== CLASSES ====================
+        async function loadClasses() {
+            try {
+                const data = await apiGet('/admin/classes');
+                allClasses = Array.isArray(data) ? data : (data.data || []);
+            } catch (err) {
+                console.error('Classes load error:', err);
+                allClasses = [];
+            }
+        }
+
+        function renderClasses() {
+            const container = document.getElementById('classesContainer');
+            const search = document.getElementById('classSearch').value.toLowerCase();
+            const dayFilter = document.getElementById('classDayFilter').value;
+            const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+
+            let classes = [...allClasses];
+            if (search) classes = classes.filter(c => (c.name || c.title || '').toLowerCase().includes(search) || (c.instructor || c.trainer_name || '').toLowerCase().includes(search));
+            if (dayFilter !== 'all') classes = classes.filter(c => {
+                const days = Array.isArray(c.days) ? c.days : (c.day ? [c.day.toLowerCase()] : []);
+                return days.includes(dayFilter);
+            });
+
+            if (!classes.length) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-chalkboard-teacher"></i><h3>No classes found</h3></div>';
+                return;
+            }
+
+            container.innerHTML = '<div class="schedule-grid">' + classes.map(c => {
+                const days = Array.isArray(c.days) ? c.days : (c.day ? [c.day] : []);
+                const isToday = days.map(d => d.toLowerCase()).includes(today);
+                return `
+                    <div class="schedule-slot" style="${isToday ? 'border-left-color: var(--success);' : ''}">
+                        <div style="display:flex;justify-content:space-between;align-items:start;">
+                            <h4>${c.name || c.title || 'Class'}</h4>
+                            ${isToday ? '<span class="badge badge-success">Today</span>' : ''}
+                        </div>
+                        <p><i class="fas fa-user"></i> ${c.instructor || c.trainer_name || 'Trainer'}</p>
+                        <p><i class="fas fa-clock"></i> ${c.time || c.start_time || 'TBD'}</p>
+                        <p><i class="fas fa-calendar"></i> ${days.join(', ') || 'TBD'}</p>
+                        ${c.capacity ? `<p><i class="fas fa-users"></i> ${c.enrolled || 0}/${c.capacity}</p>` : ''}
+                    </div>
+                `;
+            }).join('') + '</div>';
+        }
+
+        function filterClasses() { renderClasses(); }
+
+        // ==================== WORKOUT PLANS ====================
+        async function loadWorkoutPlans() {
+            try {
+                const data = await apiGet('/admin/workout-plans');
+                allWorkoutPlans = Array.isArray(data) ? data : (data.data || []);
+            } catch (err) {
+                console.error('Workout plans load error:', err);
+                allWorkoutPlans = [];
+            }
+        }
+
+        function renderWorkoutPlans() {
+            const container = document.getElementById('workoutPlansContainer');
+            const search = document.getElementById('planSearch').value.toLowerCase();
+
+            let plans = [...allWorkoutPlans];
+            if (search) plans = plans.filter(p => (p.name || p.title || '').toLowerCase().includes(search) || (p.member_name || '').toLowerCase().includes(search));
+
+            if (!plans.length) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-clipboard-list"></i><h3>No workout plans</h3><p>Create your first workout plan to get started</p></div>';
+                return;
+            }
+
+            container.innerHTML = '<div class="members-grid">' + plans.map(p => `
+                <div class="member-card">
+                    <div class="member-header">
+                        <div class="member-avatar" style="background:var(--info);"><i class="fas fa-clipboard-list"></i></div>
+                        <div class="member-info">
+                            <h4>${p.name || p.title || 'Plan'}</h4>
+                            <p>${p.member_name || 'Unassigned'}</p>
+                        </div>
+                    </div>
+                    <p style="font-size:13px;color:var(--text-secondary);margin:12px 0;">${p.description || 'No description'}</p>
+                    <div style="display:flex;gap:8px;margin-top:12px;">
+                        <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="editWorkoutPlan('${p.id || p._id}')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteWorkoutPlan('${p.id || p._id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('') + '</div>';
+        }
+
+        function filterWorkoutPlans() { renderWorkoutPlans(); }
+
+        function openWorkoutPlanModal(planId = null) {
+            document.getElementById('planModalTitle').textContent = planId ? 'Edit Workout Plan' : 'Create Workout Plan';
+            document.getElementById('planId').value = planId || '';
+
+            // Populate member dropdown
+            const memberSelect = document.getElementById('planMember');
+            memberSelect.innerHTML = '<option value="">Select Member</option>' +
+                allMembers.map(m => `<option value="${m.id || m._id}">${m.name || 'Member'}</option>`).join('');
+
+            if (planId) {
+                const plan = allWorkoutPlans.find(p => (p.id || p._id) === planId);
+                if (plan) {
+                    document.getElementById('planName').value = plan.name || plan.title || '';
+                    document.getElementById('planDescription').value = plan.description || '';
+                    document.getElementById('planDuration').value = plan.duration || '';
+                    memberSelect.value = plan.member_id || '';
+
+                    const container = document.getElementById('exercisesContainer');
+                    container.innerHTML = '';
+                    const exercises = plan.exercises || [];
+                    exercises.forEach(ex => addExerciseRow(ex));
+                    if (!exercises.length) addExerciseRow();
+                }
+            } else {
+                document.getElementById('workoutPlanForm').reset();
+                document.getElementById('exercisesContainer').innerHTML = '';
+                addExerciseRow();
+            }
+            openModal('workoutPlanModal');
+        }
+
+        function addExerciseRow(exercise = null) {
+            const container = document.getElementById('exercisesContainer');
+            const row = document.createElement('div');
+            row.className = 'exercise-row';
+            row.innerHTML = `
+                <div class="form-group">
+                    <label>Exercise Name</label>
+                    <input type="text" class="exercise-name" placeholder="e.g., Bench Press" value="${exercise ? exercise.name || '' : ''}" required>
+                </div>
+                <div class="form-group">
+                    <label>Sets</label>
+                    <input type="number" class="exercise-sets" placeholder="3" min="1" value="${exercise ? exercise.sets || '' : ''}">
+                </div>
+                <div class="form-group">
+                    <label>Reps</label>
+                    <input type="number" class="exercise-reps" placeholder="10" min="1" value="${exercise ? exercise.reps || '' : ''}">
+                </div>
+                <div class="form-group">
+                    <label>Weight (kg)</label>
+                    <input type="number" class="exercise-weight" placeholder="60" min="0" step="0.5" value="${exercise ? exercise.weight || '' : ''}">
+                </div>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeExercise(this)" style="margin-bottom:16px;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(row);
+        }
+
+        function removeExercise(btn) {
+            const rows = document.querySelectorAll('#exercisesContainer .exercise-row');
+            if (rows.length > 1) btn.closest('.exercise-row').remove();
+            else showToast('At least one exercise is required', 'error');
+        }
+
+        async function saveWorkoutPlan() {
+            const planId = document.getElementById('planId').value;
+            const exercises = [];
+            document.querySelectorAll('#exercisesContainer .exercise-row').forEach(row => {
+                const name = row.querySelector('.exercise-name').value;
+                if (name) {
+                    exercises.push({
+                        name,
+                        sets: parseInt(row.querySelector('.exercise-sets').value) || 3,
+                        reps: parseInt(row.querySelector('.exercise-reps').value) || 10,
+                        weight: parseFloat(row.querySelector('.exercise-weight').value) || 0
+                    });
+                }
+            });
+
+            const planData = {
+                member_id: document.getElementById('planMember').value,
+                name: document.getElementById('planName').value,
+                description: document.getElementById('planDescription').value,
+                duration: parseInt(document.getElementById('planDuration').value) || 4,
+                exercises,
+                trainer_id: trainerId
+            };
+
+            try {
+                if (planId) {
+                    await apiPut(`/admin/workout-plans/${planId}`, planData);
+                    showToast('Workout plan updated', 'success');
+                } else {
+                    await apiPost('/admin/workout-plans', planData);
+                    showToast('Workout plan created', 'success');
+                }
+                closeModal('workoutPlanModal');
+                await loadWorkoutPlans();
+                renderWorkoutPlans();
+            } catch (err) {
+                showToast('Failed to save plan: ' + err.message, 'error');
+            }
+        }
+
+        function editWorkoutPlan(planId) {
+            openWorkoutPlanModal(planId);
+        }
+
+        async function deleteWorkoutPlan(planId) {
+            if (!confirm('Are you sure you want to delete this workout plan?')) return;
+            try {
+                await apiDelete(`/admin/workout-plans/${planId}`);
+                showToast('Workout plan deleted', 'success');
+                await loadWorkoutPlans();
+                renderWorkoutPlans();
+            } catch (err) {
+                showToast('Failed to delete plan', 'error');
+            }
+        }
+
+        // ==================== PROGRESS ====================
+        async function loadMeasurements() {
+            try {
+                const data = await apiGet('/admin/measurements');
+                allMeasurements = Array.isArray(data) ? data : (data.data || []);
+            } catch (err) {
+                console.error('Measurements load error:', err);
+                allMeasurements = [];
+            }
+        }
+
+        function populateProgressMemberSelect() {
+            const select = document.getElementById('progressMember');
+            select.innerHTML = '<option value="">Select Member</option>' +
+                allMembers.map(m => `<option value="${m.id || m._id}">${m.name || 'Member'}</option>`).join('');
+        }
+
+        function loadMemberProgress() {
+            const memberId = document.getElementById('progressMember').value;
+            const container = document.getElementById('progressContainer');
+
+            if (!memberId) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-chart-line"></i><h3>Select a member</h3><p>Choose a member from the dropdown to view their progress</p></div>';
+                return;
+            }
+
+            const measurements = allMeasurements
+                .filter(m => m.member_id === memberId)
+                .sort((a, b) => new Date(b.date || b.created_at) - new Date(a.date || a.created_at));
+
+            const latest = measurements[0];
+
+            container.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+                    <h3 style="font-size:18px;">Member Progress</h3>
+                    <button class="btn btn-primary btn-sm" style="width:auto;" onclick="openMeasurementModal('${memberId}')">
+                        <i class="fas fa-plus"></i> Add Measurement
+                    </button>
+                </div>
+                ${latest ? `
+                    <div class="measurement-grid">
+                        <div class="measurement-item">
+                            <div class="value">${latest.weight || '--'}</div>
+                            <div class="label">Weight (kg)</div>
+                        </div>
+                        <div class="measurement-item">
+                            <div class="value">${latest.body_fat || latest.bodyFat || '--'}</div>
+                            <div class="label">Body Fat %</div>
+                        </div>
+                        <div class="measurement-item">
+                            <div class="value">${latest.chest || '--'}</div>
+                            <div class="label">Chest (cm)</div>
+                        </div>
+                        <div class="measurement-item">
+                            <div class="value">${latest.waist || '--'}</div>
+                            <div class="label">Waist (cm)</div>
+                        </div>
+                        <div class="measurement-item">
+                            <div class="value">${latest.hips || '--'}</div>
+                            <div class="label">Hips (cm)</div>
+                        </div>
+                        <div class="measurement-item">
+                            <div class="value">${latest.biceps || '--'}</div>
+                            <div class="label">Biceps (cm)</div>
+                        </div>
+                    </div>
+                ` : '<div class="measurement-grid"><div class="measurement-item" style="grid-column:1/-1;"><div class="label">No measurements recorded yet</div></div></div>'}
+                <div class="card" style="margin-top:24px;">
+                    <div class="card-header">
+                        <h3>Measurement History</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Weight</th>
+                                        <th>Body Fat</th>
+                                        <th>Chest</th>
+                                        <th>Waist</th>
+                                        <th>Hips</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${measurements.length ? measurements.map(m => `
+                                        <tr>
+                                            <td>${m.date || m.created_at ? new Date(m.date || m.created_at).toLocaleDateString() : '--'}</td>
+                                            <td>${m.weight || '--'} kg</td>
+                                            <td>${m.body_fat || m.bodyFat || '--'}%</td>
+                                            <td>${m.chest || '--'} cm</td>
+                                            <td>${m.waist || '--'} cm</td>
+                                            <td>${m.hips || '--'} cm</td>
+                                        </tr>
+                                    `).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">No measurements recorded</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openMeasurementModal(memberId) {
+            document.getElementById('measurementMember').value = memberId || '';
+            document.getElementById('measurementMember').innerHTML =
+                '<option value="">Select Member</option>' +
+                allMembers.map(m => `<option value="${m.id || m._id}" ${m.id === memberId || m._id === memberId ? 'selected' : ''}>${m.name || 'Member'}</option>`).join('');
+            document.getElementById('measurementForm').reset();
+            if (memberId) document.getElementById('measurementMember').value = memberId;
+            openModal('measurementModal');
+        }
+
+        async function saveMeasurement() {
+            const data = {
+                member_id: document.getElementById('measurementMember').value,
+                weight: parseFloat(document.getElementById('measureWeight').value) || null,
+                body_fat: parseFloat(document.getElementById('measureBodyFat').value) || null,
+                chest: parseFloat(document.getElementById('measureChest').value) || null,
+                waist: parseFloat(document.getElementById('measureWaist').value) || null,
+                hips: parseFloat(document.getElementById('measureHips').value) || null,
+                biceps: parseFloat(document.getElementById('measureBiceps').value) || null,
+                notes: document.getElementById('measureNotes').value,
+                date: new Date().toISOString()
+            };
+
+            if (!data.member_id) {
+                showToast('Please select a member', 'error');
+                return;
+            }
+
+            try {
+                await apiPost('/admin/measurements', data);
+                showToast('Measurement saved', 'success');
+                closeModal('measurementModal');
+                await loadMeasurements();
+                loadMemberProgress();
+            } catch (err) {
+                showToast('Failed to save measurement: ' + err.message, 'error');
+            }
+        }
+
+        // ==================== ATTENDANCE ====================
+        function renderAttendance() {
+            const calendar = document.getElementById('attendanceCalendar');
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('attendanceMonth').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            let html = dayHeaders.map(d => `<div class="calendar-day-header">${d}</div>`).join('');
+
+            for (let i = 0; i < firstDay; i++) {
+                html += '<div class="calendar-day" style="opacity:0.2;"></div>';
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isToday = dateStr === todayStr;
+                const daySessions = allSessions.filter(s => {
+                    const sDate = new Date(s.date || s.session_date).toISOString().split('T')[0];
+                    return sDate === dateStr;
+                });
+                const isPresent = daySessions.some(s => s.status === 'completed');
+                const isAbsent = daySessions.some(s => s.status === 'missed');
+
+                html += `<div class="calendar-day ${isToday ? 'today' : ''} ${isPresent ? 'present' : ''} ${isAbsent ? 'absent' : ''}">${day}</div>`;
+            }
+
+            calendar.innerHTML = html;
+        }
+
+        function prevMonth() {
+            currentMonth--;
+            if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            renderAttendance();
+        }
+
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            renderAttendance();
+        }
+
+        // ==================== TASKS ====================
+        async function loadTasks() {
+            try {
+                const data = await apiGet('/admin/tasks');
+                allTasks = Array.isArray(data) ? data : (data.data || []);
+            } catch (err) {
+                console.error('Tasks load error:', err);
+                allTasks = [];
+            }
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('tasksContainer');
+            const statusFilter = document.getElementById('taskFilter').value;
+            const priorityFilter = document.getElementById('taskPriorityFilter').value;
+
+            let tasks = [...allTasks];
+            if (statusFilter === 'pending') tasks = tasks.filter(t => !t.completed);
+            else if (statusFilter === 'completed') tasks = tasks.filter(t => t.completed);
+            if (priorityFilter !== 'all') tasks = tasks.filter(t => t.priority === priorityFilter);
+
+            if (!tasks.length) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-tasks"></i><h3>No tasks found</h3><p>You\'re all caught up!</p></div>';
+                return;
+            }
+
+            container.innerHTML = tasks.map(t => `
+                <div class="task-item">
+                    <div class="task-checkbox ${t.completed ? 'checked' : ''}" onclick="toggleTask('${t.id || t._id}', ${!t.completed})">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="task-content">
+                        <h4 class="${t.completed ? 'completed' : ''}">${t.title || t.name || 'Task'}</h4>
+                        <p>${t.due_date || t.dueDate || ''} ${t.description ? '— ' + t.description.substring(0, 50) : ''}</p>
+                    </div>
+                    <div class="task-priority ${t.priority || 'medium'}"></div>
+                </div>
+            `).join('');
+        }
+
+        function filterTasks() { renderTasks(); }
+
+        async function toggleTask(taskId, completed) {
+            try {
+                await apiPut(`/admin/tasks/${taskId}`, { completed });
+                const task = allTasks.find(t => (t.id || t._id) === taskId);
+                if (task) task.completed = completed;
+                renderTasks();
+                showToast(completed ? 'Task completed' : 'Task reopened', 'success');
+            } catch (err) {
+                showToast('Failed to update task', 'error');
+            }
+        }
+
+        // ==================== PROFILE ====================
+        async function renderProfile() {
+            try {
+                const data = await apiGet('/auth/me');
+                const user = data.user || data;
+                const container = document.getElementById('profileContent');
+                container.innerHTML = `
+                    <div style="display:flex;align-items:center;gap:24px;margin-bottom:32px;">
+                        <div class="trainer-avatar" style="width:80px;height:80px;font-size:32px;border-radius:16px;">
+                            ${(user.name || 'T').charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <h2 style="font-size:24px;font-weight:700;">${user.name || 'Trainer'}</h2>
+                            <p style="color:var(--text-secondary);">${user.email || ''}</p>
+                            <span class="badge badge-success" style="margin-top:8px;">Trainer</span>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;">
+                        <div class="measurement-item" style="text-align:left;padding:20px;">
+                            <div class="label" style="margin-bottom:4px;">Full Name</div>
+                            <div style="font-size:15px;font-weight:500;">${user.name || 'N/A'}</div>
+                        </div>
+                        <div class="measurement-item" style="text-align:left;padding:20px;">
+                            <div class="label" style="margin-bottom:4px;">Email</div>
+                            <div style="font-size:15px;font-weight:500;">${user.email || 'N/A'}</div>
+                        </div>
+                        <div class="measurement-item" style="text-align:left;padding:20px;">
+                            <div class="label" style="margin-bottom:4px;">Phone</div>
+                            <div style="font-size:15px;font-weight:500;">${user.phone || 'N/A'}</div>
+                        </div>
+                        <div class="measurement-item" style="text-align:left;padding:20px;">
+                            <div class="label" style="margin-bottom:4px;">Role</div>
+                            <div style="font-size:15px;font-weight:500;text-transform:capitalize;">${user.role || 'Trainer'}</div>
+                        </div>
+                        <div class="measurement-item" style="text-align:left;padding:20px;">
+                            <div class="label" style="margin-bottom:4px;">Specialization</div>
+                            <div style="font-size:15px;font-weight:500;">${user.specialization || 'General Fitness'}</div>
+                        </div>
+                        <div class="measurement-item" style="text-align:left;padding:20px;">
+                            <div class="label" style="margin-bottom:4px;">Member Since</div>
+                            <div style="font-size:15px;font-weight:500;">${user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}</div>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                document.getElementById('profileContent').innerHTML = `
+                    <div style="display:flex;align-items:center;gap:24px;margin-bottom:32px;">
+                        <div class="trainer-avatar" style="width:80px;height:80px;font-size:32px;border-radius:16px;">
+                            ${(currentUser.name || 'T').charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <h2 style="font-size:24px;font-weight:700;">${currentUser.name || 'Trainer'}</h2>
+                            <p style="color:var(--text-secondary);">${currentUser.email || ''}</p>
+                            <span class="badge badge-success" style="margin-top:8px;">Trainer</span>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;">
+                        <div class="measurement-item" style="text-align:left;padding:20px;">
+                            <div class="label" style="margin-bottom:4px;">Full Name</div>
+                            <div style="font-size:15px;font-weight:500;">${currentUser.name || 'N/A'}</div>
+                        </div>
+                        <div class="measurement-item" style="text-align:left;padding:20px;">
+                            <div class="label" style="margin-bottom:4px;">Email</div>
+                            <div style="font-size:15px;font-weight:500;">${currentUser.email || 'N/A'}</div>
+                        </div>
+                        <div class="measurement-item" style="text-align:left;padding:20px;">
+                            <div class="label" style="margin-bottom:4px;">Phone</div>
+                            <div style="font-size:15px;font-weight:500;">${currentUser.phone || 'N/A'}</div>
+                        </div>
+                        <div class="measurement-item" style="text-align:left;padding:20px;">
+                            <div class="label" style="margin-bottom:4px;">Role</div>
+                            <div style="font-size:15px;font-weight:500;text-transform:capitalize;">${currentUser.role || 'Trainer'}</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // ==================== MODALS ====================
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) overlay.classList.remove('active');
+            });
+        });
+
+        // ==================== KEYBOARD SHORTCUTS ====================
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+            }
+        });
+
+        // ==================== INIT CHECK ====================
+        if (localStorage.getItem('token') && localStorage.getItem('user')) {
+            initApp();
+        }
+    </script>
+</body>
+</html>

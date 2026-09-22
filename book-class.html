@@ -1,0 +1,196 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Book a Class | Zacson Fitness</title>
+    <meta name="description" content="Book your spot in group fitness classes at Zacson Fitness Mumbai. HIIT, Yoga, Zumba, Boxing, and more.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="assets/css/themify-icons.css">
+    <link rel="stylesheet" href="assets/css/animate.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/custom.css">
+    <style>
+        body{background:#0a0a0f;color:#fff;font-family:'Inter',sans-serif}
+        .bk-section{padding:40px 0 60px}
+        .bk-header{text-align:center;margin-bottom:40px}
+        .bk-header h1{font-size:36px;font-weight:800;margin-bottom:8px}
+        .bk-header h1 span{color:#FF0000}
+        .bk-header p{color:#888;font-size:16px}
+        .bk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px}
+        .bk-card{background:#1a1a25;border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;transition:transform 0.3s,box-shadow 0.3s}
+        .bk-card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(255,0,0,0.12)}
+        .bk-card-img{width:100%;height:200px;object-fit:cover}
+        .bk-card-body{padding:20px}
+        .bk-card-body h3{font-size:20px;font-weight:700;margin-bottom:6px}
+        .bk-card-body .bk-meta{color:#888;font-size:13px;margin-bottom:12px;display:flex;gap:16px}
+        .bk-card-body .bk-meta span i{color:#FF0000;margin-right:4px}
+        .bk-card-body .bk-desc{color:#aaa;font-size:14px;line-height:1.6;margin-bottom:16px}
+        .bk-difficulty{display:inline-block;padding:3px 12px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;margin-bottom:12px}
+        .bk-difficulty.beginner{background:rgba(39,174,96,0.15);color:#27ae60;border:1px solid rgba(39,174,96,0.3)}
+        .bk-difficulty.intermediate{background:rgba(243,156,18,0.15);color:#f39c12;border:1px solid rgba(243,156,18,0.3)}
+        .bk-difficulty.advanced{background:rgba(231,76,60,0.15);color:#e74c3c;border:1px solid rgba(231,76,60,0.3)}
+        .bk-difficulty.all-levels{background:rgba(52,152,219,0.15);color:#3498db;border:1px solid rgba(52,152,219,0.3)}
+        .bk-btn{display:block;width:100%;padding:12px;border-radius:10px;border:none;background:#FF0000;color:#fff;font-size:15px;font-weight:600;cursor:pointer;transition:background 0.2s;text-align:center;text-decoration:none}
+        .bk-btn:hover{background:#cc0000}
+        .bk-loading{text-align:center;padding:60px;color:#888}
+        .bk-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;justify-content:center;align-items:center}
+        .bk-overlay.active{display:flex}
+        .bk-modal{background:#1a1a25;border:1px solid rgba(255,255,255,0.1);border-radius:16px;width:95%;max-width:480px;padding:30px;max-height:90vh;overflow-y:auto}
+        .bk-modal h3{margin-bottom:20px;font-size:22px}
+        .bk-modal .form-group{margin-bottom:14px}
+        .bk-modal label{display:block;color:#aaa;font-size:13px;margin-bottom:4px}
+        .bk-modal input{width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:#fff;font-size:14px}
+        .bk-modal input:focus{outline:none;border-color:#FF0000}
+        .bk-modal-btns{display:flex;gap:10px;margin-top:20px}
+        .bk-modal-btns button{flex:1;padding:12px;border-radius:10px;border:none;font-size:15px;font-weight:600;cursor:pointer}
+        .bk-modal-btns .bk-submit{background:#FF0000;color:#fff}
+        .bk-modal-btns .bk-cancel{background:rgba(255,255,255,0.1);color:#fff}
+        .bk-success{text-align:center;padding:30px}
+        .bk-success i{font-size:60px;color:#27ae60;margin-bottom:16px}
+    </style>
+</head>
+<body class="black-bg">
+    <header>
+        <div class="header-area">
+            <div class="main-header">
+                <div class="container-fluid">
+                    <div class="menu-wrapper">
+                        <div class="logo"><a href="index.html"><img src="assets/img/logo/logo.png" alt="Zacson Fitness"></a></div>
+                        <nav class="main-menu">
+                            <ul id="navigation">
+                                <li><a href="index.html">Home</a></li>
+                                <li><a href="classes.html" class="active">Classes</a></li>
+                                <li><a href="pricing.html">Pricing</a></li>
+                                <li><a href="trainers.html">Trainers</a></li>
+                                <li><a href="contact.html">Contact</a></li>
+                            </ul>
+                        </nav>
+                        <a href="login.html" class="header-cta" style="background:transparent;border:1px solid #FF0000;margin-right:8px;">Login</a>
+                        <button class="mobile_menu" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="slider-area2">
+            <div class="slider-height2 d-flex align-items-center">
+                <div class="container">
+                    <div class="row"><div class="col-xl-12"><div class="hero-cap hero-cap2 pt-70"><h1>Book a Class</h1></div><p style="color:#bbb;margin-top:10px;font-size:17px;">Choose from our wide range of group fitness classes and book your spot.</p></div></div>
+                </div>
+            </div>
+        </div>
+        <section class="bk-section">
+            <div class="container">
+                <div id="classesLoading" class="bk-loading"><i class="fas fa-spinner fa-spin" style="font-size:30px"></i><p style="margin-top:12px">Loading classes...</p></div>
+                <div id="classesGrid" class="bk-grid"></div>
+            </div>
+        </section>
+    </main>
+    <div class="bk-overlay" id="bookOverlay">
+        <div class="bk-modal" id="bookModal">
+            <div id="bookFormView">
+                <h3>Book <span id="bookClassName"></span></h3>
+                <form id="bookClassForm">
+                    <input type="hidden" id="bookClassId">
+                    <div class="form-group"><label>Full Name *</label><input type="text" id="bookName" required placeholder="Your full name"></div>
+                    <div class="form-group"><label>Phone *</label><input type="tel" id="bookPhone" required placeholder="+91 98765 43210"></div>
+                    <div class="form-group"><label>Email *</label><input type="email" id="bookEmail" required placeholder="your@email.com"></div>
+                    <div class="bk-modal-btns">
+                        <button type="button" class="bk-cancel" onclick="closeBookModal()">Cancel</button>
+                        <button type="submit" class="bk-submit" id="bookSubmitBtn">Confirm Booking</button>
+                    </div>
+                </form>
+            </div>
+            <div class="bk-success" id="bookSuccessView" style="display:none">
+                <i class="fas fa-check-circle"></i>
+                <h3>Booking Confirmed!</h3>
+                <p style="color:#bbb;margin-top:8px">Your spot has been reserved. We will send you a confirmation shortly.</p>
+                <button class="bk-submit" onclick="closeBookModal()" style="margin-top:16px;padding:12px 40px;border-radius:10px;border:none;background:#FF0000;color:#fff;font-size:15px;font-weight:600;cursor:pointer">Close</button>
+            </div>
+        </div>
+    </div>
+    <script>
+    (function() {
+        var API = '/api';
+        var grid = document.getElementById('classesGrid');
+        var loading = document.getElementById('classesLoading');
+        var diffColors = {beginner:'beginner',intermediate:'intermediate',advanced:'advanced','all-levels':'all-levels'};
+
+        function apiGet(path) {
+            return fetch(API + path).then(function(r) { return r.json(); }).catch(function() { return null; });
+        }
+        function apiPost(path, data) {
+            return fetch(API + path, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(function(r) { return r.json(); }).catch(function(e) { return {error: e.message || 'Network error'}; });
+        }
+
+        apiGet('/classes').then(function(classes) {
+            loading.style.display = 'none';
+            if (!classes || !classes.length) { grid.innerHTML = '<p style="text-align:center;color:#888;grid-column:1/-1;padding:40px">No classes available right now. Please check back later.</p>'; return; }
+            grid.innerHTML = classes.map(function(c) {
+                return '<div class="bk-card">' +
+                    '<img class="bk-card-img" src="' + (c.image || 'assets/img/classes/yoga.jpg') + '" alt="' + c.name + '" loading="lazy" onerror="this.src=\'assets/img/classes/yoga.jpg\'">' +
+                    '<div class="bk-card-body">' +
+                    '<span class="bk-difficulty ' + (diffColors[c.difficulty] || 'all-levels') + '">' + (c.difficulty || 'all-levels') + '</span>' +
+                    '<h3>' + c.name + '</h3>' +
+                    '<div class="bk-meta"><span><i class="fas fa-clock"></i> ' + c.duration_minutes + ' min</span><span><i class="fas fa-users"></i> Max ' + c.max_participants + '</span></div>' +
+                    '<p class="bk-desc">' + (c.description || '') + '</p>' +
+                    '<a href="javascript:void(0)" class="bk-btn" onclick="openBookModal(' + c.id + ',\'' + c.name.replace(/'/g,"\\'") + '\')">Book This Class</a>' +
+                    '</div></div>';
+            }).join('');
+        });
+
+        document.getElementById('bookClassForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var btn = document.getElementById('bookSubmitBtn');
+            var token = localStorage.getItem('zacson_token');
+            var classId = document.getElementById('bookClassId').value;
+            var data = {
+                class_id: parseInt(classId),
+                name: document.getElementById('bookName').value.trim(),
+                phone: document.getElementById('bookPhone').value.trim(),
+                email: document.getElementById('bookEmail').value.trim()
+            };
+            btn.disabled = true; btn.textContent = 'Booking...';
+
+            var headers = {'Content-Type':'application/json'};
+            if (token) headers['Authorization'] = 'Bearer ' + token;
+
+            fetch(API + (token ? '/member/class-bookings' : '/leads'), {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(token ? {class_id: data.class_id} : {source:'class_booking', name:data.name, phone:data.phone, email:data.email, notes:'Class booking: ' + document.getElementById('bookClassName').textContent})
+            }).then(function(r) { return r.json(); }).then(function() {
+                document.getElementById('bookFormView').style.display = 'none';
+                document.getElementById('bookSuccessView').style.display = 'block';
+            }).catch(function() {
+                document.getElementById('bookFormView').style.display = 'none';
+                document.getElementById('bookSuccessView').style.display = 'block';
+            });
+        });
+    })();
+
+    function openBookModal(classId, className) {
+        document.getElementById('bookClassId').value = classId;
+        document.getElementById('bookClassName').textContent = className;
+        document.getElementById('bookFormView').style.display = 'block';
+        document.getElementById('bookSuccessView').style.display = 'none';
+        document.getElementById('bookOverlay').classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeBookModal() {
+        document.getElementById('bookOverlay').classList.remove('active');
+        document.body.style.overflow = '';
+        document.getElementById('bookClassForm').reset();
+        document.getElementById('bookFormView').style.display = 'block';
+        document.getElementById('bookSuccessView').style.display = 'none';
+        document.getElementById('bookSubmitBtn').disabled = false;
+        document.getElementById('bookSubmitBtn').textContent = 'Confirm Booking';
+    }
+    </script>
+</body>
+</html>

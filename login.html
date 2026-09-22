@@ -1,0 +1,160 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Login | Zacson Fitness</title>
+    <meta name="description" content="Login to your Zacson Fitness account. Access your membership, book classes, track progress, and more.">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="assets/css/themify-icons.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/custom.css">
+    <style>
+        body{background:#0a0a0f;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Inter',sans-serif;color:#fff;padding:20px}
+        .login-container{width:100%;max-width:420px}
+        .login-card{background:#1a1a25;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:40px 36px;box-shadow:0 8px 40px rgba(0,0,0,0.4)}
+        .login-logo{text-align:center;margin-bottom:30px}
+        .login-logo img{height:50px;margin-bottom:10px}
+        .login-logo h2{font-size:24px;font-weight:700;color:#FF0000;margin:0}
+        .login-logo p{color:#888;font-size:14px;margin-top:6px}
+        .form-group{margin-bottom:18px}
+        .form-group label{display:block;color:#aaa;font-size:13px;margin-bottom:6px;font-weight:500}
+        .form-group input{width:100%;padding:12px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);color:#fff;font-size:15px;transition:border 0.2s}
+        .form-group input:focus{outline:none;border-color:#FF0000;box-shadow:0 0 0 3px rgba(255,0,0,0.15)}
+        .form-group input::placeholder{color:#555}
+        .login-btn{width:100%;padding:14px;border-radius:10px;border:none;background:#FF0000;color:#fff;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.2s;margin-top:6px}
+        .login-btn:hover{background:#cc0000;transform:translateY(-1px)}
+        .login-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+        .login-links{text-align:center;margin-top:20px}
+        .login-links a{color:#FF0000;font-size:14px;text-decoration:none}
+        .login-links a:hover{text-decoration:underline}
+        .login-error{background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.3);color:#e74c3c;padding:10px 14px;border-radius:8px;font-size:13px;display:none;margin-bottom:16px}
+        .portal-hint{text-align:center;margin-top:24px;padding:16px;background:rgba(255,255,255,0.03);border-radius:10px;border:1px solid rgba(255,255,255,0.06)}
+        .portal-hint p{color:#888;font-size:13px;margin:0 0 8px}
+        .portal-hint a{color:#ccc;font-size:12px;display:inline-block;margin:0 8px;text-decoration:none}
+        .portal-hint a:hover{color:#FF0000}
+        .show-pass{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#666;font-size:14px}
+        .input-wrap{position:relative}
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">
+                <img src="assets/img/logo/logo.png" alt="Zacson Fitness" onerror="this.style.display='none'">
+                <h2>Zacson Fitness</h2>
+                <p>Sign in to your account</p>
+            </div>
+            <div class="login-error" id="loginError"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email Address</label>
+                    <input type="email" id="loginEmail" name="email" required placeholder="your@email.com" autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <div class="input-wrap">
+                        <input type="password" id="loginPassword" name="password" required placeholder="Enter your password" autocomplete="current-password">
+                        <span class="show-pass" onclick="var p=document.getElementById('loginPassword');p.type=p.type==='password'?'text':'password';this.textContent=p.type==='password'?'Show':'Hide';">Show</span>
+                    </div>
+                </div>
+                <button type="submit" class="login-btn" id="loginBtn">Sign In</button>
+            </form>
+            <div class="login-links">
+                <a href="javascript:void(0)" onclick="showForgotPassword()">Forgot Password?</a>
+            </div>
+        </div>
+        <div class="portal-hint">
+            <p>Quick Portal Access</p>
+            <a href="admin/">Admin Panel</a>
+            <a href="portal/">Member Portal</a>
+            <a href="trainer-portal/">Trainer Portal</a>
+            <a href="reception-portal/">Reception</a>
+            <a href="sales-portal/">Sales</a>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        var API = '/api';
+        var form = document.getElementById('loginForm');
+        var errorEl = document.getElementById('loginError');
+        var btn = document.getElementById('loginBtn');
+
+        // Check if already logged in
+        var token = localStorage.getItem('zacson_token');
+        var user = null;
+        try { user = JSON.parse(localStorage.getItem('zacson_user')); } catch(e) {}
+        if (token && user && user.role) {
+            redirectByRole(user.role);
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var email = document.getElementById('loginEmail').value.trim();
+            var password = document.getElementById('loginPassword').value;
+            if (!email || !password) { showError('Please fill in all fields.'); return; }
+            btn.disabled = true; btn.textContent = 'Signing in...';
+            errorEl.style.display = 'none';
+
+            fetch(API + '/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, password: password })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.error) { showError(data.error); btn.disabled = false; btn.textContent = 'Sign In'; return; }
+                if (data.token) localStorage.setItem('zacson_token', data.token);
+                if (data.user) {
+                    localStorage.setItem('zacson_user', JSON.stringify(data.user));
+                    redirectByRole(data.user.role);
+                } else {
+                    showError('Login failed. Please try again.'); btn.disabled = false; btn.textContent = 'Sign In';
+                }
+            })
+            .catch(function() {
+                showError('Network error. Please check your connection.'); btn.disabled = false; btn.textContent = 'Sign In';
+            });
+        });
+
+        function redirectByRole(role) {
+            switch(role) {
+                case 'super_admin':
+                case 'admin': window.location.href = 'admin/'; break;
+                case 'trainer': window.location.href = 'trainer-portal/'; break;
+                case 'receptionist': window.location.href = 'reception-portal/'; break;
+                case 'sales_manager':
+                case 'sales_executive': window.location.href = 'sales-portal/'; break;
+                default: window.location.href = 'portal/';
+            }
+        }
+
+        function showError(msg) {
+            errorEl.textContent = msg;
+            errorEl.style.display = 'block';
+        }
+
+        window.showForgotPassword = function() {
+            var email = document.getElementById('loginEmail').value.trim();
+            if (!email) { showError('Please enter your email address first.'); return; }
+            fetch(API + '/auth/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.error) { showError(data.error); }
+                else { showError('Password reset link sent to your email. Check your inbox.'); }
+            })
+            .catch(function() { showError('Could not send reset link. Please try again.'); });
+        };
+    })();
+    </script>
+</body>
+</html>

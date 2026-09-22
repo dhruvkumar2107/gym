@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zacson Fitness - Reception Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--card:#1a1a25;--card2:#22223a;--red:#FF0000;--red-dark:#cc0000;--red-glow:rgba(255,0,0,0.15);--green:#00e676;--yellow:#ffc107;--orange:#ff9800;--blue:#448aff;--purple:#b388ff;--text:#f0f0f5;--text2:#8888a0;--text3:#555570;--border:#2a2a40;--sidebar-w:240px;--topbar-h:60px}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--text3);border-radius:3px}
+
+.login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:10000}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:40px;width:400px;max-width:90vw}
+.login-box h1{font-size:24px;font-weight:800;margin-bottom:4px}
+.login-box h1 span{color:var(--red)}
+.login-box p{color:var(--text2);font-size:13px;margin-bottom:28px}
+.login-box label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px}
+.login-box input{width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:14px;margin-bottom:16px;outline:none;transition:border .2s}
+.login-box input:focus{border-color:var(--red)}
+.login-btn{width:100%;padding:13px;background:var(--red);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:background .2s}
+.login-btn:hover{background:var(--red-dark)}
+.login-btn:disabled{opacity:.5;cursor:not-allowed}
+.login-error{color:var(--red);font-size:13px;margin-bottom:12px;display:none}
+
+.app{display:none}
+.sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;transition:transform .3s}
+.sidebar-header{padding:20px;border-bottom:1px solid var(--border);text-align:center}
+.sidebar-header h2{font-size:18px;font-weight:800;letter-spacing:-0.5px}
+.sidebar-header h2 span{color:var(--red)}
+.sidebar-header small{color:var(--text2);font-size:10px;text-transform:uppercase;letter-spacing:1px}
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px 0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:var(--text2);cursor:pointer;transition:all .2s;font-size:13px;font-weight:500;border-left:3px solid transparent}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,0.03)}
+.nav-item.active{color:var(--red);background:var(--red-glow);border-left-color:var(--red)}
+.nav-item i{width:20px;text-align:center;font-size:14px}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);font-size:12px;color:var(--text3)}
+
+.main{margin-left:var(--sidebar-w);min-height:100vh}
+.topbar{height:var(--topbar-h);background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:50}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.topbar-left h3{font-size:16px;font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-time{font-size:13px;color:var(--text2);font-weight:500}
+.topbar-btn{padding:8px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text2);cursor:pointer;font-size:13px;font-family:inherit;transition:all .2s;display:flex;align-items:center;gap:6px}
+.topbar-btn:hover{border-color:var(--red);color:var(--red)}
+.topbar-btn.logout{border-color:var(--red);color:var(--red)}
+
+.content{padding:24px}
+.page{display:none}.page.active{display:block}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--red);opacity:0;transition:opacity .3s}
+.stat-card:hover::before{opacity:1}
+.stat-card .icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px}
+.stat-card .icon.red{background:var(--red-glow);color:var(--red)}
+.stat-card .icon.green{background:rgba(0,230,118,0.12);color:var(--green)}
+.stat-card .icon.blue{background:rgba(68,138,255,0.12);color:var(--blue)}
+.stat-card .icon.orange{background:rgba(255,152,0,0.12);color:var(--orange)}
+.stat-card .icon.purple{background:rgba(179,136,255,0.12);color:var(--purple)}
+.stat-card .icon.yellow{background:rgba(255,193,7,0.12);color:var(--yellow)}
+.stat-card .value{font-size:28px;font-weight:800;margin-bottom:4px}
+.stat-card .label{font-size:12px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:0.5px}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-header h3{font-size:15px;font-weight:700}
+.card-header .badge{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:600}
+.badge-red{background:var(--red-glow);color:var(--red)}
+.badge-green{background:rgba(0,230,118,0.12);color:var(--green)}
+.badge-blue{background:rgba(68,138,255,0.12);color:var(--blue)}
+.badge-yellow{background:rgba(255,193,7,0.12);color:var(--yellow)}
+
+.btn{padding:10px 20px;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:var(--red-dark)}
+.btn-green{background:var(--green);color:#000}.btn-green:hover{background:#00c864}
+.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:#3377ee}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}.btn-outline:hover{border-color:var(--red);color:var(--red)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-lg{padding:14px 28px;font-size:16px;border-radius:12px}
+
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px}
+.form-input{width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:border .2s}
+.form-input:focus{border-color:var(--red)}
+select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238888a0'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+textarea.form-input{resize:vertical;min-height:80px}
+
+.search-box{position:relative;margin-bottom:16px}
+.search-box input{width:100%;padding:12px 14px 12px 40px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:14px;outline:none}
+.search-box input:focus{border-color:var(--red)}
+.search-box i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text3)}
+
+table{width:100%;border-collapse:collapse}
+table th{text-align:left;padding:10px 14px;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid var(--border)}
+table td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border)}
+table tr:hover td{background:rgba(255,255,255,0.02)}
+
+.checkin-page{display:flex;gap:24px;flex-wrap:wrap}
+.checkin-left{flex:1;min-width:320px}
+.checkin-right{flex:1;min-width:320px}
+
+.big-checkin-btn{width:100%;padding:40px;background:linear-gradient(135deg,var(--red),#aa0000);border:none;border-radius:16px;color:#fff;font-size:24px;font-weight:800;cursor:pointer;transition:all .3s;display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:20px;font-family:inherit}
+.big-checkin-btn:hover{transform:scale(1.02);box-shadow:0 8px 32px rgba(255,0,0,0.3)}
+.big-checkin-btn i{font-size:48px}
+.big-checkin-btn.checkout{background:linear-gradient(135deg,#333,#222)}
+
+.quick-search{position:relative;margin-bottom:20px}
+.quick-search input{width:100%;padding:16px 16px 16px 48px;background:var(--card);border:2px solid var(--border);border-radius:12px;color:var(--text);font-size:16px;font-family:inherit;outline:none;transition:border .2s}
+.quick-search input:focus{border-color:var(--red)}
+.quick-search i{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text2);font-size:18px}
+
+.scan-area{background:var(--card);border:2px dashed var(--border);border-radius:12px;padding:40px;text-align:center;margin-bottom:20px;cursor:pointer;transition:border .2s}
+.scan-area:hover{border-color:var(--red)}
+.scan-area i{font-size:48px;color:var(--text3);margin-bottom:12px;display:block}
+.scan-area p{color:var(--text2);font-size:14px}
+
+.schedule-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;border:1px solid var(--border);margin-bottom:8px;transition:all .2s}
+.schedule-item:hover{border-color:var(--red);background:var(--red-glow)}
+.schedule-time{font-size:12px;font-weight:700;color:var(--red);min-width:60px;text-align:center;padding:6px;background:var(--red-glow);border-radius:6px}
+.schedule-info h4{font-size:13px;font-weight:600;margin-bottom:2px}
+.schedule-info p{font-size:11px;color:var(--text2)}
+
+.member-card{display:flex;align-items:center;gap:14px;padding:14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;transition:all .2s;cursor:pointer}
+.member-card:hover{border-color:var(--red);background:var(--red-glow)}
+.member-avatar{width:44px;height:44px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--red);flex-shrink:0}
+.member-info{flex:1}
+.member-info h4{font-size:14px;font-weight:600}
+.member-info p{font-size:12px;color:var(--text2)}
+.member-status{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:600}
+
+.cart-item{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px}
+.cart-item-info{flex:1}
+.cart-item-info h4{font-size:13px;font-weight:600}
+.cart-item-info p{font-size:12px;color:var(--text2)}
+.cart-qty{display:flex;align-items:center;gap:8px}
+.cart-qty button{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.cart-qty span{font-size:14px;font-weight:600;min-width:20px;text-align:center}
+.cart-total{display:flex;justify-content:space-between;padding:14px 0;border-top:2px solid var(--border);margin-top:8px;font-weight:700;font-size:16px}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;width:480px;max-width:90vw;max-height:85vh;overflow-y:auto}
+.modal h2{font-size:18px;font-weight:700;margin-bottom:16px}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text2);cursor:pointer;font-size:18px}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+
+.toast{position:fixed;top:20px;right:20px;padding:14px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:2000;transform:translateX(120%);transition:transform .3s;display:flex;align-items:center;gap:8px}
+.toast.show{transform:translateX(0)}
+.toast-success{background:var(--green);color:#000}
+.toast-error{background:var(--red);color:#fff}
+
+.task-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.task-item:last-child{border-bottom:none}
+.task-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.task-check.done{background:var(--green);border-color:var(--green);color:#000}
+.task-check.done::after{content:'\f00c';font-family:'Font Awesome 6 Free';font-weight:900;font-size:10px}
+.task-text{font-size:13px;flex:1}.task-text.done{text-decoration:line-through;color:var(--text3)}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.flex-between{display:flex;align-items:center;justify-content:space-between}
+.mb-16{margin-bottom:16px}
+.mt-16{margin-top:16px}
+.empty-state{text-align:center;padding:40px;color:var(--text2)}
+.empty-state i{font-size:48px;margin-bottom:12px;display:block;color:var(--text3)}
+.tag{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600}
+
+@media(max-width:900px){
+.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
+.main{margin-left:0}
+.grid-2,.grid-3{grid-template-columns:1fr}
+.stats-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <h1><span>Zacson</span> Fitness</h1>
+    <p>Reception Portal - Sign in to continue</p>
+    <div class="login-error" id="loginError">Invalid credentials</div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="admin@zacsonfitness.com" value="admin@zacsonfitness.com">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="Password" value="admin123">
+    </div>
+    <button class="login-btn" id="loginBtn" onclick="handleLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2><span>Zacson</span> Fitness</h2>
+      <small>Reception Portal</small>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" data-page="dashboard"><i class="fas fa-th-large"></i>Dashboard</div>
+      <div class="nav-item" data-page="checkin"><i class="fas fa-fingerprint"></i>Check-in</div>
+      <div class="nav-item" data-page="members"><i class="fas fa-users"></i>Members</div>
+      <div class="nav-item" data-page="memberships"><i class="fas fa-id-card"></i>Memberships</div>
+      <div class="nav-item" data-page="bookings"><i class="fas fa-calendar-check"></i>Bookings</div>
+      <div class="nav-item" data-page="classes"><i class="fas fa-dumbbell"></i>Classes</div>
+      <div class="nav-item" data-page="pt"><i class="fas fa-person-running"></i>PT Sessions</div>
+      <div class="nav-item" data-page="pos"><i class="fas fa-shopping-cart"></i>POS</div>
+      <div class="nav-item" data-page="payments"><i class="fas fa-credit-card"></i>Payments</div>
+      <div class="nav-item" data-page="leads"><i class="fas fa-bullhorn"></i>Leads</div>
+      <div class="nav-item" data-page="followups"><i class="fas fa-phone"></i>Follow-ups</div>
+      <div class="nav-item" data-page="support"><i class="fas fa-headset"></i>Support</div>
+    </nav>
+    <div class="sidebar-footer">v1.0.0 - Reception</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-btn" id="menuBtn" onclick="toggleSidebar()" style="display:none"><i class="fas fa-bars"></i></button>
+        <h3 id="pageTitle">Dashboard</h3>
+      </div>
+      <div class="topbar-right">
+        <span class="topbar-time" id="clock"></span>
+        <button class="topbar-btn" onclick="loadDashboard()"><i class="fas fa-sync-alt"></i></button>
+        <button class="topbar-btn logout" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="icon red"><i class="fas fa-user-check"></i></div><div class="value" id="statCheckins">0</div><div class="label">Today's Check-ins</div></div>
+          <div class="stat-card"><div class="icon green"><i class="fas fa-door-open"></i></div><div class="value" id="statInside">0</div><div class="label">Inside Now</div></div>
+          <div class="stat-card"><div class="icon blue"><i class="fas fa-calendar"></i></div><div class="value" id="statClasses">0</div><div class="label">Classes Today</div></div>
+          <div class="stat-card"><div class="icon orange"><i class="fas fa-clock"></i></div><div class="value" id="statPending">0</div><div class="label">Pending Tasks</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><h3><i class="fas fa-calendar-day" style="color:var(--red);margin-right:8px"></i>Today's Schedule</h3><span class="badge badge-red" id="todayDate"></span></div>
+            <div id="todaySchedule"><div class="empty-state"><i class="fas fa-calendar"></i>Loading...</div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3><i class="fas fa-clipboard-list" style="color:var(--orange);margin-right:8px"></i>Quick Tasks</h3><button class="btn btn-sm btn-outline" onclick="showAddTask()"><i class="fas fa-plus"></i></button></div>
+            <div id="taskList"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3><i class="fas fa-history" style="color:var(--blue);margin-right:8px"></i>Recent Check-ins</h3></div>
+          <table><thead><tr><th>Member</th><th>Time</th><th>Type</th></tr></thead><tbody id="recentCheckins"><tr><td colspan="3" style="text-align:center;color:var(--text3)">Loading...</td></tr></tbody></table>
+        </div>
+      </div>
+
+      <!-- CHECK-IN -->
+      <div class="page" id="page-checkin">
+        <div class="checkin-page">
+          <div class="checkin-left">
+            <button class="big-checkin-btn" id="bigCheckinBtn" onclick="quickCheckin()">
+              <i class="fas fa-fingerprint"></i>
+              <span>Tap to Check In</span>
+              <small style="font-weight:400;font-size:12px">Scan member QR or enter ID</small>
+            </button>
+            <div class="quick-search">
+              <i class="fas fa-search"></i>
+              <input type="text" id="checkinSearch" placeholder="Search by phone, name, or member ID..." oninput="searchMembersForCheckin(this.value)">
+            </div>
+            <div id="checkinSearchResults"></div>
+            <div class="grid-2">
+              <button class="btn btn-green btn-lg" onclick="showManualCheckin('in')" style="justify-content:center"><i class="fas fa-sign-in-alt"></i>Manual Check-in</button>
+              <button class="btn btn-outline btn-lg" onclick="showManualCheckin('out')" style="justify-content:center"><i class="fas fa-sign-out-alt"></i>Manual Check-out</button>
+            </div>
+          </div>
+          <div class="checkin-right">
+            <div class="scan-area" onclick="simulateQRScan()">
+              <i class="fas fa-qrcode"></i>
+              <p><strong>QR Code Scanner</strong></p>
+              <p>Click to simulate QR scan</p>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Currently Inside</h3><span class="badge badge-green" id="insideCount">0</span></div>
+              <div id="insideList"><div class="empty-state"><i class="fas fa-users"></i>No one inside</div></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Recent Activity</h3></div>
+              <div id="checkinActivity" style="max-height:200px;overflow-y:auto"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEMBERS -->
+      <div class="page" id="page-members">
+        <div class="search-box"><i class="fas fa-search"></i><input type="text" id="memberSearch" placeholder="Search members by name, phone, or email..." oninput="searchMembers(this.value)"></div>
+        <div class="card">
+          <div class="card-header"><h3>Members</h3><span class="badge badge-blue" id="memberCount">0</span></div>
+          <table>
+            <thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Email</th><th>Membership</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="membersTable"><tr><td colspan="7" style="text-align:center;color:var(--text3)">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MEMBERSHIPS -->
+      <div class="page" id="page-memberships">
+        <div class="flex-between mb-16">
+          <div class="search-box" style="margin-bottom:0;flex:1;max-width:400px"><i class="fas fa-search"></i><input type="text" id="membershipSearch" placeholder="Search memberships..." oninput="searchMemberships(this.value)"></div>
+          <button class="btn btn-red" onclick="showCreateMembership()"><i class="fas fa-plus"></i>New Membership</button>
+        </div>
+        <div class="card">
+          <table>
+            <thead><tr><th>ID</th><th>Member</th><th>Type</th><th>Start</th><th>End</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="membershipsTable"><tr><td colspan="7" style="text-align:center;color:var(--text3)">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- BOOKINGS -->
+      <div class="page" id="page-bookings">
+        <div class="flex-between mb-16">
+          <div class="search-box" style="margin-bottom:0;flex:1;max-width:400px"><i class="fas fa-search"></i><input type="text" id="bookingSearch" placeholder="Search bookings..." oninput="searchBookings(this.value)"></div>
+          <button class="btn btn-red" onclick="showCreateBooking()"><i class="fas fa-plus"></i>New Booking</button>
+        </div>
+        <div class="card">
+          <table>
+            <thead><tr><th>ID</th><th>Member</th><th>Class</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="bookingsTable"><tr><td colspan="6" style="text-align:center;color:var(--text3)">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CLASSES -->
+      <div class="page" id="page-classes">
+        <div class="flex-between mb-16">
+          <h3>Today's Classes</h3>
+          <button class="btn btn-red" onclick="showCreateClass()"><i class="fas fa-plus"></i>Add Class</button>
+        </div>
+        <div id="classesList"><div class="empty-state"><i class="fas fa-dumbbell"></i>Loading classes...</div></div>
+      </div>
+
+      <!-- PT -->
+      <div class="page" id="page-pt">
+        <div class="flex-between mb-16">
+          <h3>Personal Training Sessions Today</h3>
+          <button class="btn btn-red" onclick="showCreatePT()"><i class="fas fa-plus"></i>Schedule Session</button>
+        </div>
+        <div class="card">
+          <table>
+            <thead><tr><th>Trainer</th><th>Member</th><th>Time</th><th>Type</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="ptTable"><tr><td colspan="6" style="text-align:center;color:var(--text3)">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- POS -->
+      <div class="page" id="page-pos">
+        <div class="grid-2">
+          <div>
+            <div class="card">
+              <div class="card-header"><h3><i class="fas fa-box" style="color:var(--red);margin-right:8px"></i>Products</h3></div>
+              <div class="search-box"><i class="fas fa-search"></i><input type="text" id="posSearch" placeholder="Search products..." oninput="searchPOS(this.value)"></div>
+              <div id="posProducts" style="max-height:400px;overflow-y:auto"><div class="empty-state"><i class="fas fa-box"></i>Loading products...</div></div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-header"><h3><i class="fas fa-shopping-cart" style="color:var(--green);margin-right:8px"></i>Cart</h3><button class="btn btn-sm btn-outline" onclick="clearCart()"><i class="fas fa-trash"></i>Clear</button></div>
+              <div id="posCart"><div class="empty-state"><i class="fas fa-cart-plus"></i>Cart is empty</div></div>
+              <div class="cart-total" id="cartTotal" style="display:none"><span>Total</span><span id="cartTotalAmount">$0.00</span></div>
+              <div style="margin-top:12px">
+                <div class="form-group">
+                  <label>Member (optional)</label>
+                  <input class="form-input" id="posMember" placeholder="Phone or ID to link sale">
+                </div>
+                <div class="form-group">
+                  <label>Payment Method</label>
+                  <select class="form-input" id="posPayMethod">
+                    <option value="cash">Cash</option>
+                    <option value="card">Card</option>
+                    <option value="upi">UPI</option>
+                  </select>
+                </div>
+                <button class="btn btn-red btn-lg" style="width:100%;justify-content:center" onclick="checkoutPOS()"><i class="fas fa-check"></i>Complete Sale</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAYMENTS -->
+      <div class="page" id="page-payments">
+        <div class="flex-between mb-16">
+          <h3>Payment Records</h3>
+          <button class="btn btn-red" onclick="showRecordPayment()"><i class="fas fa-plus"></i>Record Payment</button>
+        </div>
+        <div class="card">
+          <table>
+            <thead><tr><th>ID</th><th>Member</th><th>Amount</th><th>Method</th><th>For</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody id="paymentsTable"><tr><td colspan="7" style="text-align:center;color:var(--text3)">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- LEADS -->
+      <div class="page" id="page-leads">
+        <div class="flex-between mb-16">
+          <h3>Walk-in Leads</h3>
+          <button class="btn btn-red" onclick="showCaptureLead()"><i class="fas fa-plus"></i>Capture Lead</button>
+        </div>
+        <div class="card">
+          <table>
+            <thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Source</th><th>Status</th><th>Notes</th><th>Action</th></tr></thead>
+            <tbody id="leadsTable"><tr><td colspan="7" style="text-align:center;color:var(--text3)">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- FOLLOW-UPS -->
+      <div class="page" id="page-followups">
+        <div class="flex-between mb-16">
+          <h3>Follow-up Tasks</h3>
+          <button class="btn btn-red" onclick="showCreateFollowup()"><i class="fas fa-plus"></i>Add Follow-up</button>
+        </div>
+        <div class="card">
+          <table>
+            <thead><tr><th>Lead</th><th>Phone</th><th>Scheduled</th><th>Status</th><th>Notes</th><th>Action</th></tr></thead>
+            <tbody id="followupsTable"><tr><td colspan="6" style="text-align:center;color:var(--text3)">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SUPPORT -->
+      <div class="page" id="page-support">
+        <div class="flex-between mb-16">
+          <h3>Support Tickets</h3>
+          <button class="btn btn-red" onclick="showCreateTicket()"><i class="fas fa-plus"></i>New Ticket</button>
+        </div>
+        <div class="card">
+          <table>
+            <thead><tr><th>ID</th><th>Member</th><th>Subject</th><th>Priority</th><th>Status</th><th>Created</th><th>Action</th></tr></thead>
+            <tbody id="supportTable"><tr><td colspan="7" style="text-align:center;color:var(--text3)">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API='/api';
+let token='', currentUser=null, cart=[], tasks=[];
+const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
+
+// AUTH
+function handleLogin(){
+  const email=$('#loginEmail').value, pass=$('#loginPassword').value;
+  if(!email||!pass)return;
+  $('#loginBtn').disabled=true;
+  $('#loginBtn').textContent='Signing in...';
+  fetch(`${API}/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})})
+  .then(r=>r.json()).then(d=>{
+    if(d.token){token=d.token;currentUser=d.user||d;$('#loginOverlay').style.display='none';$('#app').style.display='block';initApp();}
+    else throw new Error(d.message||'Login failed');
+  }).catch(e=>{$('#loginError').textContent=e.message||'Invalid credentials';$('#loginError').style.display='block';})
+  .finally(()=>{$('#loginBtn').disabled=false;$('#loginBtn').textContent='Sign In';});
+}
+function handleLogout(){token='';currentUser=null;$('#loginOverlay').style.display='flex';$('#app').style.display='none';}
+$('#loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')handleLogin()});
+
+function authHeaders(){return{'Content-Type':'application/json','Authorization':`Bearer ${token}`}}
+function apiFetch(path,opts={}  ){return fetch(`${API}${path}`,{...opts,headers:{...authHeaders(),...opts.headers}}).then(r=>r.json())}
+
+// NAVIGATION
+$$('.nav-item').forEach(n=>{n.onclick=()=>{
+  $$('.nav-item').forEach(x=>x.classList.remove('active'));n.classList.add('active');
+  $$('.page').forEach(p=>p.classList.remove('active'));
+  $(`#page-${n.dataset.page}`).classList.add('active');
+  $('#pageTitle').textContent=n.textContent.trim();
+  loadPageData(n.dataset.page);
+}};
+function toggleSidebar(){$('#sidebar').classList.toggle('open')}
+function goTo(page){$$('.nav-item').forEach(n=>{if(n.dataset.page===page)n.click()})}
+
+// CLOCK
+function updateClock(){const d=new Date();$('#clock').textContent=d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})}
+setInterval(updateClock,1000);updateClock();
+
+// TOAST
+function toast(msg,type='success'){const t=$('#toast');t.className=`toast toast-${type} show`;t.innerHTML=`<i class="fas fa-${type==='success'?'check-circle':'exclamation-circle'}"></i>${msg}`;setTimeout(()=>t.classList.remove('show'),3000)}
+
+// MODAL
+function showModal(html){$('#modalContent').innerHTML=html;$('#modalOverlay').classList.add('show')}
+function closeModal(){$('#modalOverlay').classList.remove('show')}
+
+// INIT
+function initApp(){loadDashboard();loadDashboardData()}
+
+// LOAD DATA
+function loadPageData(page){
+  switch(page){
+    case'dashboard':loadDashboardData();break;
+    case'checkin':loadCheckinData();break;
+    case'members':loadMembers();break;
+    case'memberships':loadMemberships();break;
+    case'bookings':loadBookings();break;
+    case'classes':loadClasses();break;
+    case'pt':loadPT();break;
+    case'pos':loadProducts();break;
+    case'payments':loadPayments();break;
+    case'leads':loadLeads();break;
+    case'followups':loadFollowups();break;
+    case'support':loadTickets();break;
+  }
+}
+
+function loadDashboard(){loadDashboardData()}
+
+// DASHBOARD
+function loadDashboardData(){
+  Promise.all([
+    apiFetch('/admin/attendance').catch(()=>({attendance:[]})),
+    apiFetch('/admin/classes').catch(()=>({classes:[]})),
+    apiFetch('/admin/users').catch(()=>({users:[]}))
+  ]).then(([att,cls,usr])=>{
+    const today=new Date().toISOString().split('T')[0];
+    const todayAtt=(att.attendance||[]).filter(a=>a.date&&a.date.startsWith(today));
+    const inside=todayAtt.filter(a=>!a.checkout_time);
+    $('#statCheckins').textContent=todayAtt.length;
+    $('#statInside').textContent=inside.length;
+    const todayCls=(cls.classes||[]).filter(c=>{const d=c.date||c.day||'';return d===today||d.toLowerCase()===new Date().toLocaleDateString('en-US',{weekday:'long'}).toLowerCase()});
+    $('#statClasses').textContent=todayCls.length;
+    $('#statPending').textContent=tasks.filter(t=>!t.done).length;
+    $('#todayDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    renderSchedule(todayCls);
+    renderRecentCheckins(todayAtt);
+    renderTasks();
+  });
+}
+
+function renderSchedule(classes){
+  if(!classes.length){$('#todaySchedule').innerHTML='<div class="empty-state"><i class="fas fa-calendar"></i>No classes today</div>';return}
+  $('#todaySchedule').innerHTML=classes.map(c=>`<div class="schedule-item"><div class="schedule-time">${c.time||c.start_time||'--:--'}</div><div class="schedule-info"><h4>${c.name||c.class_name||'Class'}</h4><p>${c.trainer||c.instructor||''} ${c.capacity?`• ${c.capacity} spots`:''}</p></div></div>`).join('');
+}
+
+function renderRecentCheckins(list){
+  const recent=list.slice(-10).reverse();
+  if(!recent.length){$('#recentCheckins').innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--text3)">No check-ins today yet</td></tr>';return}
+  $('#recentCheckins').innerHTML=recent.map(a=>`<tr><td>${a.member_name||a.user_name||'Member'}</td><td>${a.checkin_time?new Date(a.checkin_time).toLocaleTimeString():'--'}</td><td><span class="tag badge-green">IN</span></td></tr>`).join('');
+}
+
+// TASKS
+function renderTasks(){
+  const list=tasks.slice(0,8);
+  if(!list.length){$('#taskList').innerHTML='<div class="empty-state" style="padding:20px"><i class="fas fa-clipboard"></i>No tasks</div>';return}
+  $('#taskList').innerHTML=list.map((t,i)=>`<div class="task-item"><div class="task-check ${t.done?'done':''}" onclick="toggleTask(${i})"></div><span class="task-text ${t.done?'done':''}">${t.text}</span><button class="btn btn-sm btn-outline" onclick="removeTask(${i})"><i class="fas fa-times"></i></button></div>`).join('');
+}
+function showAddTask(){
+  showModal(`<h2>Add Task</h2><div class="form-group"><label>Task</label><input class="form-input" id="taskInput" placeholder="Enter task..."></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn btn-red" onclick="addTask()">Add</button></div>`);
+  setTimeout(()=>$('#taskInput')?.focus(),100);
+}
+function addTask(){const v=$('#taskInput')?.value?.trim();if(v){tasks.unshift({text:v,done:false});renderTasks();closeModal();toast('Task added')}}
+function toggleTask(i){tasks[i].done=!tasks[i].done;renderTasks()}
+function removeTask(i){tasks.splice(i,1);renderTasks()}
+
+// CHECK-IN
+function loadCheckinData(){
+  apiFetch('/admin/attendance').then(d=>{
+    const today=new Date().toISOString().split('T')[0];
+    const todayAtt=(d.attendance||[]).filter(a=>a.date&&a.date.startsWith(today));
+    const inside=todayAtt.filter(a=>!a.checkout_time);
+    $('#insideCount').textContent=inside.length;
+    if(inside.length){
+      $('#insideList').innerHTML=inside.map(a=>`<div class="member-card"><div class="member-avatar">${(a.member_name||a.user_name||'M').charAt(0)}</div><div class="member-info"><h4>${a.member_name||a.user_name||'Member'}</h4><p>In since ${a.checkin_time?new Date(a.checkin_time).toLocaleTimeString():'--'}</p></div><span class="member-status badge-green">Inside</span></div>`).join('');
+    }else{$('#insideList').innerHTML='<div class="empty-state" style="padding:20px"><i class="fas fa-door-open"></i>No one inside</div>'}
+    renderCheckinActivity(todayAtt.slice(-8).reverse());
+  });
+}
+function renderCheckinActivity(list){
+  if(!list.length){$('#checkinActivity').innerHTML='<div class="empty-state" style="padding:16px"><i class="fas fa-history"></i>No activity yet</div>';return}
+  $('#checkinActivity').innerHTML=list.map(a=>`<div class="member-card"><div class="member-avatar" style="width:36px;height:36px;font-size:13px">${(a.member_name||a.user_name||'M').charAt(0)}</div><div class="member-info"><h4 style="font-size:13px">${a.member_name||a.user_name||'Member'}</h4><p>${a.checkout_time?'Checked out '+new Date(a.checkout_time).toLocaleTimeString():a.checkin_time?'Checked in '+new Date(a.checkin_time).toLocaleTimeString():''}</p></div></div>`).join('');
+}
+
+function quickCheckin(){
+  showModal(`<h2>Quick Check-in</h2><div class="form-group"><label>Member Phone or ID</label><input class="form-input" id="quickCheckinInput" placeholder="Enter phone number or member ID"></div><div class="form-group"><label>Check-in Type</label><select class="form-input" id="quickCheckinType"><option value="in">Check In</option><option value="out">Check Out</option></select></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn btn-red" onclick="processQuickCheckin()">Check In</button></div>`);
+  setTimeout(()=>$('#quickCheckinInput')?.focus(),100);
+}
+function processQuickCheckin(){
+  const val=$('#quickCheckinInput')?.value?.trim();
+  const type=$('#quickCheckinType')?.value||'in';
+  if(!val){toast('Enter phone or ID','error');return}
+  closeModal();
+  if(type==='in'){
+    apiFetch('/admin/attendance/checkin',{method:'POST',body:JSON.stringify({phone:val,member_id:val})}).then(d=>{
+      toast(d.message||'Check-in successful');loadCheckinData();loadDashboardData();
+    }).catch(()=>toast('Check-in failed','error'));
+  }else{
+    apiFetch('/admin/attendance/checkout',{method:'POST',body:JSON.stringify({phone:val,member_id:val})}).then(d=>{
+      toast(d.message||'Check-out successful');loadCheckinData();
+    }).catch(()=>toast('Check-out failed','error'));
+  }
+}
+
+function searchMembersForCheckin(q){
+  if(!q||q.length<2){$('#checkinSearchResults').innerHTML='';return}
+  apiFetch(`/admin/users?search=${encodeURIComponent(q)}`).then(d=>{
+    const users=d.users||d.data||[];
+    if(!users.length){$('#checkinSearchResults').innerHTML='<div style="padding:12px;color:var(--text2);font-size:13px">No members found</div>';return}
+    $('#checkinSearchResults').innerHTML=users.slice(0,5).map(u=>`<div class="member-card" onclick="quickCheckinMember('${u.id||u._id}','${u.name||''}')"><div class="member-avatar">${(u.name||'M').charAt(0)}</div><div class="member-info"><h4>${u.name||'Member'}</h4><p>${u.phone||u.email||''}</p></div><span class="btn btn-sm btn-green">Check In</span></div>`).join('');
+  });
+}
+function quickCheckinMember(id,name){
+  apiFetch('/admin/attendance/checkin',{method:'POST',body:JSON.stringify({member_id:id})}).then(d=>{
+    toast(`${name} checked in`);loadCheckinData();loadDashboardData();
+  }).catch(()=>toast('Check-in failed','error'));
+}
+
+function simulateQRScan(){
+  showModal(`<h2>QR Scan Simulation</h2><div class="form-group"><label>Simulated Member ID</label><input class="form-input" id="qrMemberId" placeholder="Enter member ID to simulate" value="M001"></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn btn-red" onclick="processQRScan()">Scan & Check In</button></div>`);
+  setTimeout(()=>$('#qrMemberId')?.focus(),100);
+}
+function processQRScan(){
+  const id=$('#qrMemberId')?.value?.trim()||'M001';closeModal();
+  apiFetch('/admin/attendance/checkin',{method:'POST',body:JSON.stringify({member_id:id})}).then(d=>{
+    toast(d.message||'QR check-in successful');loadCheckinData();
+  }).catch(()=>toast('QR scan failed','error'));
+}
+
+function showManualCheckin(type){
+  const isCheckin=type==='in';
+  showModal(`<h2>${isCheckin?'Manual Check-in':'Manual Check-out'}</h2><div class="form-group"><label>Member Phone or ID</label><input class="form-input" id="manualCheckinInput" placeholder="Enter phone or member ID"></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn ${isCheckin?'btn-green':'btn-outline'}" onclick="processManualCheckin('${type}')">${isCheckin?'Check In':'Check Out'}</button></div>`);
+  setTimeout(()=>$('#manualCheckinInput')?.focus(),100);
+}
+function processManualCheckin(type){
+  const val=$('#manualCheckinInput')?.value?.trim();if(!val){toast('Enter phone or ID','error');return}closeModal();
+  const endpoint=type==='in'?'/admin/attendance/checkin':'/admin/attendance/checkout';
+  apiFetch(endpoint,{method:'POST',body:JSON.stringify({phone:val,member_id:val})}).then(d=>{
+    toast(d.message||`Manual ${type==='in'?'check-in':'check-out'} successful`);loadCheckinData();loadDashboardData();
+  }).catch(()=>toast('Operation failed','error'));
+}
+
+// MEMBERS
+function loadMembers(){
+  apiFetch('/admin/users').then(d=>{
+    const users=d.users||d.data||[];
+    $('#memberCount').textContent=users.length;
+    renderMembersTable(users);
+  }).catch(()=>renderMembersTable([]));
+}
+function renderMembersTable(users){
+  if(!users.length){$('#membersTable').innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text3)">No members found</td></tr>';return}
+  $('#membersTable').innerHTML=users.map(u=>`<tr><td>${u.id||u._id||'--'}</td><td><strong>${u.name||'--'}</strong></td><td>${u.phone||'--'}</td><td>${u.email||'--'}</td><td><span class="badge badge-blue">${u.membership_type||u.membership||'None'}</span></td><td><span class="badge ${u.status==='active'?'badge-green':'badge-yellow'}">${u.status||'active'}</span></td><td><button class="btn btn-sm btn-outline" onclick="viewMember('${u.id||u._id}')"><i class="fas fa-eye"></i></button></td></tr>`).join('');
+}
+function searchMembers(q){
+  if(!q||q.length<2){loadMembers();return}
+  apiFetch(`/admin/users?search=${encodeURIComponent(q)}`).then(d=>renderMembersTable(d.users||d.data||[]));
+}
+function viewMember(id){
+  apiFetch(`/admin/users/${id}`).then(d=>{
+    const u=d.user||d;
+    showModal(`<h2>${u.name||'Member Details'}</h2><div class="grid-2" style="gap:12px"><div class="form-group"><label>ID</label><p>${u.id||u._id||'--'}</p></div><div class="form-group"><label>Name</label><p>${u.name||'--'}</p></div><div class="form-group"><label>Phone</label><p>${u.phone||'--'}</p></div><div class="form-group"><label>Email</label><p>${u.email||'--'}</p></div><div class="form-group"><label>Membership</label><p>${u.membership_type||u.membership||'None'}</p></div><div class="form-group"><label>Status</label><p><span class="badge ${u.status==='active'?'badge-green':'badge-yellow'}">${u.status||'active'}</span></p></div></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Close</button></div>`);
+  });
+}
+
+// MEMBERSHIPS
+function loadMemberships(){
+  apiFetch('/admin/memberships').then(d=>{renderMembershipsTable(d.memberships||d.data||[])}).catch(()=>renderMembershipsTable([]));
+}
+function renderMembershipsTable(list){
+  if(!list.length){$('#membershipsTable').innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text3)">No memberships found</td></tr>';return}
+  $('#membershipsTable').innerHTML=list.map(m=>`<tr><td>${m.id||m._id||'--'}</td><td>${m.member_name||m.user_name||'--'}</td><td><span class="badge badge-blue">${m.type||m.plan||'--'}</span></td><td>${m.start_date?new Date(m.start_date).toLocaleDateString():'--'}</td><td>${m.end_date?new Date(m.end_date).toLocaleDateString():'--'}</td><td><span class="badge ${m.status==='active'?'badge-green':'badge-yellow'}">${m.status||'active'}</span></td><td><button class="btn btn-sm btn-outline" onclick="viewMembership('${m.id||m._id}')"><i class="fas fa-eye"></i></button></td></tr>`).join('');
+}
+function searchMemberships(q){
+  if(!q||q.length<2){loadMemberships();return}
+  apiFetch(`/admin/memberships?search=${encodeURIComponent(q)}`).then(d=>renderMembershipsTable(d.memberships||d.data||[]));
+}
+function showCreateMembership(){
+  apiFetch('/admin/users').then(d=>{
+    const users=d.users||d.data||[];
+    showModal(`<h2>Create Membership</h2><div class="form-group"><label>Member</label><select class="form-input" id="newMemMember"><option value="">Select member</option>${users.map(u=>`<option value="${u.id||u._id}">${u.name||u.email||'Member'}</option>`).join('')}</select></div><div class="form-group"><label>Plan</label><select class="form-input" id="newMemPlan"><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="yearly">Yearly</option></select></div><div class="form-group"><label>Start Date</label><input class="form-input" type="date" id="newMemStart" value="${new Date().toISOString().split('T')[0]}"></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn btn-red" onclick="createMembership()">Create</button></div>`);
+  });
+}
+function createMembership(){
+  const data={user_id:$('#newMemMember').value,type:$('#newMemPlan').value,start_date:$('#newMemStart').value};
+  apiFetch('/admin/memberships',{method:'POST',body:JSON.stringify(data)}).then(d=>{
+    toast(d.message||'Membership created');closeModal();loadMemberships();
+  }).catch(()=>toast('Failed to create membership','error'));
+}
+function viewMembership(id){
+  apiFetch(`/admin/memberships/${id}`).then(d=>{
+    const m=d.membership||d;
+    showModal(`<h2>Membership Details</h2><div class="grid-2" style="gap:12px"><div class="form-group"><label>Member</label><p>${m.member_name||m.user_name||'--'}</p></div><div class="form-group"><label>Type</label><p>${m.type||m.plan||'--'}</p></div><div class="form-group"><label>Start</label><p>${m.start_date?new Date(m.start_date).toLocaleDateString():'--'}</p></div><div class="form-group"><label>End</label><p>${m.end_date?new Date(m.end_date).toLocaleDateString():'--'}</p></div><div class="form-group"><label>Status</label><p><span class="badge ${m.status==='active'?'badge-green':'badge-yellow'}">${m.status||'active'}</span></p></div></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Close</button></div>`);
+  });
+}
+
+// BOOKINGS
+function loadBookings(){
+  apiFetch('/admin/bookings').then(d=>{renderBookingsTable(d.bookings||d.data||[])}).catch(()=>renderBookingsTable([]));
+}
+function renderBookingsTable(list){
+  if(!list.length){$('#bookingsTable').innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text3)">No bookings found</td></tr>';return}
+  $('#bookingsTable').innerHTML=list.map(b=>`<tr><td>${b.id||b._id||'--'}</td><td>${b.member_name||b.user_name||'--'}</td><td>${b.class_name||b.class||'--'}</td><td>${b.date?new Date(b.date).toLocaleDateString():'--'}</td><td><span class="badge ${b.status==='confirmed'?'badge-green':'badge-yellow'}">${b.status||'pending'}</span></td><td><button class="btn btn-sm btn-outline" onclick="viewBooking('${b.id||b._id}')"><i class="fas fa-eye"></i></button></td></tr>`).join('');
+}
+function searchBookings(q){
+  if(!q||q.length<2){loadBookings();return}
+  apiFetch(`/admin/bookings?search=${encodeURIComponent(q)}`).then(d=>renderBookingsTable(d.bookings||d.data||[]));
+}
+function showCreateBooking(){
+  Promise.all([apiFetch('/admin/users').catch(()=>({users:[]})),apiFetch('/admin/classes').catch(()=>({classes:[]}))]).then(([u,c])=>{
+    const users=u.users||u.data||[];
+    const classes=c.classes||c.data||[];
+    showModal(`<h2>New Booking</h2><div class="form-group"><label>Member</label><select class="form-input" id="newBookMember"><option value="">Select member</option>${users.map(u=>`<option value="${u.id||u._id}">${u.name||u.email||'Member'}</option>`).join('')}</select></div><div class="form-group"><label>Class</label><select class="form-input" id="newBookClass"><option value="">Select class</option>${classes.map(c=>`<option value="${c.id||c._id}">${c.name||c.class_name||'Class'} ${c.time||''}</option>`).join('')}</select></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn btn-red" onclick="createBooking()">Book</button></div>`);
+  });
+}
+function createBooking(){
+  const data={user_id:$('#newBookMember').value,class_id:$('#newBookClass').value};
+  apiFetch('/admin/bookings',{method:'POST',body:JSON.stringify(data)}).then(d=>{
+    toast(d.message||'Booking created');closeModal();loadBookings();
+  }).catch(()=>toast('Failed to create booking','error'));
+}
+
+// CLASSES
+function loadClasses(){
+  apiFetch('/admin/classes').then(d=>{
+    const cls=d.classes||d.data||[];
+    const today=new Date().toISOString().split('T')[0];
+    const todayName=new Date().toLocaleDateString('en-US',{weekday:'long'}).toLowerCase();
+    const todayCls=cls.filter(c=>{const dt=c.date||c.day||'';return dt===today||dt.toLowerCase()===todayName});
+    if(!todayCls.length&&!cls.length){$('#classesList').innerHTML='<div class="empty-state"><i class="fas fa-dumbbell"></i>No classes scheduled</div>';return}
+    const render=cls.length?cls:todayCls;
+    $('#classesList').innerHTML=render.map(c=>`<div class="card" style="margin-bottom:12px"><div class="flex-between"><div><h3 style="margin-bottom:4px">${c.name||c.class_name||'Class'}</h3><p style="color:var(--text2);font-size:13px"><i class="fas fa-clock" style="margin-right:4px"></i>${c.time||c.start_time||'--'} ${c.end_time?'- '+c.end_time:''} <i class="fas fa-user" style="margin:0 4px 0 12px"></i>${c.trainer||c.instructor||'TBD'} <i class="fas fa-users" style="margin:0 4px 0 12px"></i>${c.capacity||c.max_capacity||'?'} spots</p></div><div><span class="badge ${c.status==='active'||!c.status?'badge-green':'badge-yellow'}">${c.status||'active'}</span></div></div></div>`).join('');
+  });
+}
+function showCreateClass(){
+  showModal(`<h2>Add Class</h2><div class="form-group"><label>Class Name</label><input class="form-input" id="newClassName" placeholder="e.g. Yoga Flow"></div><div class="form-group"><label>Trainer</label><input class="form-input" id="newClassTrainer" placeholder="Trainer name"></div><div class="form-group"><label>Time</label><input class="form-input" type="time" id="newClassTime"></div><div class="form-group"><label>Capacity</label><input class="form-input" type="number" id="newClassCap" value="20"></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn btn-red" onclick="createClass()">Create</button></div>`);
+}
+function createClass(){
+  const data={name:$('#newClassName').value,trainer:$('#newClassTrainer').value,time:$('#newClassTime').value,capacity:parseInt($('#newClassCap').value)||20};
+  apiFetch('/admin/classes',{method:'POST',body:JSON.stringify(data)}).then(d=>{
+    toast(d.message||'Class created');closeModal();loadClasses();
+  }).catch(()=>toast('Failed to create class','error'));
+}
+
+// PT
+function loadPT(){
+  apiFetch('/admin/pt').then(d=>{renderPTTable(d.sessions||d.pt_sessions||d.data||[])}).catch(()=>renderPTTable([]));
+}
+function renderPTTable(list){
+  if(!list.length){$('#ptTable').innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text3)">No PT sessions scheduled today</td></tr>';return}
+  $('#ptTable').innerHTML=list.map(s=>`<tr><td>${s.trainer_name||s.trainer||'--'}</td><td>${s.member_name||s.user_name||'--'}</td><td>${s.time||s.start_time||'--'}</td><td>${s.type||s.session_type||'General'}</td><td><span class="badge ${s.status==='completed'?'badge-green':s.status==='scheduled'?'badge-blue':'badge-yellow'}">${s.status||'scheduled'}</span></td><td><button class="btn btn-sm btn-outline" onclick="viewPT('${s.id||s._id}')"><i class="fas fa-eye"></i></button></td></tr>`).join('');
+}
+function showCreatePT(){
+  apiFetch('/admin/users').then(d=>{
+    const users=d.users||d.data||[];
+    showModal(`<h2>Schedule PT Session</h2><div class="form-group"><label>Member</label><select class="form-input" id="newPTMember"><option value="">Select member</option>${users.map(u=>`<option value="${u.id||u._id}">${u.name||u.email||'Member'}</option>`).join('')}</select></div><div class="form-group"><label>Trainer</label><input class="form-input" id="newPTTrainer" placeholder="Trainer name"></div><div class="form-group"><label>Time</label><input class="form-input" type="time" id="newPTTime"></div><div class="form-group"><label>Type</label><select class="form-input" id="newPTType"><option value="general">General</option><option value="strength">Strength</option><option value="cardio">Cardio</option><option value="rehab">Rehabilitation</option></select></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn btn-red" onclick="createPT()">Schedule</button></div>`);
+  });
+}
+function createPT(){
+  const data={user_id:$('#newPTMember').value,trainer:$('#newPTTrainer').value,time:$('#newPTTime').value,type:$('#newPTType').value};
+  apiFetch('/admin/pt',{method:'POST',body:JSON.stringify(data)}).then(d=>{
+    toast(d.message||'PT session scheduled');closeModal();loadPT();
+  }).catch(()=>toast('Failed to schedule','error'));
+}
+
+// POS
+function loadProducts(){
+  apiFetch('/admin/products').then(d=>{renderPOSProducts(d.products||d.data||[])}).catch(()=>renderPOSProducts([]));
+}
+function renderPOSProducts(products){
+  if(!products.length){$('#posProducts').innerHTML='<div class="empty-state" style="padding:20px"><i class="fas fa-box"></i>No products available</div>';return}
+  $('#posProducts').innerHTML=products.map(p=>`<div class="member-card" onclick="addToCart('${p.id||p._id}','${(p.name||'').replace(/'/g,"\\'")}',${p.price||0})"><div class="member-avatar" style="background:var(--red-glow)"><i class="fas fa-${p.category==='supplement'?'-pills':'tshirt'}"></i></div><div class="member-info"><h4>${p.name||'Product'}</h4><p>$${(p.price||0).toFixed(2)} • ${p.stock||0} in stock</p></div><span class="btn btn-sm btn-green"><i class="fas fa-plus"></i></span></div>`).join('');
+}
+function searchPOS(q){
+  if(!q||q.length<2){loadProducts();return}
+  apiFetch(`/admin/products?search=${encodeURIComponent(q)}`).then(d=>renderPOSProducts(d.products||d.data||[]));
+}
+function addToCart(id,name,price){
+  const existing=cart.find(c=>c.id===id);
+  if(existing){existing.qty++}else{cart.push({id,name,price,qty:1})}
+  renderCart();
+  toast(`${name} added to cart`);
+}
+function renderCart(){
+  if(!cart.length){$('#posCart').innerHTML='<div class="empty-state" style="padding:20px"><i class="fas fa-cart-plus"></i>Cart is empty</div>';$('#cartTotal').style.display='none';return}
+  $('#posCart').innerHTML=cart.map((c,i)=>`<div class="cart-item"><div class="cart-item-info"><h4>${c.name}</h4><p>$${c.price.toFixed(2)}</p></div><div class="cart-qty"><button onclick="updateCartQty(${i},-1)">-</button><span>${c.qty}</span><button onclick="updateCartQty(${i},1)">+</button></div><button class="btn btn-sm btn-outline" onclick="removeCartItem(${i})"><i class="fas fa-times"></i></button></div>`).join('');
+  const total=cart.reduce((s,c)=>s+c.price*c.qty,0);
+  $('#cartTotalAmount').textContent='$'+total.toFixed(2);
+  $('#cartTotal').style.display='flex';
+}
+function updateCartQty(i,delta){cart[i].qty+=delta;if(cart[i].qty<1)cart.splice(i,1);renderCart()}
+function removeCartItem(i){cart.splice(i,1);renderCart()}
+function clearCart(){cart=[];renderCart()}
+function checkoutPOS(){
+  if(!cart.length){toast('Cart is empty','error');return}
+  const total=cart.reduce((s,c)=>s+c.price*c.qty,0);
+  const data={items:cart.map(c=>({product_id:c.id,name:c.name,price:c.price,quantity:c.qty})),total,payment_method:$('#posPayMethod').value,member_id:$('#posMember').value||undefined};
+  apiFetch('/admin/pos/orders',{method:'POST',body:JSON.stringify(data)}).then(d=>{
+    toast(d.message||`Sale complete: $${total.toFixed(2)}`);cart=[];renderCart();
+  }).catch(()=>toast('Sale failed','error'));
+}
+
+// PAYMENTS
+function loadPayments(){
+  apiFetch('/admin/payments').then(d=>{renderPaymentsTable(d.payments||d.data||[])}).catch(()=>renderPaymentsTable([]));
+}
+function renderPaymentsTable(list){
+  if(!list.length){$('#paymentsTable').innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text3)">No payments found</td></tr>';return}
+  $('#paymentsTable').innerHTML=list.map(p=>`<tr><td>${p.id||p._id||'--'}</td><td>${p.member_name||p.user_name||'--'}</td><td><strong>$${(p.amount||0).toFixed(2)}</strong></td><td><span class="badge badge-blue">${p.method||p.payment_method||'--'}</span></td><td>${p.for||p.description||'--'}</td><td>${p.date?new Date(p.date).toLocaleDateString():p.created_at?new Date(p.created_at).toLocaleDateString():'--'}</td><td><span class="badge ${p.status==='paid'||p.status==='completed'?'badge-green':'badge-yellow'}">${p.status||'pending'}</span></td></tr>`).join('');
+}
+function showRecordPayment(){
+  apiFetch('/admin/users').then(d=>{
+    const users=d.users||d.data||[];
+    showModal(`<h2>Record Payment</h2><div class="form-group"><label>Member</label><select class="form-input" id="newPayMember"><option value="">Select member</option>${users.map(u=>`<option value="${u.id||u._id}">${u.name||u.email||'Member'}</option>`).join('')}</select></div><div class="form-group"><label>Amount ($)</label><input class="form-input" type="number" step="0.01" id="newPayAmount" placeholder="0.00"></div><div class="form-group"><label>Method</label><select class="form-input" id="newPayMethod"><option value="cash">Cash</option><option value="card">Card</option><option value="upi">UPI</option><option value="bank_transfer">Bank Transfer</option></select></div><div class="form-group"><label>For</label><input class="form-input" id="newPayFor" placeholder="Membership, PT, etc."></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn btn-red" onclick="recordPayment()">Record</button></div>`);
+  });
+}
+function recordPayment(){
+  const data={user_id:$('#newPayMember').value,amount:parseFloat($('#newPayAmount').value)||0,method:$('#newPayMethod').value,description:$('#newPayFor').value};
+  apiFetch('/admin/payments',{method:'POST',body:JSON.stringify(data)}).then(d=>{
+    toast(d.message||'Payment recorded');closeModal();loadPayments();
+  }).catch(()=>toast('Failed to record payment','error'));
+}
+
+// LEADS
+function loadLeads(){
+  apiFetch('/admin/leads').then(d=>{renderLeadsTable(d.leads||d.data||[])}).catch(()=>renderLeadsTable([]));
+}
+function renderLeadsTable(list){
+  if(!list.length){$('#leadsTable').innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text3)">No leads found</td></tr>';return}
+  $('#leadsTable').innerHTML=list.map(l=>`<tr><td>${l.id||l._id||'--'}</td><td><strong>${l.name||'--'}</strong></td><td>${l.phone||'--'}</td><td><span class="badge badge-blue">${l.source||'walk-in'}</span></td><td><span class="badge ${l.status==='converted'?'badge-green':l.status==='interested'?'badge-blue':'badge-yellow'}">${l.status||'new'}</span></td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.notes||'--'}</td><td><button class="btn btn-sm btn-outline" onclick="viewLead('${l.id||l._id}')"><i class="fas fa-eye"></i></button></td></tr>`).join('');
+}
+function showCaptureLead(){
+  showModal(`<h2>Capture Walk-in Lead</h2><div class="form-group"><label>Name</label><input class="form-input" id="newLeadName" placeholder="Full name"></div><div class="form-group"><label>Phone</label><input class="form-input" id="newLeadPhone" placeholder="Phone number"></div><div class="form-group"><label>Email</label><input class="form-input" id="newLeadEmail" placeholder="Email (optional)"></div><div class="form-group"><label>Source</label><select class="form-input" id="newLeadSource"><option value="walk-in">Walk-in</option><option value="referral">Referral</option><option value="social">Social Media</option><option value="website">Website</option></select></div><div class="form-group"><label>Notes</label><textarea class="form-input" id="newLeadNotes" placeholder="Any notes..."></textarea></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn btn-red" onclick="captureLead()">Capture</button></div>`);
+  setTimeout(()=>$('#newLeadName')?.focus(),100);
+}
+function captureLead(){
+  const data={name:$('#newLeadName').value,phone:$('#newLeadPhone').value,email:$('#newLeadEmail').value,source:$('#newLeadSource').value,notes:$('#newLeadNotes').value};
+  apiFetch('/admin/leads',{method:'POST',body:JSON.stringify(data)}).then(d=>{
+    toast(d.message||'Lead captured');closeModal();loadLeads();
+  }).catch(()=>toast('Failed to capture lead','error'));
+}
+function viewLead(id){
+  apiFetch(`/admin/leads/${id}`).then(d=>{
+    const l=d.lead||d;
+    showModal(`<h2>Lead Details</h2><div class="grid-2" style="gap:12px"><div class="form-group"><label>Name</label><p>${l.name||'--'}</p></div><div class="form-group"><label>Phone</label><p>${l.phone||'--'}</p></div><div class="form-group"><label>Email</label><p>${l.email||'--'}</p></div><div class="form-group"><label>Source</label><p>${l.source||'--'}</p></div><div class="form-group"><label>Status</label><p><span class="badge badge-blue">${l.status||'new'}</span></p></div><div class="form-group"><label>Notes</label><p>${l.notes||'--'}</p></div></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Close</button></div>`);
+  });
+}
+
+// FOLLOW-UPS
+function loadFollowups(){
+  apiFetch('/admin/followups').then(d=>{renderFollowupsTable(d.followups||d.follow_ups||d.data||[])}).catch(()=>renderFollowupsTable([]));
+}
+function renderFollowupsTable(list){
+  if(!list.length){$('#followupsTable').innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text3)">No follow-ups scheduled</td></tr>';return}
+  $('#followupsTable').innerHTML=list.map(f=>`<tr><td>${f.lead_name||f.member_name||'--'}</td><td>${f.phone||f.lead_phone||'--'}</td><td>${f.scheduled_date?new Date(f.scheduled_date).toLocaleDateString():'--'}</td><td><span class="badge ${f.status==='completed'?'badge-green':f.status==='pending'?'badge-yellow':'badge-blue'}">${f.status||'pending'}</span></td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.notes||'--'}</td><td>${f.status!=='completed'?`<button class="btn btn-sm btn-green" onclick="completeFollowup('${f.id||f._id}')"><i class="fas fa-check"></i></button>`:''}</td></tr>`).join('');
+}
+function showCreateFollowup(){
+  apiFetch('/admin/leads').then(d=>{
+    const leads=d.leads||d.data||[];
+    showModal(`<h2>Add Follow-up</h2><div class="form-group"><label>Lead</label><select class="form-input" id="newFULead"><option value="">Select lead</option>${leads.map(l=>`<option value="${l.id||l._id}">${l.name||'Lead'} - ${l.phone||''}</option>`).join('')}</select></div><div class="form-group"><label>Scheduled Date</label><input class="form-input" type="date" id="newFUDate" value="${new Date().toISOString().split('T')[0]}"></div><div class="form-group"><label>Notes</label><textarea class="form-input" id="newFUNotes" placeholder="Notes..."></textarea></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn btn-red" onclick="createFollowup()">Create</button></div>`);
+  });
+}
+function createFollowup(){
+  const data={lead_id:$('#newFULead').value,scheduled_date:$('#newFUDate').value,notes:$('#newFUNotes').value};
+  apiFetch('/admin/followups',{method:'POST',body:JSON.stringify(data)}).then(d=>{
+    toast(d.message||'Follow-up created');closeModal();loadFollowups();
+  }).catch(()=>toast('Failed to create follow-up','error'));
+}
+function completeFollowup(id){
+  apiFetch(`/admin/followups/${id}`,{method:'PUT',body:JSON.stringify({status:'completed'})}).then(d=>{
+    toast(d.message||'Follow-up completed');loadFollowups();
+  }).catch(()=>toast('Failed','error'));
+}
+
+// SUPPORT
+function loadTickets(){
+  apiFetch('/admin/tickets').then(d=>{renderTicketsTable(d.tickets||d.data||[])}).catch(()=>renderTicketsTable([]));
+}
+function renderTicketsTable(list){
+  if(!list.length){$('#supportTable').innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text3)">No tickets found</td></tr>';return}
+  $('#supportTable').innerHTML=list.map(t=>`<tr><td>${t.id||t._id||'--'}</td><td>${t.member_name||t.user_name||'--'}</td><td>${t.subject||t.title||'--'}</td><td><span class="badge ${t.priority==='high'?'badge-red':t.priority==='medium'?'badge-yellow':'badge-blue'}">${t.priority||'low'}</span></td><td><span class="badge ${t.status==='resolved'||t.status==='closed'?'badge-green':'badge-yellow'}">${t.status||'open'}</span></td><td>${t.created_at?new Date(t.created_at).toLocaleDateString():'--'}</td><td><button class="btn btn-sm btn-outline" onclick="viewTicket('${t.id||t._id}')"><i class="fas fa-eye"></i></button></td></tr>`).join('');
+}
+function showCreateTicket(){
+  apiFetch('/admin/users').then(d=>{
+    const users=d.users||d.data||[];
+    showModal(`<h2>New Support Ticket</h2><div class="form-group"><label>Member</label><select class="form-input" id="newTickMember"><option value="">Select member (optional)</option>${users.map(u=>`<option value="${u.id||u._id}">${u.name||u.email||'Member'}</option>`).join('')}</select></div><div class="form-group"><label>Subject</label><input class="form-input" id="newTickSubject" placeholder="Brief subject"></div><div class="form-group"><label>Priority</label><select class="form-input" id="newTickPriority"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></div><div class="form-group"><label>Description</label><textarea class="form-input" id="newTickDesc" placeholder="Describe the issue..."></textarea></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn btn-red" onclick="createTicket()">Create</button></div>`);
+  });
+}
+function createTicket(){
+  const data={user_id:$('#newTickMember').value||undefined,subject:$('#newTickSubject').value,priority:$('#newTickPriority').value,description:$('#newTickDesc').value};
+  apiFetch('/admin/tickets',{method:'POST',body:JSON.stringify(data)}).then(d=>{
+    toast(d.message||'Ticket created');closeModal();loadTickets();
+  }).catch(()=>toast('Failed to create ticket','error'));
+}
+function viewTicket(id){
+  apiFetch(`/admin/tickets/${id}`).then(d=>{
+    const t=d.ticket||d;
+    showModal(`<h2>Ticket #${t.id||t._id||''}</h2><div class="grid-2" style="gap:12px"><div class="form-group"><label>Subject</label><p>${t.subject||t.title||'--'}</p></div><div class="form-group"><label>Member</label><p>${t.member_name||t.user_name||'--'}</p></div><div class="form-group"><label>Priority</label><p><span class="badge ${t.priority==='high'?'badge-red':'badge-blue'}">${t.priority||'low'}</span></p></div><div class="form-group"><label>Status</label><p><span class="badge badge-green">${t.status||'open'}</span></p></div></div><div class="form-group"><label>Description</label><p style="color:var(--text2)">${t.description||t.message||'--'}</p></div><div class="modal-actions"><button class="btn btn-outline" onclick="closeModal()">Close</button></div>`);
+  });
+}
+
+// INIT LOAD
+if(!token){$('#loginOverlay').style.display='flex';$('#app').style.display='none'}
+</script>
+</body>
+</html>

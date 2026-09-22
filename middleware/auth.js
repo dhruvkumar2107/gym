@@ -7,8 +7,9 @@ function authMiddleware(req, res, next) {
   if (!token) return res.status(401).json({ error: 'Authentication required' });
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = get('SELECT id, username, email, role, full_name, phone, avatar FROM users WHERE id = ?', [decoded.userId]);
+    const user = get('SELECT id, username, email, role, full_name, phone, avatar, is_active FROM users WHERE id = ?', [decoded.userId]);
     if (!user) return res.status(401).json({ error: 'User not found' });
+    if (!user.is_active) return res.status(403).json({ error: 'Account deactivated' });
     req.user = user;
     next();
   } catch (err) {
@@ -17,10 +18,33 @@ function authMiddleware(req, res, next) {
 }
 
 function adminMiddleware(req, res, next) {
-  if (!req.user || req.user.role !== 'admin') {
+  const adminRoles = ['admin', 'super_admin', 'branch_manager'];
+  if (!req.user || !adminRoles.includes(req.user.role)) {
     return res.status(403).json({ error: 'Admin access required' });
   }
   next();
+}
+
+function roleMiddleware(...roles) {
+  return (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+    next();
+  };
+}
+
+function permissionMiddleware(permission) {
+  return (req, res, next) => {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    if (req.user.role === 'super_admin' || req.user.role === 'admin') return next();
+    const userRole = get('SELECT id FROM roles WHERE name = ?', [req.user.role]);
+    if (userRole) {
+      const hasPermission = get('SELECT id FROM role_permissions rp JOIN permissions p ON rp.permission_id = p.id WHERE rp.role_id = ? AND p.name = ?', [userRole.id, permission]);
+      if (hasPermission) return next();
+    }
+    return res.status(403).json({ error: 'Insufficient permissions' });
+  };
 }
 
 function optionalAuth(req, res, next) {
@@ -35,4 +59,4 @@ function optionalAuth(req, res, next) {
   next();
 }
 
-module.exports = { authMiddleware, adminMiddleware, optionalAuth, JWT_SECRET };
+module.exports = { authMiddleware, adminMiddleware, roleMiddleware, permissionMiddleware, optionalAuth, JWT_SECRET };

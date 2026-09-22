@@ -152,7 +152,10 @@ function apiGet(path) {
   }).catch(function() { return getLocalData(path); });
 }
 function apiPost(path, data) {
-  return fetch(API + path, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(function(r){
+  var headers = {'Content-Type':'application/json'};
+  var token = getToken();
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  return fetch(API + path, {method:'POST',headers:headers,body:JSON.stringify(data)}).then(function(r){
     if (!r.ok) return r.json().catch(function(){return{error:'Request failed (status ' + r.status + ')'};}).then(function(d){ throw d; });
     return r.json();
   }).catch(function(e){ return (e && e.error) ? e : {error:'Network error'}; });
@@ -207,6 +210,52 @@ function openWhatsApp(message) {
   var msg = encodeURIComponent(message || 'Hi! I am interested in Zacson Fitness memberships.');
   window.open('https://wa.me/' + phone + '?text=' + msg, '_blank');
   trackEvent('whatsapp_click');
+}
+
+function openFreeTrialModal() {
+  var existing = document.getElementById('freeTrialModal');
+  if (existing) existing.remove();
+  var modal = document.createElement('div');
+  modal.id = 'freeTrialModal';
+  modal.className = 'checkout-overlay active';
+  modal.innerHTML = '<div class="checkout-dialog" style="max-width:520px">' +
+    '<div class="checkout-header"><h3>Book Your Free Trial</h3><button class="checkout-close" onclick="document.getElementById(\'freeTrialModal\').remove();document.body.style.overflow=\'\';">&times;</button></div>' +
+    '<div class="checkout-body">' +
+    '<p style="color:#bbb;margin-bottom:6px;">Experience Zacson Fitness for free. Fill out the form below and we\'ll get back to you within 24 hours.</p>' +
+    '<form id="freeTrialModalForm">' +
+    '<div class="form-group" style="margin-bottom:14px"><label style="display:block;color:#aaa;font-size:13px;margin-bottom:4px;">Full Name *</label><input type="text" name="name" required placeholder="Your full name" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;"></div>' +
+    '<div class="form-group" style="margin-bottom:14px"><label style="display:block;color:#aaa;font-size:13px;margin-bottom:4px;">Phone Number *</label><input type="tel" name="phone" required placeholder="+91 98765 43210" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;"></div>' +
+    '<div class="form-group" style="margin-bottom:14px"><label style="display:block;color:#aaa;font-size:13px;margin-bottom:4px;">Email Address *</label><input type="email" name="email" required placeholder="your@email.com" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;"></div>' +
+    '<div class="form-group" style="margin-bottom:14px"><label style="display:block;color:#aaa;font-size:13px;margin-bottom:4px;">Fitness Goal</label><select name="fitness_goal" style="width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;"><option value="">Select goal</option><option value="weight_loss">Weight Loss</option><option value="muscle_gain">Muscle Gain</option><option value="general_fitness">General Fitness</option><option value="flexibility">Flexibility</option><option value="endurance">Endurance</option></select></div>' +
+    '<button type="submit" class="checkout-next-btn" id="freeTrialModalBtn">Book Free Trial</button>' +
+    '</form></div></div>';
+  document.body.appendChild(modal);
+  modal.querySelector('#freeTrialModalForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var fd = new FormData(this);
+    var name = fd.get('name'), phone = fd.get('phone'), email = fd.get('email'), goal = fd.get('fitness_goal');
+    var btn = document.getElementById('freeTrialModalBtn');
+    btn.disabled = true; btn.textContent = 'Submitting...';
+    apiPost('/leads', {
+      source: 'free_trial',
+      name: name, phone: phone, email: email,
+      notes: 'Free Trial via modal. Goal: ' + (goal || 'Not specified')
+    }).then(function(r) {
+      btn.disabled = false; btn.textContent = 'Book Free Trial';
+      if (r && !r.error) {
+        modal.querySelector('.checkout-body').innerHTML = '<div style="text-align:center;padding:30px;">' +
+          '<div class="success-icon"><i class="fas fa-check-circle"></i></div>' +
+          '<h3 style="color:#fff;margin:10px 0;">Thank You!</h3>' +
+          '<p style="color:#bbb;">Your free trial request has been received. We will contact you within 24 hours to confirm your session.</p>' +
+          '<button class="checkout-next-btn" onclick="document.getElementById(\'freeTrialModal\').remove();document.body.style.overflow=\'\';" style="margin-top:20px;">Close</button></div>';
+        trackEvent('lead_generated', {source: 'free_trial_modal'});
+        showToast('Free trial request submitted!', 'success');
+      } else {
+        showToast('Thank you! We will contact you soon.', 'success');
+        modal.remove(); document.body.style.overflow = '';
+      }
+    });
+  });
 }
 
 function showToast(message, type) {
@@ -265,7 +314,7 @@ function initNavbar() {
       var isActive = currentPage === n.href;
       return '<li' + (isActive ? ' class="active"' : '') + '><a href="' + n.href + '"><span class="nav-icon">' + n.icon + '</span>' + n.text + '<span class="nav-arrow">&#8250;</span></a></li>';
     }).join('');
-    drawer.innerHTML = '<div class="mobile-nav-drawer-header"><img src="assets/img/logo/logo.png" alt="Zacson Fitness" class="mobile-nav-drawer-logo"><button class="mobile-nav-close" aria-label="Close navigation">&times;</button></div><div class="mobile-nav-drawer-nav"><ul>' + linksHtml + '</ul></div><div class="mobile-nav-drawer-cta"><a href="contact.html">Book Free Trial</a></div>';
+    drawer.innerHTML = '<div class="mobile-nav-drawer-header"><img src="assets/img/logo/logo.png" alt="Zacson Fitness" class="mobile-nav-drawer-logo"><button class="mobile-nav-close" aria-label="Close navigation">&times;</button></div><div class="mobile-nav-drawer-nav"><ul>' + linksHtml + '</ul></div><div class="mobile-nav-drawer-cta"><a href="javascript:void(0)" onclick="openFreeTrialModal();closeMenu();">Book Free Trial</a></div>';
     document.body.appendChild(drawer);
   }
   function closeMenu() {
@@ -492,12 +541,58 @@ function renderCheckoutFinalSummary() {
 function initiateRazorpayPayment() {
   var plan = checkoutState.plan;
   var total = (plan.price * plan.duration) - checkoutState.discount;
+  var form = document.getElementById('checkoutForm');
+  var userData = {};
+  if (form) new FormData(form).forEach(function(v, k) { userData[k] = v; });
+  var payBtn = document.querySelector('.checkout-pay-btn');
+  if (payBtn && payBtn.disabled) return;
+
+  function onPaymentSuccess(paymentId) {
+    if (payBtn) { payBtn.disabled = true; payBtn.textContent = 'Processing...'; }
+    apiPost('/auth/register', {
+      name: userData.name,
+      email: userData.email,
+      phone: userData.phone,
+      password: 'Zacson@' + Math.random().toString(36).slice(-6),
+      role: 'member'
+    }).then(function(regResult) {
+      var userId = regResult && regResult.user ? regResult.user.id : null;
+      var token = regResult && regResult.token ? regResult.token : null;
+      if (token) setToken(token);
+      if (userId) {
+        return apiPost('/membership/purchase', {
+          plan_id: plan.id,
+          payment_method: 'razorpay',
+          razorpay_payment_id: paymentId || 'DEMO'
+        }).then(function() { return userId; }).catch(function() { return userId; });
+      }
+      return userId;
+    }).then(function(userId) {
+      apiPost('/leads', {
+        source: 'online_purchase',
+        name: userData.name,
+        phone: userData.phone,
+        email: userData.email,
+        notes: 'Purchased ' + plan.name + ' plan online. Payment ID: ' + (paymentId || 'DEMO')
+      });
+      document.querySelectorAll('.checkout-step-content').forEach(function(el) { el.style.display = 'none'; });
+      document.getElementById('checkoutSuccess').style.display = 'block';
+      document.getElementById('checkoutSuccessMsg').textContent = 'Payment successful! Welcome to Zacson Fitness.';
+      document.getElementById('checkoutInvoiceNum').textContent = 'Payment ID: ' + (paymentId || 'DEMO-' + Date.now());
+      trackEvent('purchase_completed', {plan_name: plan.name, value: total});
+      showToast('Welcome to Zacson Fitness!', 'success');
+      if (payBtn) payBtn.textContent = 'Paid';
+    }).catch(function() {
+      document.querySelectorAll('.checkout-step-content').forEach(function(el) { el.style.display = 'none'; });
+      document.getElementById('checkoutSuccess').style.display = 'block';
+      document.getElementById('checkoutSuccessMsg').textContent = 'Payment received! Your membership will be activated shortly.';
+      trackEvent('purchase_completed', {plan_name: plan.name, value: total});
+      showToast('Welcome to Zacson Fitness!', 'success');
+      if (payBtn) payBtn.textContent = 'Done';
+    });
+  }
+
   if (typeof Razorpay !== 'undefined') {
-    var form = document.getElementById('checkoutForm');
-    var userData = {};
-    if (form) new FormData(form).forEach(function(v, k) { userData[k] = v; });
-    var payBtn = document.querySelector('.checkout-pay-btn');
-    if (payBtn && payBtn.disabled) return;
     if (payBtn) { payBtn.disabled = true; payBtn.textContent = 'Processing...'; }
     var options = {
       key: 'rzp_test_placeholder',
@@ -505,25 +600,14 @@ function initiateRazorpayPayment() {
       currency: 'INR',
       name: 'Zacson Fitness',
       description: plan.name + ' Membership',
-      handler: function() {
-        document.querySelectorAll('.checkout-step-content').forEach(function(el) { el.style.display = 'none'; });
-        document.getElementById('checkoutSuccess').style.display = 'block';
-        document.getElementById('checkoutSuccessMsg').textContent = 'Payment successful! Welcome to Zacson Fitness.';
-        trackEvent('purchase_completed', {plan_name: plan.name, value: total});
-        showToast('Welcome to Zacson Fitness!', 'success');
-      },
+      handler: function(response) { onPaymentSuccess(response.razorpay_payment_id); },
       prefill: {name: userData.name, email: userData.email, contact: userData.phone},
       theme: {color: '#FF0000'},
-      modal: {ondismiss: function() { if (payBtn) { payBtn.disabled = false; payBtn.textContent = 'Pay Now'; } showToast('Payment cancelled.', 'error'); }}
+      modal: {ondismiss: function() { if (payBtn) { payBtn.disabled = false; payBtn.textContent = 'Pay with Razorpay'; } showToast('Payment cancelled.', 'error'); }}
     };
-    try { new Razorpay(options).open(); } catch(err) { if (payBtn) { payBtn.disabled = false; payBtn.textContent = 'Pay Now'; } showToast('Payment error. Please try again.', 'error'); }
+    try { new Razorpay(options).open(); } catch(err) { if (payBtn) { payBtn.disabled = false; payBtn.textContent = 'Pay with Razorpay'; } showToast('Payment error. Please try again.', 'error'); }
   } else {
-    document.querySelectorAll('.checkout-step-content').forEach(function(el) { el.style.display = 'none'; });
-    document.getElementById('checkoutSuccess').style.display = 'block';
-    document.getElementById('checkoutSuccessMsg').textContent = 'Demo mode: Payment simulated successfully! Welcome to Zacson Fitness.';
-    document.getElementById('checkoutInvoiceNum').textContent = 'Invoice: ZAC-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + Math.floor(1000 + Math.random() * 9000);
-    trackEvent('purchase_completed', {plan_name: plan.name, value: total});
-    showToast('Welcome to Zacson Fitness!', 'success');
+    onPaymentSuccess('DEMO-' + Date.now());
   }
 }
 
@@ -859,13 +943,59 @@ function loadClassesList() {
     container.innerHTML = classes.map(function(c) {
       return '<div class="col-lg-4 col-md-6"><div class="single-class mb-30">' +
         '<div class="class-img"><img src="' + (c.image || 'assets/img/classes/yoga.jpg') + '" alt="' + c.name + '" loading="lazy" onerror="this.src=\'assets/img/classes/yoga.jpg\'"></div>' +
-        '<div class="class-content"><span class="difficulty-badge" style="background:' + (diffColors[c.difficulty] || '#3498db') + '">' + (c.difficulty || 'all-levels') + '</span>' +
+        '<div class="class-content"><span class="difficulty-badge ' + (c.difficulty || 'all-levels') + '">' + (c.difficulty || 'all-levels') + '</span>' +
         '<h3>' + c.name + '</h3><p>' + (c.description || '') + '</p>' +
         '<div class="class-meta"><span><i class="fas fa-clock"></i> ' + c.duration_minutes + ' min</span>' +
         '<span><i class="fas fa-users"></i> Max ' + c.max_participants + '</span></div>' +
-        '<a href="javascript:void(0)" onclick="openWhatsApp(\'Hi! I would like to join the ' + c.name + ' class.\')" class="border-btn border-btn2">Enquire Now</a>' +
+        '<a href="javascript:void(0)" class="border-btn border-btn2" onclick="bookPublicClass(' + c.id + ',\'' + c.name.replace(/'/g,"\\'") + '\')">Book Class</a>' +
         '</div></div></div>';
     }).join('');
+  });
+}
+
+function bookPublicClass(classId, className) {
+  var token = getToken();
+  if (!token) {
+    var modal = document.createElement('div');
+    modal.className = 'checkout-overlay active';
+    modal.innerHTML = '<div class="checkout-dialog" style="max-width:500px">' +
+      '<div class="checkout-header"><h3>Book ' + className + '</h3><button class="checkout-close" onclick="this.closest(\'.checkout-overlay\').remove();document.body.style.overflow=\'\';">&times;</button></div>' +
+      '<div class="checkout-body">' +
+      '<p style="color:#bbb;margin-bottom:20px;">Please fill in your details to book this class. If you\'re a new member, we\'ll contact you to complete your registration.</p>' +
+      '<form id="classBookForm">' +
+      '<div class="form-group"><label>Full Name *</label><input type="text" name="name" required placeholder="Your full name" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;"></div>' +
+      '<div class="form-group"><label>Phone *</label><input type="tel" name="phone" required placeholder="+91 98765 43210" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;"></div>' +
+      '<div class="form-group"><label>Email *</label><input type="email" name="email" required placeholder="your@email.com" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;"></div>' +
+      '<button type="submit" class="checkout-next-btn" style="margin-top:10px;">Submit Booking</button>' +
+      '</form></div></div>';
+    document.body.appendChild(modal);
+    modal.querySelector('#classBookForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var fd = new FormData(this);
+      var name = fd.get('name'), phone = fd.get('phone'), email = fd.get('email');
+      apiPost('/leads', {
+        source: 'class_booking',
+        name: name, phone: phone, email: email,
+        notes: 'Booked class: ' + className + ' (ID: ' + classId + ')'
+      }).then(function(r) {
+        modal.remove();
+        document.body.style.overflow = '';
+        if (r && !r.error) {
+          showToast('Class booking request received for ' + className + '! We will confirm your spot shortly.', 'success');
+        } else {
+          showToast('Thank you! We will contact you to confirm your booking.', 'success');
+        }
+      });
+    });
+    return;
+  }
+  apiPost('/admin/class-bookings', {class_id: classId}).then(function(result) {
+    if (result && result.error) {
+      showToast(result.error, 'error');
+    } else {
+      showToast('Successfully booked ' + className + '!', 'success');
+      trackEvent('class_booked', {class_name: className});
+    }
   });
 }
 
@@ -907,9 +1037,9 @@ function handleContactForm() {
       subject: form.querySelector('[name="subject"]') ? form.querySelector('[name="subject"]').value.trim() : '',
       message: message
     };
-    apiPost('/contact/submit', data).then(function(result) {
+    apiPost('/leads', {source:'contact_form', name:data.name, phone:data.phone, email:data.email, message:data.message}).then(function(result) {
       if (result.error) { showToast(result.error, 'error'); }
-      else { showToast(result.message || 'Message sent successfully!', 'success'); form.reset(); trackEvent('lead_generated', {source:'contact_form'}); }
+      else { showToast(result.message || 'Message sent successfully! We will get back to you soon.', 'success'); form.reset(); trackEvent('lead_generated', {source:'contact_form'}); }
       if (btn) { btn.disabled = false; btn.textContent = 'Send Message'; }
     });
   });
@@ -941,7 +1071,7 @@ function handleFreeTrialForm() {
       preferred_time: form.querySelector('[name="preferred_time"]') ? form.querySelector('[name="preferred_time"]').value : '',
       message: form.querySelector('[name="message"]') ? form.querySelector('[name="message"]').value : ''
     };
-    apiPost('/contact/free-trial', data).then(function(result) {
+    apiPost('/leads', {source:'free_trial', name:data.name, phone:data.phone, email:data.email, notes:'Free Trial: ' + data.fitness_goal + ' | ' + data.preferred_date + ' ' + data.preferred_time}).then(function(result) {
       if (result.error) { showToast(result.error, 'error'); }
       else {
         showToast('Your free trial request has been received! We will contact you within 24 hours.', 'success');
