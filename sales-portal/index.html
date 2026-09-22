@@ -697,10 +697,7 @@ async function handleLogin(e) {
       errEl.textContent = data.message || 'Invalid credentials'; errEl.style.display = 'block';
     }
   } catch (err) {
-    // Fallback for demo mode
-    currentUser = { name: 'Sales User', email: email };
-    localStorage.setItem('sales_token', 'demo_token');
-    showApp();
+    errEl.textContent = 'Network error. Please try again.'; errEl.style.display = 'block';
   }
   btn.textContent = 'Sign In'; btn.disabled = false;
   return false;
@@ -753,72 +750,80 @@ async function loadAllData() {
   const token = localStorage.getItem('sales_token');
   const headers = { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
   try {
-    const [leadsRes, pipelineRes, followupsRes, membershipsRes, offersRes, dashRes] = await Promise.allSettled([
+    const [leadsRes, pipelineRes, followupsRes, membershipsRes, offersRes, dashRes, usersRes, paymentsRes] = await Promise.allSettled([
       fetch(`${API}/admin/leads`, { headers }),
       fetch(`${API}/admin/leads/pipeline`, { headers }),
       fetch(`${API}/admin/leads?followups=pending`, { headers }),
-      fetch(`${API}/admin/memberships`, { headers }),
+      fetch(`${API}/admin/plans`, { headers }),
       fetch(`${API}/admin/offers`, { headers }),
-      fetch(`${API}/admin/dashboard`, { headers })
+      fetch(`${API}/admin/dashboard`, { headers }),
+      fetch(`${API}/admin/users`, { headers }),
+      fetch(`${API}/admin/payments`, { headers })
     ]);
 
     if (leadsRes.status === 'fulfilled' && leadsRes.value.ok) {
       const d = await leadsRes.value.json();
       leads = Array.isArray(d) ? d : (d.leads || d.data || []);
-    } else { leads = getDemoLeads(); }
+    } else { leads = []; }
 
     filteredLeads = [...leads];
     renderLeads();
     renderPipeline();
+
+    if (followupsRes.status === 'fulfilled' && followupsRes.value.ok) {
+      const d = await followupsRes.value.json();
+      followupsData = Array.isArray(d) ? d : (d.followups || d.data || []);
+    } else { followupsData = []; }
     renderFollowups();
+
     renderTrials();
+
+    if (usersRes.status === 'fulfilled' && usersRes.value.ok) {
+      const d = await usersRes.value.json();
+      customersData = Array.isArray(d) ? d.filter(u => u.role === 'member') : (d.users || d.data || []).filter(u => u.role === 'member');
+    } else { customersData = []; }
     renderCustomers();
+
+    if (membershipsRes.status === 'fulfilled' && membershipsRes.value.ok) {
+      const d = await membershipsRes.value.json();
+      membershipsData = Array.isArray(d) ? d : (d.plans || d.data || []);
+    } else { membershipsData = []; }
     renderMemberships();
+
+    if (offersRes.status === 'fulfilled' && offersRes.value.ok) {
+      const d = await offersRes.value.json();
+      offersData = Array.isArray(d) ? d : (d.offers || d.data || []);
+    } else { offersData = []; }
     renderOffers();
+
+    if (paymentsRes.status === 'fulfilled' && paymentsRes.value.ok) {
+      const d = await paymentsRes.value.json();
+      commissionsData = Array.isArray(d) ? d.filter(p => p.commission) : (d.payments || d.data || []).filter(p => p.commission);
+    } else { commissionsData = []; }
     renderCommissions();
   } catch (e) {
-    leads = getDemoLeads();
-    filteredLeads = [...leads];
-    renderLeads();
-    renderPipeline();
-    renderFollowups();
-    renderTrials();
-    renderCustomers();
-    renderMemberships();
-    renderOffers();
-    renderCommissions();
+    leads = []; filteredLeads = []; followupsData = []; customersData = []; membershipsData = []; offersData = []; commissionsData = [];
+    renderLeads(); renderPipeline(); renderFollowups(); renderCustomers(); renderMemberships(); renderOffers(); renderCommissions();
   }
 }
 
-function getDemoLeads() {
-  return [
-    { id: 1, name: 'Rahul Sharma', phone: '+91 98765 43210', email: 'rahul@email.com', source: 'Walk-in', score: 'hot', status: 'qualified', lastContact: '2 hours ago', lastContactDate: new Date(Date.now()-7200000), notes: 'Interested in Premium plan' },
-    { id: 2, name: 'Priya Patel', phone: '+91 87654 32109', email: 'priya@email.com', source: 'Instagram', score: 'warm', status: 'contacted', lastContact: '1 day ago', lastContactDate: new Date(Date.now()-86400000), notes: 'Asked about yoga classes' },
-    { id: 3, name: 'Amit Kumar', phone: '+91 76543 21098', email: 'amit@email.com', source: 'Google Ads', score: 'cold', status: 'new', lastContact: 'Never', lastContactDate: null, notes: 'Came from Google Ad' },
-    { id: 4, name: 'Sneha Reddy', phone: '+91 65432 10987', email: 'sneha@email.com', source: 'Referral', score: 'hot', status: 'trial', lastContact: '3 hours ago', lastContactDate: new Date(Date.now()-10800000), notes: 'Trial completed, very interested' },
-    { id: 5, name: 'Vikram Singh', phone: '+91 54321 09876', email: 'vikram@email.com', source: 'Walk-in', score: 'warm', status: 'contacted', lastContact: '2 days ago', lastContactDate: new Date(Date.now()-172800000), notes: 'Comparing with other gyms' },
-    { id: 6, name: 'Neha Gupta', phone: '+91 43210 98765', email: 'neha@email.com', source: 'JustDial', score: 'cold', status: 'new', lastContact: 'Never', lastContactDate: null, notes: '' },
-    { id: 7, name: 'Arjun Nair', phone: '+91 32109 87654', email: 'arjun@email.com', source: 'Instagram', score: 'hot', status: 'converted', lastContact: '5 hours ago', lastContactDate: new Date(Date.now()-18000000), notes: 'Converted to 6-month plan' },
-    { id: 8, name: 'Kavita Joshi', phone: '+91 21098 76543', email: 'kavita@email.com', source: 'Website', score: 'warm', status: 'qualified', lastContact: '12 hours ago', lastContactDate: new Date(Date.now()-43200000), notes: 'Interested in couples plan' },
-    { id: 9, name: 'Rohan Mehta', phone: '+91 10987 65432', email: 'rohan@email.com', source: 'Walk-in', score: 'cold', status: 'lost', lastContact: '1 week ago', lastContactDate: new Date(Date.now()-604800000), notes: 'Chose another gym' },
-    { id: 10, name: 'Deepika Rao', phone: '+91 09876 54321', email: 'deepika@email.com', source: 'Referral', score: 'warm', status: 'contacted', lastContact: '4 hours ago', lastContactDate: new Date(Date.now()-14400000), notes: 'Friend referral, wants personal training' },
-    { id: 11, name: 'Sanjay Verma', phone: '+91 98712 34567', email: 'sanjay@email.com', source: 'Google Ads', score: 'hot', status: 'trial', lastContact: '1 hour ago', lastContactDate: new Date(Date.now()-3600000), notes: 'Trial session today, loved CrossFit' },
-    { id: 12, name: 'Pooja Desai', phone: '+91 87612 34567', email: 'pooja@email.com', source: 'Instagram', score: 'warm', status: 'new', lastContact: 'Never', lastContactDate: null, notes: 'DM about membership prices' }
-  ];
-}
+function getDemoLeads() { return []; }
 
 // RENDER LEADS TABLE
 function renderLeads() {
   const tbody = document.getElementById('leads-tbody');
   if (!filteredLeads.length) { tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-users"></i><h3>No leads found</h3><p>Try adjusting your filters or add a new lead.</p></div></td></tr>'; return; }
-  tbody.innerHTML = filteredLeads.map(l => `
+  tbody.innerHTML = filteredLeads.map(l => {
+    const score = l.lead_score || l.score || 'warm';
+    const status = (l.status || 'new').toLowerCase();
+    return `
     <tr>
       <td><div style="font-weight:600;font-size:13.5px">${esc(l.name)}</div></td>
       <td><div style="font-size:12.5px">${esc(l.phone)}</div><div style="font-size:11.5px;color:var(--text-dim)">${esc(l.email||'')}</div></td>
       <td><span class="badge badge-gray">${esc(l.source)}</span></td>
-      <td><span class="lead-score ${l.score}"><i class="fas fa-circle" style="font-size:6px"></i>${capitalize(l.score)}</span></td>
-      <td><span class="badge ${statusBadge(l.status)}">${capitalize(l.status)}</span></td>
-      <td style="font-size:12px;color:var(--text-dim)">${esc(l.lastContact)}</td>
+      <td><span class="lead-score ${score}"><i class="fas fa-circle" style="font-size:6px"></i>${capitalize(score)}</span></td>
+      <td><span class="badge ${statusBadge(status)}">${capitalize(status)}</span></td>
+      <td style="font-size:12px;color:var(--text-dim)">${esc(l.lastContact || l.last_contact || '')}</td>
       <td>
         <div class="action-btns">
           <button class="btn btn-icon call" onclick="quickAction('call','${esc(l.phone)}')" title="Call"><i class="fas fa-phone"></i></button>
@@ -828,7 +833,7 @@ function renderLeads() {
         </div>
       </td>
     </tr>
-  `).join('');
+  `}).join('');
 }
 
 function filterLeads() {
@@ -840,7 +845,7 @@ function filterLeads() {
     if (q && !l.name.toLowerCase().includes(q) && !(l.phone||'').toLowerCase().includes(q) && !(l.email||'').toLowerCase().includes(q)) return false;
     if (src && l.source !== src) return false;
     if (status && l.status !== status) return false;
-    if (score && l.score !== score) return false;
+    if (score && (l.lead_score || l.score) !== score) return false;
     return true;
   });
   renderLeads();
@@ -865,13 +870,15 @@ function renderPipeline() {
           <div class="kanban-col-title"><div class="dot" style="background:${col.color}"></div>${col.title}<span class="kanban-count">${colLeads.length}</span></div>
         </div>
         <div class="kanban-cards">
-          ${colLeads.map(l => `
+          ${colLeads.map(l => {
+            const score = l.lead_score || l.score || 'warm';
+            return `
             <div class="kanban-card" draggable="true" ondragstart="handleDragStart(event,${l.id})" ondragend="this.classList.remove('dragging')">
               <div class="kc-name">${esc(l.name)}</div>
               <div class="kc-phone"><i class="fas fa-phone" style="font-size:10px"></i>${esc(l.phone)}</div>
               <div class="kc-meta">
                 <span class="kc-source">${esc(l.source)}</span>
-                <span class="lead-score ${l.score}" style="font-size:10px;padding:2px 6px"><i class="fas fa-circle" style="font-size:5px"></i>${capitalize(l.score)}</span>
+                <span class="lead-score ${score}" style="font-size:10px;padding:2px 6px"><i class="fas fa-circle" style="font-size:5px"></i>${capitalize(score)}</span>
               </div>
               <div style="display:flex;gap:4px;margin-top:10px">
                 <button class="btn btn-icon btn-sm call" onclick="quickAction('call','${esc(l.phone)}')" title="Call" style="width:28px;height:28px;font-size:11px"><i class="fas fa-phone"></i></button>
@@ -879,7 +886,7 @@ function renderPipeline() {
                 <button class="btn btn-icon btn-sm" onclick="openFollowupModal(${l.id})" title="Follow-up" style="width:28px;height:28px;font-size:11px"><i class="fas fa-clock"></i></button>
               </div>
             </div>
-          `).join('')}
+          `}).join('')}
         </div>
       </div>
     `;
@@ -928,16 +935,16 @@ function setPipelineView(view, btn) {
 function renderFollowups(filter = 'all') {
   const list = document.getElementById('followups-list');
   const now = new Date();
-  const demoFollowups = [
-    { id: 1, leadId: 1, leadName: 'Rahul Sharma', type: 'call', note: 'Discuss premium plan pricing', date: new Date(Date.now() - 3600000), status: 'pending', category: 'overdue' },
-    { id: 2, leadId: 2, leadName: 'Priya Patel', type: 'whatsapp', note: 'Send yoga class schedule', date: new Date(), status: 'pending', category: 'today' },
-    { id: 3, leadId: 5, leadName: 'Vikram Singh', type: 'email', note: 'Send comparison chart', date: new Date(Date.now() + 86400000), status: 'pending', category: 'upcoming' },
-    { id: 4, leadId: 10, leadName: 'Deepika Rao', type: 'call', note: 'Follow up on personal training query', date: new Date(Date.now() + 172800000), status: 'pending', category: 'upcoming' },
-    { id: 5, leadId: 8, leadName: 'Kavita Joshi', type: 'meeting', note: 'Couples plan discussion at gym', date: new Date(Date.now() + 259200000), status: 'pending', category: 'upcoming' },
-    { id: 6, leadId: 3, leadName: 'Amit Kumar', type: 'call', note: 'First contact call', date: new Date(Date.now() - 172800000), status: 'pending', category: 'overdue' },
-  ];
-  followupsData = demoFollowups;
-  const filtered = filter === 'all' ? followupsData : followupsData.filter(f => f.category === filter);
+  const enrichedFollowups = (followupsData || []).map(f => {
+    const fDate = new Date(f.scheduled_date || f.next_date || f.created_at || Date.now());
+    const diffMs = fDate - now;
+    const diffDays = Math.ceil(diffMs / 86400000);
+    let category = 'upcoming';
+    if (diffDays < 0) category = 'overdue';
+    else if (diffDays === 0) category = 'today';
+    return { ...f, date: fDate, category, leadName: f.lead_name || f.name || f.member_name || 'Unknown', type: f.followup_type || f.type || 'call', note: f.note || f.description || '', status: f.status || 'pending' };
+  });
+  const filtered = filter === 'all' ? enrichedFollowups : enrichedFollowups.filter(f => f.category === filter);
   if (!filtered.length) {
     list.innerHTML = '<div class="empty-state"><i class="fas fa-clock"></i><h3>No follow-ups</h3><p>All clear! No pending follow-ups for this filter.</p></div>';
     return;
@@ -954,7 +961,7 @@ function renderFollowups(filter = 'all') {
         <div class="fu-time ${timeClass}">${timeText}</div>
         <div class="fu-actions">
           <button class="btn btn-sm btn-primary" onclick="completeFollowup(${f.id})">Done</button>
-          <button class="btn btn-sm btn-secondary" onclick="openFollowupModal(${f.leadId})">Reschedule</button>
+          <button class="btn btn-sm btn-secondary" onclick="openFollowupModal(${f.lead_id || f.leadId || f.id})">Reschedule</button>
         </div>
       </div>`;
   }).join('');
@@ -974,13 +981,15 @@ function completeFollowup(id) {
 
 // TRIALS
 function renderTrials() {
-  trialsData = [
-    { id: 1, leadName: 'Sneha Reddy', date: '2026-09-22', time: '10:00 AM', type: 'Gym Session', status: 'scheduled' },
-    { id: 2, leadName: 'Sanjay Verma', date: '2026-09-21', time: '6:00 PM', type: 'CrossFit', status: 'attended' },
-    { id: 3, leadName: 'Kavita Joshi', date: '2026-09-20', time: '9:00 AM', type: 'Yoga Class', status: 'attended' },
-    { id: 4, leadName: 'Amit Kumar', date: '2026-09-19', time: '5:00 PM', type: 'Gym Session', status: 'no-show' },
-    { id: 5, leadName: 'Rahul Sharma', date: '2026-09-18', time: '7:00 AM', type: 'Personal Training', status: 'converted' },
-  ];
+  const trialLeads = (leads || []).filter(l => l.status === 'trial' || l.preferred_date);
+  trialsData = trialLeads.map((l, i) => ({
+    id: l.id,
+    leadName: l.name,
+    date: l.preferred_date || new Date().toISOString().split('T')[0],
+    time: l.preferred_time || '10:00 AM',
+    type: l.fitness_goal || 'Gym Session',
+    status: l.status === 'converted' ? 'converted' : 'scheduled'
+  }));
   const tbody = document.getElementById('trials-tbody');
   const sb = { scheduled: 'badge-blue', attended: 'badge-green', 'no-show': 'badge-red', converted: 'badge-purple' };
   tbody.innerHTML = trialsData.map(t => `
@@ -999,24 +1008,17 @@ function filterTrialsStatus() {}
 
 // CUSTOMERS
 function renderCustomers() {
-  customersData = [
-    { id: 1, name: 'Arjun Nair', membership: '6 Month Premium', joinDate: '2026-08-01', expiry: '2027-02-01', status: 'active' },
-    { id: 2, name: 'Rahul Sharma', membership: '1 Year VIP', joinDate: '2026-09-18', expiry: '2027-09-18', status: 'active' },
-    { id: 3, name: 'Priya Patel', membership: '3 Month Basic', joinDate: '2026-06-15', expiry: '2026-09-15', status: 'expired' },
-    { id: 4, name: 'Sneha Reddy', membership: '1 Month Trial', joinDate: '2026-09-01', expiry: '2026-10-01', status: 'active' },
-    { id: 5, name: 'Vikram Singh', membership: '6 Month Standard', joinDate: '2026-04-10', expiry: '2026-10-10', status: 'active' },
-    { id: 6, name: 'Deepika Rao', membership: '3 Month Premium', joinDate: '2026-07-20', expiry: '2026-10-20', status: 'frozen' },
-  ];
   const tbody = document.getElementById('customers-tbody');
+  if (!customersData.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-users"></i><h3>No customers yet</h3><p>Converted leads will appear here.</p></div></td></tr>'; return; }
   const sb = { active: 'badge-green', expired: 'badge-red', frozen: 'badge-yellow' };
   tbody.innerHTML = customersData.map(c => `
     <tr>
-      <td style="font-weight:600">${esc(c.name)}</td>
-      <td><span class="badge badge-gray">${esc(c.membership)}</span></td>
-      <td>${esc(c.joinDate)}</td>
-      <td>${esc(c.expiry)}</td>
-      <td><span class="badge ${sb[c.status]}">${capitalize(c.status)}</span></td>
-      <td><div class="action-btns"><button class="btn btn-sm btn-secondary"><i class="fas fa-eye"></i></button><button class="btn btn-sm btn-secondary"><i class="fas fa-edit"></i></button></div></td>
+      <td style="font-weight:600">${esc(c.full_name || c.name || c.email)}</td>
+      <td><span class="badge badge-gray">${esc(c.membership || c.role || 'Member')}</span></td>
+      <td>${esc(c.created_at ? new Date(c.created_at).toISOString().split('T')[0] : '')}</td>
+      <td>${esc(c.membership_end || '')}</td>
+      <td><span class="badge ${sb[c.status] || 'badge-green'}">${capitalize(c.status || 'active')}</span></td>
+      <td><div class="action-btns"><button class="btn btn-sm btn-secondary"><i class="fas fa-eye"></i></button></div></td>
     </tr>
   `).join('');
 }
@@ -1025,78 +1027,72 @@ function filterCustomerType() {}
 
 // MEMBERSHIPS
 function renderMemberships() {
-  membershipsData = [
-    { id: 1, name: '1 Month Basic', duration: 1, price: 2500, commission: 8, features: ['Gym Access', 'Locker'], color: 'var(--text-dim)' },
-    { id: 2, name: '3 Month Standard', duration: 3, price: 6000, commission: 10, features: ['Gym Access', 'Locker', '1 Class/mo'], color: 'var(--info)' },
-    { id: 3, name: '6 Month Premium', duration: 6, price: 12000, commission: 12, features: ['Unlimited Access', 'Locker', 'All Classes', 'Steam'], color: 'var(--warning)' },
-    { id: 4, name: '1 Year VIP', duration: 12, price: 20000, commission: 15, features: ['Unlimited Access', 'Personal Locker', 'All Classes', 'Steam', 'Sauna', 'Pool'], color: 'var(--red)' },
-  ];
   const grid = document.getElementById('memberships-grid');
-  grid.innerHTML = membershipsData.map(m => `
+  if (!membershipsData.length) { grid.innerHTML = '<div class="empty-state"><i class="fas fa-id-card"></i><h3>No plans found</h3><p>Create membership plans in the admin panel.</p></div>'; return; }
+  grid.innerHTML = membershipsData.map(m => {
+    const features = (() => { try { return typeof m.features === 'string' ? JSON.parse(m.features) : (m.features || []); } catch(e) { return []; } })();
+    return `
     <div class="card" style="position:relative;overflow:hidden">
-      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${m.color}"></div>
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--red)"></div>
       <h3 style="font-size:17px;font-weight:700;margin-bottom:4px">${esc(m.name)}</h3>
-      <div style="font-size:12px;color:var(--text-dim);margin-bottom:14px">${m.duration} month${m.duration>1?'s':''}</div>
-      <div style="font-size:32px;font-weight:800;letter-spacing:-1px">₹${m.price.toLocaleString()}</div>
-      <div style="font-size:12px;color:var(--success);margin-top:4px;margin-bottom:14px">${m.commission}% commission</div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:14px">${m.duration_months || m.duration || 1} month${(m.duration_months || m.duration || 1)>1?'s':''}</div>
+      <div style="font-size:32px;font-weight:800;letter-spacing:-1px">₹${(m.price || 0).toLocaleString()}</div>
+      <div style="font-size:12px;color:var(--success);margin-top:4px;margin-bottom:14px">${m.commission_percent || m.commission || 0}% commission</div>
       <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">
-        ${m.features.map(f => `<div style="font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:6px"><i class="fas fa-check" style="color:var(--success);font-size:10px;width:14px"></i>${esc(f)}</div>`).join('')}
+        ${features.map(f => `<div style="font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:6px"><i class="fas fa-check" style="color:var(--success);font-size:10px;width:14px"></i>${esc(typeof f === 'string' ? f : f.name || f)}</div>`).join('')}
       </div>
-      <button class="btn btn-secondary btn-sm" style="width:100%">Edit Plan</button>
     </div>
-  `).join('');
+  `}).join('');
 
   const salesTbody = document.getElementById('membership-sales-tbody');
-  const sales = [
-    { customer: 'Arjun Nair', plan: '6 Month Premium', amount: 12000, date: '2026-08-01', status: 'confirmed' },
-    { customer: 'Rahul Sharma', plan: '1 Year VIP', amount: 20000, date: '2026-09-18', status: 'confirmed' },
-    { customer: 'Sneha Reddy', plan: '1 Month Basic', amount: 2500, date: '2026-09-01', status: 'confirmed' },
-  ];
-  salesTbody.innerHTML = sales.map(s => `
+  if (!salesTbody) return;
+  const recentPayments = commissionsData.slice(0, 5);
+  if (!recentPayments.length) { salesTbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><p>No sales recorded yet.</p></div></td></tr>'; return; }
+  salesTbody.innerHTML = recentPayments.map(s => `
     <tr>
-      <td style="font-weight:600">${esc(s.customer)}</td>
-      <td><span class="badge badge-gray">${esc(s.plan)}</span></td>
-      <td style="font-weight:700">₹${s.amount.toLocaleString()}</td>
-      <td>${esc(s.date)}</td>
-      <td><span class="badge badge-green">${capitalize(s.status)}</span></td>
+      <td style="font-weight:600">${esc(s.full_name || s.user_name || 'Member')}</td>
+      <td><span class="badge badge-gray">${esc(s.method || 'N/A')}</span></td>
+      <td style="font-weight:700">₹${(s.amount || 0).toLocaleString()}</td>
+      <td>${esc(s.created_at ? new Date(s.created_at).toISOString().split('T')[0] : '')}</td>
+      <td><span class="badge badge-green">${capitalize(s.status || 'completed')}</span></td>
     </tr>
   `).join('');
 }
 
 // OFFERS
 function renderOffers() {
-  offersData = [
-    { id: 1, title: 'Festive Season Bonanza', type: 'percentage', discount: 20, desc: 'Get 20% off on all annual plans. Limited period offer for festive season.', validFrom: '2026-09-15', validTo: '2026-10-15', color: 'red-offer' },
-    { id: 2, title: 'Refer & Earn', type: 'flat', discount: 500, desc: 'Refer a friend and both get ₹500 off on your next renewal.', validFrom: '2026-09-01', validTo: '2026-12-31', color: 'green-offer' },
-    { id: 3, title: 'First Month Free', type: 'bogo', discount: 0, desc: 'Sign up for 6+ months and get your first month absolutely free.', validFrom: '2026-09-20', validTo: '2026-10-20', color: 'blue-offer' },
-    { id: 4, title: 'Couples Combo', type: 'addon', discount: 15, desc: '15% off when two family members join together. Plus free personal training session.', validFrom: '2026-09-10', validTo: '2026-11-10', color: 'red-offer' },
-  ];
   const grid = document.getElementById('offers-grid');
+  if (!offersData.length) { grid.innerHTML = '<div class="empty-state"><i class="fas fa-tags"></i><h3>No offers</h3><p>Create offers in the admin panel.</p></div>'; return; }
   const icons = { percentage: 'fa-percent', flat: 'fa-indian-rupee-sign', bogo: 'fa-gift', addon: 'fa-plus-circle' };
-  grid.innerHTML = offersData.map(o => `
-    <div class="offer-card ${o.color}">
-      <h4>${esc(o.title)}</h4>
-      <div class="offer-type"><i class="fas ${icons[o.type]||'fa-tag'}"></i> ${capitalize(o.type)}</div>
-      <div class="offer-discount">${o.discount ? (o.type==='flat'?'₹'+o.discount:o.discount+'%') : 'FREE'}</div>
-      <div class="offer-desc">${esc(o.desc)}</div>
-      <div class="offer-valid"><i class="fas fa-calendar"></i> Valid: ${esc(o.validFrom)} to ${esc(o.validTo)}</div>
+  const colors = ['red-offer','green-offer','blue-offer'];
+  grid.innerHTML = offersData.map((o, i) => `
+    <div class="offer-card ${colors[i % colors.length]}">
+      <h4>${esc(o.title || o.name)}</h4>
+      <div class="offer-type"><i class="fas ${icons[o.type]||'fa-tag'}"></i> ${capitalize(o.type || 'discount')}</div>
+      <div class="offer-discount">${o.discount_percent ? o.discount_percent+'%' : o.discount_amount ? '₹'+o.discount_amount : o.discount || 'N/A'}</div>
+      <div class="offer-desc">${esc(o.description || o.desc || '')}</div>
+      <div class="offer-valid"><i class="fas fa-calendar"></i> Valid: ${esc(o.valid_from || o.start_date || '')} to ${esc(o.valid_until || o.end_date || '')}</div>
     </div>
   `).join('');
 }
 
 // COMMISSIONS
 function renderCommissions() {
-  commissionsData = [
-    { id: 1, leadName: 'Arjun Nair', plan: '6 Month Premium', amount: 1440, date: '2026-08-01', status: 'paid' },
-    { id: 2, leadName: 'Rahul Sharma', plan: '1 Year VIP', amount: 3000, date: '2026-09-18', status: 'pending' },
-    { id: 3, leadName: 'Sneha Reddy', plan: '1 Month Basic', amount: 200, date: '2026-09-01', status: 'paid' },
-    { id: 4, leadName: 'Deepika Rao', plan: '3 Month Premium', amount: 432, date: '2026-07-20', status: 'paid' },
-    { id: 5, leadName: 'Vikram Singh', plan: '6 Month Standard', amount: 720, date: '2026-04-10', status: 'paid' },
-    { id: 6, leadName: 'Kavita Joshi', plan: '3 Month Standard', amount: 180, date: '2026-09-15', status: 'pending' },
-  ];
   const list = document.getElementById('commissions-list');
-  const sb = { paid: 'badge-green', pending: 'badge-yellow' };
-  const icons = { paid: { icon: 'fa-check-circle', bg: 'rgba(0,204,102,0.12)', color: 'var(--success)' }, pending: { icon: 'fa-hourglass-half', bg: 'rgba(255,170,0,0.12)', color: 'var(--warning)' } };
+  const sb = { paid: 'badge-green', pending: 'badge-yellow', completed: 'badge-green' };
+  const icons = { paid: { icon: 'fa-check-circle', bg: 'rgba(0,204,102,0.12)', color: 'var(--success)' }, completed: { icon: 'fa-check-circle', bg: 'rgba(0,204,102,0.12)', color: 'var(--success)' }, pending: { icon: 'fa-hourglass-half', bg: 'rgba(255,170,0,0.12)', color: 'var(--warning)' } };
+  if (!commissionsData.length) { list.innerHTML = '<div class="empty-state"><i class="fas fa-coins"></i><h3>No commissions</h3><p>Commission records will appear when sales are made.</p></div>'; return; }
+  list.innerHTML = commissionsData.map(c => {
+    const ic = icons[c.status] || icons.pending;
+    return `
+      <div class="commission-item">
+        <div class="ci-icon" style="background:${ic.bg};color:${ic.color}"><i class="fas ${ic.icon}"></i></div>
+        <div class="ci-info"><div class="ci-name">${esc(c.full_name || c.user_name || 'Member')} — ${esc(c.method || 'N/A')}</div><div class="ci-detail">${esc(c.created_at ? new Date(c.created_at).toISOString().split('T')[0] : '')}</div></div>
+        <span class="badge ${sb[c.status] || 'badge-yellow'}">${capitalize(c.status || 'pending')}</span>
+        <div class="ci-amount">₹${(c.amount || 0).toLocaleString()}</div>
+      </div>`;
+  }).join('');
+}
   list.innerHTML = commissionsData.map(c => {
     const ic = icons[c.status];
     return `
@@ -1139,11 +1135,9 @@ async function handleAddLead(e) {
     phone: document.getElementById('al-phone').value.trim(),
     email: document.getElementById('al-email').value.trim(),
     source: document.getElementById('al-source').value,
-    score: document.getElementById('al-score').value,
+    lead_score: document.getElementById('al-score').value,
     status: 'new',
-    notes: document.getElementById('al-notes').value.trim(),
-    lastContact: 'Just now',
-    lastContactDate: new Date()
+    notes: document.getElementById('al-notes').value.trim()
   };
   const token = localStorage.getItem('sales_token');
   try {
@@ -1152,9 +1146,9 @@ async function handleAddLead(e) {
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(lead)
     });
-    if (res.ok) { const d = await res.json(); leads.unshift(d.lead || d || { ...lead, id: Date.now() }); }
-    else { lead.id = Date.now(); leads.unshift(lead); }
-  } catch(e) { lead.id = Date.now(); leads.unshift(lead); }
+    if (res.ok) { await loadAllData(); }
+    else { lead.id = Date.now(); leads.unshift(lead); filteredLeads = [...leads]; renderLeads(); renderPipeline(); }
+  } catch(e) { lead.id = Date.now(); leads.unshift(lead); filteredLeads = [...leads]; renderLeads(); renderPipeline(); }
   filteredLeads = [...leads];
   renderLeads();
   renderPipeline();
@@ -1169,10 +1163,10 @@ async function handleFollowup(e) {
   const leadId = parseInt(document.getElementById('fu-lead-id').value);
   const lead = leads.find(l => l.id === leadId);
   const data = {
-    type: document.getElementById('fu-type').value,
-    notes: document.getElementById('fu-notes').value.trim(),
+    followup_type: document.getElementById('fu-type').value,
+    note: document.getElementById('fu-notes').value.trim(),
     outcome: document.getElementById('fu-outcome').value,
-    nextDate: document.getElementById('fu-next-date').value
+    next_followup_date: document.getElementById('fu-next-date').value || null
   };
   if (lead) {
     lead.lastContact = 'Just now';
@@ -1319,17 +1313,22 @@ document.addEventListener('keydown', (e) => {
 });
 
 // INIT
-(function init() {
+(async function init() {
   const token = localStorage.getItem('sales_token');
   if (token) {
-    currentUser = { name: 'Sales User', email: 'user@zacson.com' };
-    showApp();
-  }
-
-  // Populate trial lead dropdown
-  const btLead = document.getElementById('bt-lead');
-  if (btLead && leads.length) {
-    btLead.innerHTML = '<option value="">Select a lead</option>' + leads.map(l => `<option value="${l.id}">${esc(l.name)}</option>`).join('');
+    try {
+      const res = await fetch(`${API}/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (res.ok) {
+        const data = await res.json();
+        currentUser = data.user || data;
+        showApp();
+      } else {
+        localStorage.removeItem('sales_token');
+      }
+    } catch(e) {
+      currentUser = { name: 'Sales User', email: 'user@zacson.com' };
+      showApp();
+    }
   }
 })();
 </script>

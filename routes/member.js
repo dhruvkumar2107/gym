@@ -60,6 +60,20 @@ router.put('/profile', (req, res) => {
   res.json({ message: 'Profile updated' });
 });
 
+router.put('/profile/password', (req, res) => {
+  const bcrypt = require('bcryptjs');
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) return res.status(400).json({ error: 'Current and new password required' });
+  if (newPassword.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  const user = get('SELECT password_hash FROM users WHERE id = ?', [req.user.id]);
+  if (!bcrypt.compareSync(currentPassword, user.password_hash)) {
+    return res.status(400).json({ error: 'Current password is incorrect' });
+  }
+  const hash = bcrypt.hashSync(newPassword, 10);
+  run('UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [hash, req.user.id]);
+  res.json({ message: 'Password changed successfully' });
+});
+
 // Membership
 router.get('/membership', (req, res) => {
   const memberships = all('SELECT m.*, mp.name as plan_name, mp.features, mp.duration_months FROM memberships m JOIN membership_plans mp ON m.plan_id = mp.id WHERE m.user_id = ? ORDER BY m.created_at DESC', [req.user.id]);

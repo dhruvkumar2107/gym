@@ -18,7 +18,7 @@ function authMiddleware(req, res, next) {
 }
 
 function adminMiddleware(req, res, next) {
-  const adminRoles = ['admin', 'super_admin', 'branch_manager'];
+  const adminRoles = ['admin', 'super_admin', 'branch_manager', 'trainer', 'receptionist', 'sales_manager', 'sales_executive', 'accountant', 'nutritionist', 'hr_manager', 'staff'];
   if (!req.user || !adminRoles.includes(req.user.role)) {
     return res.status(403).json({ error: 'Admin access required' });
   }

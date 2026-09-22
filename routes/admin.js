@@ -224,8 +224,8 @@ router.post('/memberships', (req, res) => {
     [memId, user_id, plan_id, branch_id || 1, 'active', start_date || new Date().toISOString().split('T')[0], end_date, assigned_salesperson || null, assigned_trainer || null, discount || 0, tax || 0, finalAmount, payment_method || 'razorpay', noteText]);
   run('UPDATE users SET role = "member" WHERE id = ?', [user_id]);
   if (payment_reference) {
-    run('INSERT INTO payments (user_id, membership_id, amount, payment_method, payment_reference, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [user_id, memId, finalAmount, payment_method || 'razorpay', payment_reference, 'completed', 'Online payment via checkout']);
+    run('INSERT INTO payments (user_id, membership_id, amount, method, transaction_ref, status, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [user_id, memId, finalAmount, payment_method || 'razorpay', payment_reference || '', 'completed', noteText]);
   }
   res.json({ message: 'Membership created', membership_id: memId });
 });

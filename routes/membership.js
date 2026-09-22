@@ -43,18 +43,22 @@ router.post('/purchase', authMiddleware, [
   const payment = get('SELECT * FROM payments WHERE user_id = ? ORDER BY id DESC LIMIT 1', [req.user.id]);
 
   const startDate = new Date().toISOString().split('T')[0];
-  const endDate = new Date(Date.now() + plan.duration_months * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-  run("INSERT INTO memberships (user_id, plan_id, status, start_date, end_date, payment_id) VALUES (?, ?, 'active', ?, ?, ?)",
-    [req.user.id, plan_id, startDate, endDate, payment.id]);
+  const endDate = new Date(Date.now() + plan.duration_months * 30 * 24 * 60 * 60 * 1000).toISOString().split('0')[0];
+  const memId = 'MEM-' + Date.now().toString(36).toUpperCase();
+  run("INSERT INTO memberships (membership_id, user_id, plan_id, status, start_date, end_date, final_amount, payment_method, notes) VALUES (?, ?, ?, 'active', ?, ?, ?, ?, ?)",
+    [memId, req.user.id, plan_id, startDate, endDate, amount, payment_method, 'Paid via ' + (payment_method || 'online')]);
 
   const invoiceNumber = 'ZAC-' + Date.now();
-  run('INSERT INTO invoices (payment_id, invoice_number, data) VALUES (?, ?, ?)',
-    [payment.id, invoiceNumber, JSON.stringify({ plan: plan.name, amount, date: startDate })]);
+  run('INSERT INTO invoices (invoice_number, user_id, membership_id, subtotal, total, amount_paid, balance, status, due_date, notes) VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, ?)',
+    [invoiceNumber, req.user.id, get('SELECT id FROM memberships WHERE membership_id = ?', [memId])?.id || null, amount, amount, amount, 'paid', startDate, plan.name + ' membership']);
 
   run("INSERT INTO notifications (user_id, title, message, type) VALUES (?, ?, ?, 'success')",
     [req.user.id, 'Membership Activated', 'Your ' + plan.name + ' plan is now active!']);
 
-  res.json({ message: 'Membership purchased successfully', invoice: invoiceNumber, amount });
+  run("INSERT INTO audit_logs (user_id, user_name, action, entity_type, entity_id, entity_name, new_value) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    [req.user.id, req.user.full_name || 'Member', 'CREATE', 'membership', memId, plan.name, JSON.stringify({ plan: plan.name, amount, start: startDate, end: endDate })]);
+
+  res.json({ message: 'Membership purchased successfully', invoice: invoiceNumber, amount, membership_id: memId });
 });
 
 router.get('/my-membership', authMiddleware, (req, res) => {
